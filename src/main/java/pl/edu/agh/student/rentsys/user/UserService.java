@@ -1,16 +1,22 @@
 package pl.edu.agh.student.rentsys.user;
 
 import lombok.AllArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import pl.edu.agh.student.rentsys.registration.token.ConfirmationToken;
+import pl.edu.agh.student.rentsys.registration.token.ConfirmationTokenService;
+
+import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Service
 @AllArgsConstructor
 public class UserService implements UserDetailsService {
+    private final ConfirmationTokenService confirmationTokenService;
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
@@ -21,6 +27,11 @@ public class UserService implements UserDetailsService {
                 .orElseThrow(() -> new UsernameNotFoundException(String.format(USER_NOT_FOUND, username)));
     }
 
+    public void save(User user) {
+        userRepository.save(user);
+    }
+
+    @Transactional
     public String signUp(User user) {
         boolean isEmailTaken = userRepository
                 .findByEmail(user.getEmail())
@@ -38,8 +49,17 @@ public class UserService implements UserDetailsService {
 
         String encodedPassword = passwordEncoder.encode(user.getPassword());
         user.setPassword(encodedPassword);
-        userRepository.save(user);
+        save(user);
 
-        return "link";
+        final int TOKEN_VALID_MINUTES = 15;
+        ConfirmationToken token = ConfirmationToken.builder()
+                .token(UUID.randomUUID().toString())
+                .createdAt(LocalDateTime.now())
+                .expiresAt(LocalDateTime.now().plusMinutes(TOKEN_VALID_MINUTES))
+                .user(user)
+                .build();
+        confirmationTokenService.save(token);
+
+        return token.getToken();
     }
 }

@@ -2,14 +2,19 @@ package pl.edu.agh.student.rentsys.registration;
 
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
+import pl.edu.agh.student.rentsys.registration.token.ConfirmationToken;
+import pl.edu.agh.student.rentsys.registration.token.ConfirmationTokenService;
 import pl.edu.agh.student.rentsys.security.UserRole;
 import pl.edu.agh.student.rentsys.user.User;
 import pl.edu.agh.student.rentsys.user.UserService;
+
+import java.time.LocalDateTime;
 
 @Service
 @AllArgsConstructor
 public class RegistrationService {
 
+    private final ConfirmationTokenService tokenService;
     private final UserService userService;
     private final EmailValidator emailValidator;
     public String register(RegistrationRequest request) {
@@ -27,5 +32,29 @@ public class RegistrationService {
                         .locked(false)
                         .build()
         );
+    }
+
+    public String confirmToken(String sToken) {
+        LocalDateTime timeNow = LocalDateTime.now();
+
+        ConfirmationToken token = tokenService.getToken(sToken)
+                .orElseThrow(() -> new IllegalStateException(String.format("Token %s not found", sToken)));
+
+        if(token.getConfirmedAt() != null) {
+            throw new IllegalStateException("Email already confirmed");
+        }
+
+        if(timeNow.isAfter(token.getExpiresAt())) {
+            throw new IllegalStateException("Token already expired");
+        }
+
+        token.setConfirmedAt(timeNow);
+        User user = token.getUser();
+        user.setEnabled(true);
+
+        tokenService.save(token);
+        userService.save(user);
+
+        return "enabled";
     }
 }
