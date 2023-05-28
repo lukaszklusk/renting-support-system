@@ -2,6 +2,8 @@ package pl.edu.agh.student.rentsys.registration;
 
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
+import pl.edu.agh.student.rentsys.registration.email.EmailSenderService;
+import pl.edu.agh.student.rentsys.registration.email.EmailValidator;
 import pl.edu.agh.student.rentsys.registration.token.ConfirmationToken;
 import pl.edu.agh.student.rentsys.registration.token.ConfirmationTokenService;
 import pl.edu.agh.student.rentsys.security.UserRole;
@@ -14,15 +16,17 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class RegistrationService {
 
-    private final ConfirmationTokenService tokenService;
     private final UserService userService;
+    private final ConfirmationTokenService tokenService;
     private final EmailValidator emailValidator;
+    private final EmailSenderService emailSenderService;
+
     public String register(RegistrationRequest request) {
         boolean isEmailValid = emailValidator.validate(request.email());
         if(!isEmailValid) {
-            throw new IllegalStateException(String.format("%s in not a valid email name", request.email()));
+            throw new IllegalStateException(String.format("%s in not a valid email", request.email()));
         }
-        return userService.signUp(
+        String token = userService.signUp(
                 User.builder()
                         .username(request.username())
                         .email(request.email())
@@ -32,6 +36,13 @@ public class RegistrationService {
                         .locked(false)
                         .build()
         );
+        emailSenderService.send(
+                RegistrationConfig.APP_EMAIL,
+                request.email(),
+                RegistrationConfig.CONFIRMATION_EMAIL_SUBJECT,
+                RegistrationConfig.buildEmailBody(request.username(), RegistrationConfig.buildActivationLink(token))
+        );
+        return token;
     }
 
     public String confirmToken(String sToken) {
