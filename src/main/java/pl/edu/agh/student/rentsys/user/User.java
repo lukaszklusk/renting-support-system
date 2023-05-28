@@ -45,15 +45,6 @@ public class User implements UserDetails {
     @Column(nullable = false)
     private boolean enabled;
 
-    public User(String email, String username, String password, UserRole userRole, boolean locked, boolean enabled) {
-        this.email = email;
-        this.username = username;
-        this.password = password;
-        this.userRole = userRole;
-        this.locked = locked;
-        this.enabled = enabled;
-    }
-
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         SimpleGrantedAuthority authority = new SimpleGrantedAuthority(getUserRole().name());
