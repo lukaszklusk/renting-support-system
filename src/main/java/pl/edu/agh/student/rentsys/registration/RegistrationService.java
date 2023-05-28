@@ -18,14 +18,14 @@ public class RegistrationService {
             throw new IllegalStateException(String.format("%s in not a valid email name", request.email()));
         }
         return userService.signUp(
-                new User(
-                        request.username(),
-                        request.email(),
-                        request.password(),
-                        UserRole.USER,
-                        false,
-                        false
-                )
+                User.builder()
+                        .username(request.username())
+                        .email(request.email())
+                        .password(request.password())
+                        .userRole(UserRole.USER)
+                        .enabled(false)
+                        .locked(false)
+                        .build()
         );
     }
 }
