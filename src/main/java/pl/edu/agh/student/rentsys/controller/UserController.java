@@ -34,16 +34,16 @@ public class UserController {
         return ResponseEntity.ok(userService.getAllUsers());
     }
 
-    @GetMapping("/user/{id}")
-    public ResponseEntity<User> getUserById(@PathVariable long id){
-        Optional<User> userOptional = userService.getUserById(id);
+    @GetMapping("/user/{uid}")
+    public ResponseEntity<User> getUserById(@PathVariable long uid){
+        Optional<User> userOptional = userService.getUserById(uid);
         if(userOptional.isPresent()) return ResponseEntity.ok(userOptional.get());
         else return ResponseEntity.notFound().build();
     }
 
-    @GetMapping("/user/{id}/apartment")
-    public ResponseEntity<List<Apartment>> getAllApartmentsForUser(@PathVariable long id){
-        Optional<User> userOptional = userService.getUserById(id);
+    @GetMapping("/user/{uid}/apartment")
+    public ResponseEntity<List<Apartment>> getAllApartmentsForUser(@PathVariable long uid){
+        Optional<User> userOptional = userService.getUserById(uid);
         if(userOptional.isPresent()){
             return ResponseEntity.ok(apartmentService.getApartmentsForUser(userOptional.get()));
         }else return ResponseEntity.notFound().build();
