@@ -12,6 +12,8 @@ import pl.edu.agh.student.rentsys.user.UserService;
 
 import java.time.LocalDateTime;
 
+import static pl.edu.agh.student.rentsys.registration.RegistrationConfig.*;
+
 @Service
 @AllArgsConstructor
 public class RegistrationService {
