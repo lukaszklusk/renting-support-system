@@ -2,6 +2,8 @@ package pl.edu.agh.student.rentsys.model;
 
 import jakarta.persistence.*;
 
+import java.util.Objects;
+
 @Entity
 public class Picture {
     private Long id;
@@ -34,5 +36,18 @@ public class Picture {
 
     public void setImage(byte[] image) {
         this.image = image;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Picture picture = (Picture) o;
+        return getId().equals(picture.getId());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getId());
     }
 }
