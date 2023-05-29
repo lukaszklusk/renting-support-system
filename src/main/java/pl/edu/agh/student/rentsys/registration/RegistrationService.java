@@ -39,10 +39,10 @@ public class RegistrationService {
                         .build()
         );
         emailSenderService.send(
-                RegistrationConfig.APP_EMAIL,
+                APP_EMAIL,
                 request.email(),
-                RegistrationConfig.CONFIRMATION_EMAIL_SUBJECT,
-                RegistrationConfig.buildEmailBody(request.username(), RegistrationConfig.buildActivationLink(token))
+                CONFIRMATION_EMAIL_SUBJECT,
+                buildEmailBody(request.username(), buildActivationLink(token))
         );
         return token;
     }
