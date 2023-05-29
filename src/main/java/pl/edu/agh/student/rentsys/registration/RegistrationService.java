@@ -24,15 +24,15 @@ public class RegistrationService {
     private final EmailSenderService emailSenderService;
 
     public String register(RegistrationRequest request) {
-        boolean isEmailValid = emailValidator.validate(request.email());
+        boolean isEmailValid = emailValidator.validate(request.getEmail());
         if(!isEmailValid) {
-            throw new IllegalStateException(String.format("%s in not a valid email", request.email()));
+            throw new IllegalStateException(String.format("%s in not a valid email", request.getEmail()));
         }
         String token = userService.signUp(
                 User.builder()
-                        .username(request.username())
-                        .email(request.email())
-                        .password(request.password())
+                        .username(request.getUsername())
+                        .email(request.getEmail())
+                        .password(request.getPassword())
                         .userRole(UserRole.USER)
                         .enabled(false)
                         .locked(false)
@@ -40,9 +40,9 @@ public class RegistrationService {
         );
         emailSenderService.send(
                 APP_EMAIL,
-                request.email(),
+                request.getEmail(),
                 CONFIRMATION_EMAIL_SUBJECT,
-                buildEmailBody(request.username(), buildActivationLink(token))
+                buildEmailBody(request.getUsername(), buildActivationLink(token))
         );
         return token;
     }

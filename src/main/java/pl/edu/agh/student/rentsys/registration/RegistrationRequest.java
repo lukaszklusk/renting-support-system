@@ -1,6 +1,10 @@
 package pl.edu.agh.student.rentsys.registration;
 
-public record RegistrationRequest(String username,
-                                  String email,
-                                  String password) {
+import lombok.Data;
+
+@Data
+public class RegistrationRequest {
+    private String username;
+    private String email;
+    private String password;
 }
