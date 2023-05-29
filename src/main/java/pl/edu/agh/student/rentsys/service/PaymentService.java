@@ -1,9 +1,13 @@
 package pl.edu.agh.student.rentsys.service;
 
 import org.springframework.stereotype.Service;
+import pl.edu.agh.student.rentsys.model.Agreement;
 import pl.edu.agh.student.rentsys.model.Payment;
 import pl.edu.agh.student.rentsys.model.PaymentStatus;
 import pl.edu.agh.student.rentsys.repository.PaymentRepository;
+
+import java.util.List;
+import java.util.Optional;
 
 @Service
 public class PaymentService {
@@ -26,6 +30,14 @@ public class PaymentService {
     public Payment changePaymentAmount(Payment payment, double amount){
         payment.setAmount(amount);
         return paymentRepository.save(payment);
+    }
+
+    public Optional<Payment> getPayment(long id){
+        return paymentRepository.findById(id);
+    }
+
+    public List<Payment> getPaymentsForAgreement(Agreement agreement){
+        return paymentRepository.getPaymentsByAgreement(agreement);
     }
 
 }
