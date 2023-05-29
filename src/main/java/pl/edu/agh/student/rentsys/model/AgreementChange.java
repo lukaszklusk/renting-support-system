@@ -16,6 +16,17 @@ public class AgreementChange {
     private String oldValue;
     private String newValue;
 
+    public AgreementChange() {
+    }
+
+    public AgreementChange(Agreement agreement, LocalDate changeDate,
+                           String changedValue, String oldValue, String newValue) {
+        this.agreement = agreement;
+        this.changeDate = changeDate;
+        this.changedValue = changedValue;
+        this.oldValue = oldValue;
+        this.newValue = newValue;
+    }
 
     public void setId(Long id) {
         this.id = id;
