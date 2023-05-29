@@ -15,6 +15,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import static pl.edu.agh.student.rentsys.registration.RegistrationConfig.ACTIVATION_TOKEN_VALID_TIME_IN_MINUTES;
+
 @Service
 @AllArgsConstructor
 public class UserService implements UserDetailsService {
@@ -71,11 +73,10 @@ public class UserService implements UserDetailsService {
         dbUser.setPassword(encodedPassword);
         save(dbUser);
 
-        final int TOKEN_VALID_MINUTES = 15;
         ConfirmationToken token = ConfirmationToken.builder()
                 .token(UUID.randomUUID().toString())
                 .createdAt(LocalDateTime.now())
-                .expiresAt(LocalDateTime.now().plusMinutes(TOKEN_VALID_MINUTES))
+                .expiresAt(LocalDateTime.now().plusMinutes(ACTIVATION_TOKEN_VALID_TIME_IN_MINUTES))
                 .user(dbUser)
                 .build();
         confirmationTokenService.save(token);

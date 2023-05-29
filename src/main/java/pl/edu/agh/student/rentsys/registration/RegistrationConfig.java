@@ -6,6 +6,7 @@ import org.springframework.context.annotation.Configuration;
 public class RegistrationConfig {
     public static final String APP_EMAIL = "rentsys@mail.com";
     public static final String CONFIRMATION_EMAIL_SUBJECT = "Account Activation";
+    public static final int ACTIVATION_TOKEN_VALID_TIME_IN_MINUTES = 15;
 
     public static String buildActivationLink(String token) {
         return String.format("http://localhost:8080/registration/confirm?token=%s", token);
