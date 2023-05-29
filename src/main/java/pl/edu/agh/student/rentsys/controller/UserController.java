@@ -1,15 +1,14 @@
 package pl.edu.agh.student.rentsys.controller;
 
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import pl.edu.agh.student.rentsys.model.Apartment;
 import pl.edu.agh.student.rentsys.model.User;
 import pl.edu.agh.student.rentsys.service.ApartmentService;
 import pl.edu.agh.student.rentsys.service.UserService;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @RestController
@@ -58,5 +57,24 @@ public class UserController {
             else return ResponseEntity.notFound().build();
         }
         else return ResponseEntity.notFound().build();
+    }
+
+    @PostMapping("/user")
+    public ResponseEntity<User> createUser(@RequestBody Map<String, Object> payload){
+        if(!payload.containsKey("username") || !payload.containsKey("password") ||
+                !payload.containsKey("email") || !payload.containsKey("phoneNumber")){
+            return ResponseEntity.badRequest().build();
+        }
+        User newUser = new User();
+        newUser.setUsername((String) payload.get("username"));
+        newUser.setPassword((String) payload.get("password"));
+        newUser.setEmail((String) payload.get("email"));
+        newUser.setPhoneNumber((String) payload.get("phoneNumber"));
+        User user = userService.createNewUser(newUser);
+        if(user != null){
+            return ResponseEntity.ok(user);
+        }else{
+            return ResponseEntity.badRequest().build();
+        }
     }
 }

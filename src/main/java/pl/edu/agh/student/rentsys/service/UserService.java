@@ -24,4 +24,8 @@ public class UserService {
     public Optional<User> getUserById(long id){
         return userRepository.findById(id);
     }
+
+    public User createNewUser(User user){
+        return userRepository.save(user);
+    }
 }
