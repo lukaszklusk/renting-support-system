@@ -10,6 +10,7 @@ import pl.edu.agh.student.rentsys.service.UserService;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 @RestController
 public class UserController {
@@ -76,5 +77,27 @@ public class UserController {
         }else{
             return ResponseEntity.badRequest().build();
         }
+    }
+
+    @PostMapping("/user/{uid}")
+    public ResponseEntity<Apartment> createApartment(@PathVariable long uid,
+                                                     @RequestBody Map<String, Object> payload){
+        if(!payload.containsKey("apartmentName") || !payload.containsKey("address") ||
+                !payload.containsKey("coordinatesX") || !payload.containsKey("coordinatesY") ||
+                !payload.containsKey("equipment") || !payload.containsKey("properties") ||
+                !payload.containsKey("pictures")){
+            return ResponseEntity.badRequest().build();
+        }
+        if(!payload.get("equipment").getClass().equals(List.class)) return ResponseEntity.badRequest().build();
+        Apartment newApartment = new Apartment();
+        Optional<User> owner = userService.getUserById(uid);
+        if(owner.isEmpty()) return ResponseEntity.notFound().build();
+        newApartment.setOwner(owner.get());
+        newApartment.setAddress((String) payload.get("address"));
+        newApartment.setName((String) payload.get("apartmentName"));
+        newApartment.setCoordinatesX((Double) payload.get("coordinatesX"));
+        newApartment.setCoordinatesY((Double) payload.get("coordinatesY"));
+        //TODO
+        return null;
     }
 }
