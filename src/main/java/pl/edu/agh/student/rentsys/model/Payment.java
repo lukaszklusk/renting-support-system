@@ -1,9 +1,6 @@
 package pl.edu.agh.student.rentsys.model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
-import jakarta.persistence.OneToOne;
+import jakarta.persistence.*;
 
 import java.time.LocalDate;
 
@@ -11,7 +8,7 @@ import java.time.LocalDate;
 public class Payment {
     private Long id;
     private double amount;
-    private String status;
+    private PaymentStatus status;
     private Agreement agreement;
     private LocalDate dueDate;
 
@@ -33,11 +30,12 @@ public class Payment {
         this.amount = amount;
     }
 
-    public String getStatus() {
+    @Enumerated(EnumType.STRING)
+    public PaymentStatus getStatus() {
         return status;
     }
 
-    public void setStatus(String status) {
+    public void setStatus(PaymentStatus status) {
         this.status = status;
     }
 
