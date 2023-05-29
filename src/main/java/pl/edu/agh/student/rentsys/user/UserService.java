@@ -11,6 +11,8 @@ import pl.edu.agh.student.rentsys.registration.token.ConfirmationToken;
 import pl.edu.agh.student.rentsys.registration.token.ConfirmationTokenService;
 
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -33,30 +35,48 @@ public class UserService implements UserDetailsService {
 
     @Transactional
     public String signUp(User user) {
-        boolean isEmailTaken = userRepository
-                .findByEmail(user.getEmail())
-                .isPresent();
-        if(isEmailTaken) {
-            throw new IllegalStateException(String.format("Email %s already taken", user.getEmail()));
+
+        User registeredNotActivatedUser = null;
+
+        Optional<User> optionalRegisteredUser = userRepository
+                .findByEmail(user.getEmail());
+        if(optionalRegisteredUser.isPresent()) {
+            if(optionalRegisteredUser.get().isEnabled()) {
+                throw new IllegalStateException(String.format("Email %s already taken", user.getEmail()));
+            }
+            registeredNotActivatedUser = optionalRegisteredUser.get();
+            List<ConfirmationToken> userTokens = confirmationTokenService.getUserTokens(registeredNotActivatedUser);
+            for (var token: userTokens) {
+                token.setExpiresAt(token.getCreatedAt());
+            }
+            confirmationTokenService.saveAll(userTokens);
         }
 
-        boolean isUsernameTaken = userRepository
+        userRepository
                 .findByUsername(user.getUsername())
-                .isPresent();
-        if(isUsernameTaken) {
-            throw new IllegalStateException(String.format("Username %s already taken", user.getUsername()));
-        }
+                .ifPresent(db_user -> {
+                    if(!db_user.getEmail().equals(user.getEmail())) {
+                        throw new IllegalStateException(String.format("Username %s already taken", user.getUsername()));
+                    }
+                });
 
         String encodedPassword = passwordEncoder.encode(user.getPassword());
-        user.setPassword(encodedPassword);
-        save(user);
+
+        User dbUser = user;
+        if(registeredNotActivatedUser != null) {
+            registeredNotActivatedUser.setUsername(user.getUsername());
+            dbUser = registeredNotActivatedUser;
+        }
+
+        dbUser.setPassword(encodedPassword);
+        save(dbUser);
 
         final int TOKEN_VALID_MINUTES = 15;
         ConfirmationToken token = ConfirmationToken.builder()
                 .token(UUID.randomUUID().toString())
                 .createdAt(LocalDateTime.now())
                 .expiresAt(LocalDateTime.now().plusMinutes(TOKEN_VALID_MINUTES))
-                .user(user)
+                .user(dbUser)
                 .build();
         confirmationTokenService.save(token);
 
