@@ -2,15 +2,12 @@ package pl.edu.agh.student.rentsys.controller;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import pl.edu.agh.student.rentsys.model.Apartment;
-import pl.edu.agh.student.rentsys.model.User;
+import pl.edu.agh.student.rentsys.model.*;
 import pl.edu.agh.student.rentsys.service.ApartmentService;
 import pl.edu.agh.student.rentsys.service.UserService;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
+import java.lang.reflect.Array;
+import java.util.*;
 
 @RestController
 public class UserController {
@@ -75,11 +72,11 @@ public class UserController {
         if(user != null){
             return ResponseEntity.ok(user);
         }else{
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.internalServerError().build();
         }
     }
 
-    @PostMapping("/user/{uid}")
+    @PostMapping("/user/{uid}/apartment")
     public ResponseEntity<Apartment> createApartment(@PathVariable long uid,
                                                      @RequestBody Map<String, Object> payload){
         if(!payload.containsKey("apartmentName") || !payload.containsKey("address") ||
@@ -88,7 +85,8 @@ public class UserController {
                 !payload.containsKey("pictures")){
             return ResponseEntity.badRequest().build();
         }
-        if(!payload.get("equipment").getClass().equals(List.class)) return ResponseEntity.badRequest().build();
+        if(!(payload.get("pictures") instanceof ArrayList))
+            return ResponseEntity.badRequest().build();
         Apartment newApartment = new Apartment();
         Optional<User> owner = userService.getUserById(uid);
         if(owner.isEmpty()) return ResponseEntity.notFound().build();
@@ -97,7 +95,42 @@ public class UserController {
         newApartment.setName((String) payload.get("apartmentName"));
         newApartment.setCoordinatesX((Double) payload.get("coordinatesX"));
         newApartment.setCoordinatesY((Double) payload.get("coordinatesY"));
-        //TODO
-        return null;
+        Set<Picture> pictureSet = new HashSet<>();
+        for(Map<String, Object> payloadPic: (List<Map<String, Object>>) payload.get("pictures")){
+            if(!payloadPic.containsKey("name") || !payloadPic.containsKey("image"))
+                return ResponseEntity.badRequest().build();
+            Picture picture = new Picture();
+            picture.setName((String) payloadPic.get("name"));
+            picture.setImage(Base64.getDecoder().decode((String) payloadPic.get("image")));
+            pictureSet.add(picture);
+        }
+        newApartment.setPictures(pictureSet);
+        Set<Equipment> equipmentSet = new HashSet<>();
+        for (Map<String, Object> payloadEq: (List<Map<String, Object>>) payload.get("equipment")){
+            if(!payloadEq.containsKey("name") || !payloadEq.containsKey("description"))
+                return ResponseEntity.badRequest().build();
+            Equipment equipment = new Equipment();
+            equipment.setName((String) payloadEq.get("name"));
+            equipment.setDescription((String) payloadEq.get("description"));
+            equipmentSet.add(equipment);
+        }
+        newApartment.setEquipment(equipmentSet);
+        Set<ApartmentProperty> propertySet = new HashSet<>();
+        for(Map<String, Object> payloadProp: (List<Map<String, Object>>) payload.get("properties")){
+            if(!payloadProp.containsKey("name") || !payloadProp.containsKey("valueType") ||
+                    !payloadProp.containsKey("value"))
+                return ResponseEntity.badRequest().build();
+            ApartmentProperty property = new ApartmentProperty();
+            property.setName((String) payloadProp.get("name"));
+            property.setValueType((String) payloadProp.get("valueType"));
+            property.setValue((String) payloadProp.get("value"));
+            propertySet.add(property);
+        }
+        newApartment.setProperties(propertySet);
+        Apartment apartment = apartmentService.createApartment(newApartment);
+        if(apartment != null){
+            return ResponseEntity.ok(apartment);
+        }
+        else return ResponseEntity.internalServerError().build();
     }
 }

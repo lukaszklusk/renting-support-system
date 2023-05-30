@@ -43,6 +43,7 @@ public class Picture {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Picture picture = (Picture) o;
+        if(picture.getId() == null || this.getId()== null) return false;
         return getId().equals(picture.getId());
     }
 

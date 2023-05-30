@@ -2,6 +2,7 @@ package pl.edu.agh.student.rentsys.model;
 
 import jakarta.persistence.*;
 
+import java.util.HashSet;
 import java.util.Set;
 
 @Entity
@@ -22,7 +23,7 @@ public class Apartment {
     }
 
     public void setPictures(Set<Picture> pictures) {
-        this.pictures = pictures;
+        this.pictures = new HashSet<>(pictures);
     }
 
     public void setId(Long id) {
@@ -82,7 +83,7 @@ public class Apartment {
     }
 
     public void setEquipment(Set<Equipment> equipment) {
-        this.equipment = equipment;
+        this.equipment = new HashSet<>(equipment);
     }
 
     @OneToMany
@@ -91,6 +92,6 @@ public class Apartment {
     }
 
     public void setProperties(Set<ApartmentProperty> properties) {
-        this.properties = properties;
+        this.properties = new HashSet<>(properties);
     }
 }

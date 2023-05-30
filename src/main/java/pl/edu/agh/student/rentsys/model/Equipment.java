@@ -43,6 +43,7 @@ public class Equipment {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Equipment equipment = (Equipment) o;
+        if(equipment.getId() == null || this.getId()== null) return false;
         return getId().equals(equipment.getId());
     }
 
