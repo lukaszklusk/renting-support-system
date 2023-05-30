@@ -1,5 +1,6 @@
 package pl.edu.agh.student.rentsys.controller;
 
+import jakarta.persistence.criteria.CriteriaBuilder;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import pl.edu.agh.student.rentsys.model.*;
@@ -176,7 +177,9 @@ public class UserController {
         if(owner.isEmpty()) return ResponseEntity.notFound().build();
         newAgreement.setOwner(owner.get());
         newAgreement.setName((String) payload.get("name"));
-        Optional<Apartment> apartment = apartmentService.getApartment((Long) payload.get("apartment"));
+        if(!((Map<String,Object>) payload.get("apartment")).containsKey("id")) return ResponseEntity.badRequest().build();
+        Optional<Apartment> apartment = apartmentService.getApartment(
+                Long.valueOf((Integer)((Map<String,Object>) payload.get("apartment")).get("id")));
         if(apartment.isEmpty()) return ResponseEntity.notFound().build();
         newAgreement.setApartment(apartment.get());
         newAgreement.setSigningDate(LocalDate.parse((String) payload.get("signingDate"),
@@ -186,7 +189,7 @@ public class UserController {
         Set<Client> tenantSet = new HashSet<>();
         for(Map<String,Object> payloadClient: (List<Map<String,Object>>) payload.get("tenants")){
             if(!payloadClient.containsKey("id")) return ResponseEntity.badRequest().build();
-            Optional<Client> client = clientService.getClientById((Long) payloadClient.get("id"));
+            Optional<Client> client = clientService.getClientById(Long.valueOf((Integer)payloadClient.get("id")));
             if(client.isEmpty()) return ResponseEntity.notFound().build();
             tenantSet.add(client.get());
         }
