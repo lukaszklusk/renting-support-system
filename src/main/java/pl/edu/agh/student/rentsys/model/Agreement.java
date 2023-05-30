@@ -3,6 +3,7 @@ package pl.edu.agh.student.rentsys.model;
 import jakarta.persistence.*;
 
 import java.time.LocalDate;
+import java.util.HashSet;
 import java.util.Set;
 
 @Entity
@@ -83,6 +84,6 @@ public class Agreement {
     }
 
     public void setTenants(Set<Client> tenants) {
-        this.tenants = tenants;
+        this.tenants = new HashSet<>(tenants);
     }
 }

@@ -3,10 +3,14 @@ package pl.edu.agh.student.rentsys.controller;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import pl.edu.agh.student.rentsys.model.*;
+import pl.edu.agh.student.rentsys.service.AgreementService;
 import pl.edu.agh.student.rentsys.service.ApartmentService;
+import pl.edu.agh.student.rentsys.service.ClientService;
 import pl.edu.agh.student.rentsys.service.UserService;
 
 import java.lang.reflect.Array;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 @RestController
@@ -14,11 +18,17 @@ public class UserController {
 
     private UserService userService;
     private ApartmentService apartmentService;
+    private AgreementService agreementService;
+    private ClientService clientService;
 
     public UserController(UserService userService,
-                          ApartmentService apartmentService) {
+                          ApartmentService apartmentService,
+                          AgreementService agreementService,
+                          ClientService clientService) {
         this.userService = userService;
         this.apartmentService = apartmentService;
+        this.agreementService = agreementService;
+        this.clientService = clientService;
     }
 
     @GetMapping("/a")
@@ -57,6 +67,25 @@ public class UserController {
         else return ResponseEntity.notFound().build();
     }
 
+    @GetMapping("/user/{uid}/agreement")
+    public ResponseEntity<List<Agreement>> getAllAgreementsForUser(@PathVariable long uid){
+        Optional<User> userOptional = userService.getUserById(uid);
+        if(userOptional.isPresent()){
+            return ResponseEntity.ok(agreementService.getAgreementForUser(userOptional.get()));
+        }else return ResponseEntity.notFound().build();
+    }
+
+    @GetMapping("/user/{uid}/agreement/{agid}")
+    public ResponseEntity<Agreement> getAgreementForUserById(@PathVariable long uid,
+                                                             @PathVariable long agid){
+        Optional<User> userOptional = userService.getUserById(uid);
+        if(userOptional.isPresent()){
+            Optional<Agreement> agreementOptional = agreementService.getAgreementById(agid);
+            if(agreementOptional.isPresent()) return ResponseEntity.ok(agreementOptional.get());
+            else return ResponseEntity.notFound().build();
+        }else return ResponseEntity.notFound().build();
+    }
+
     @PostMapping("/user")
     public ResponseEntity<User> createUser(@RequestBody Map<String, Object> payload){
         if(!payload.containsKey("username") || !payload.containsKey("password") ||
@@ -85,7 +114,7 @@ public class UserController {
                 !payload.containsKey("pictures")){
             return ResponseEntity.badRequest().build();
         }
-        if(!(payload.get("pictures") instanceof ArrayList))
+        if(!(payload.get("pictures") instanceof ArrayList)) //TODO finish json validation
             return ResponseEntity.badRequest().build();
         Apartment newApartment = new Apartment();
         Optional<User> owner = userService.getUserById(uid);
@@ -131,6 +160,39 @@ public class UserController {
         if(apartment != null){
             return ResponseEntity.ok(apartment);
         }
+        else return ResponseEntity.internalServerError().build();
+    }
+
+    @PostMapping("/user/{uid}/agreement")
+    public ResponseEntity<Agreement> createAgreement(@PathVariable long uid,
+                                                     @RequestBody Map<String, Object> payload){
+        if(!payload.containsKey("name") || !payload.containsKey("monthlyPayment") ||
+                !payload.containsKey("apartment") || !payload.containsKey("signingDate") ||
+                !payload.containsKey("expirationDate") || !payload.containsKey("tenants")){
+            return ResponseEntity.badRequest().build();
+        }
+        Agreement newAgreement = new Agreement();
+        Optional<User> owner = userService.getUserById(uid);
+        if(owner.isEmpty()) return ResponseEntity.notFound().build();
+        newAgreement.setOwner(owner.get());
+        newAgreement.setName((String) payload.get("name"));
+        Optional<Apartment> apartment = apartmentService.getApartment((Long) payload.get("apartment"));
+        if(apartment.isEmpty()) return ResponseEntity.notFound().build();
+        newAgreement.setApartment(apartment.get());
+        newAgreement.setSigningDate(LocalDate.parse((String) payload.get("signingDate"),
+                DateTimeFormatter.ofPattern("yyyy-MM-dd")));
+        newAgreement.setExpirationDate(LocalDate.parse((String) payload.get("expirationDate"),
+                DateTimeFormatter.ofPattern("yyyy-MM-dd")));
+        Set<Client> tenantSet = new HashSet<>();
+        for(Map<String,Object> payloadClient: (List<Map<String,Object>>) payload.get("tenants")){
+            if(!payloadClient.containsKey("id")) return ResponseEntity.badRequest().build();
+            Optional<Client> client = clientService.getClientById((Long) payloadClient.get("id"));
+            if(client.isEmpty()) return ResponseEntity.notFound().build();
+            tenantSet.add(client.get());
+        }
+        newAgreement.setTenants(tenantSet);
+        Agreement agreement = agreementService.createAgreement(newAgreement);
+        if(agreement != null) return ResponseEntity.ok(agreement);
         else return ResponseEntity.internalServerError().build();
     }
 }
