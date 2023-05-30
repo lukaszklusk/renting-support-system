@@ -1,22 +1,20 @@
 package pl.edu.agh.student.rentsys.model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
-import jakarta.persistence.OneToOne;
+import jakarta.persistence.*;
 
 import java.time.LocalDate;
+import java.util.Set;
 
 @Entity
 public class Agreement {
     private Long id;
     private String name;
-    private int tenantsNo;
     private double monthlyPayment;
     private Apartment apartment;
     private User owner;
     private LocalDate signingDate;
     private LocalDate expirationDate;
+    private Set<Client> tenants;
 
 
     public void setId(Long id) {
@@ -35,14 +33,6 @@ public class Agreement {
 
     public void setName(String name) {
         this.name = name;
-    }
-
-    public int getTenantsNo() {
-        return tenantsNo;
-    }
-
-    public void setTenantsNo(int tenantsNo) {
-        this.tenantsNo = tenantsNo;
     }
 
     public double getMonthlyPayment() {
@@ -85,5 +75,14 @@ public class Agreement {
 
     public void setExpirationDate(LocalDate expirationDate) {
         this.expirationDate = expirationDate;
+    }
+
+    @OneToMany
+    public Set<Client> getTenants() {
+        return tenants;
+    }
+
+    public void setTenants(Set<Client> tenants) {
+        this.tenants = tenants;
     }
 }
