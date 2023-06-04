@@ -1,4 +1,4 @@
-package pl.edu.agh.student.rentsys.registration.token;
+package pl.edu.agh.student.rentsys.auth.token;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;

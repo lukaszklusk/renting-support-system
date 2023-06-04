@@ -1,29 +1,36 @@
-package pl.edu.agh.student.rentsys.registration;
+package pl.edu.agh.student.rentsys.auth;
 
 import lombok.AllArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
-import pl.edu.agh.student.rentsys.registration.email.EmailSenderService;
-import pl.edu.agh.student.rentsys.registration.email.EmailValidator;
-import pl.edu.agh.student.rentsys.registration.token.ConfirmationToken;
-import pl.edu.agh.student.rentsys.registration.token.ConfirmationTokenService;
+import pl.edu.agh.student.rentsys.auth.email.EmailSenderService;
+import pl.edu.agh.student.rentsys.auth.email.EmailValidator;
+import pl.edu.agh.student.rentsys.auth.token.ConfirmationToken;
+import pl.edu.agh.student.rentsys.auth.token.ConfirmationTokenService;
 import pl.edu.agh.student.rentsys.security.UserRole;
+import pl.edu.agh.student.rentsys.security.jwt.JwtService;
 import pl.edu.agh.student.rentsys.user.User;
 import pl.edu.agh.student.rentsys.user.UserService;
 
 import java.time.LocalDateTime;
 
-import static pl.edu.agh.student.rentsys.registration.RegistrationConfig.*;
+import static pl.edu.agh.student.rentsys.auth.AuthenticationConfig.*;
 
 @Service
 @AllArgsConstructor
-public class RegistrationService {
+public class AuthenticationService {
 
     private final UserService userService;
     private final ConfirmationTokenService tokenService;
-    private final EmailValidator emailValidator;
     private final EmailSenderService emailSenderService;
+    private final JwtService jwtService;
+    private final EmailValidator emailValidator;
+    private final AuthenticationManager authenticationManager;
 
-    public String register(RegistrationRequest request) {
+    public void register(SignUpRequest request) {
         boolean isEmailValid = emailValidator.validate(request.getEmail());
         if(!isEmailValid) {
             throw new IllegalStateException(String.format("%s in not a valid email", request.getEmail()));
@@ -44,10 +51,9 @@ public class RegistrationService {
                 CONFIRMATION_EMAIL_SUBJECT,
                 buildEmailBody(request.getUsername(), buildActivationLink(token))
         );
-        return token;
     }
 
-    public String confirmToken(String sToken) {
+    public void activateUser(String sToken) {
         LocalDateTime timeNow = LocalDateTime.now();
 
         ConfirmationToken token = tokenService.getToken(sToken)
@@ -67,7 +73,20 @@ public class RegistrationService {
 
         tokenService.save(token);
         userService.save(user);
+    }
 
-        return "enabled";
+    public SignInResponse login(SignInRequest request) {
+        authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(
+                        request.getUsername(),
+                        request.getPassword()
+                )
+        );
+        UserDetails user = userService.loadUserByUsername(request.getUsername());
+        String jwtToken = jwtService.generateToken(user);
+        return SignInResponse.builder()
+                .token(jwtToken)
+                .build();
+
     }
 }

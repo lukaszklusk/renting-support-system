@@ -1,4 +1,4 @@
-package pl.edu.agh.student.rentsys.registration.token;
+package pl.edu.agh.student.rentsys.auth.token;
 
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;

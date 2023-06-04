@@ -7,15 +7,15 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import pl.edu.agh.student.rentsys.registration.token.ConfirmationToken;
-import pl.edu.agh.student.rentsys.registration.token.ConfirmationTokenService;
+import pl.edu.agh.student.rentsys.auth.token.ConfirmationToken;
+import pl.edu.agh.student.rentsys.auth.token.ConfirmationTokenService;
 
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-import static pl.edu.agh.student.rentsys.registration.RegistrationConfig.ACTIVATION_TOKEN_VALID_TIME_IN_MINUTES;
+import static pl.edu.agh.student.rentsys.auth.AuthenticationConfig.ACTIVATION_TOKEN_VALID_TIME_IN_MINUTES;
 
 @Service
 @AllArgsConstructor

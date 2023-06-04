@@ -1,4 +1,4 @@
-package pl.edu.agh.student.rentsys.registration.email;
+package pl.edu.agh.student.rentsys.auth.email;
 
 import jakarta.mail.internet.AddressException;
 import jakarta.mail.internet.InternetAddress;
