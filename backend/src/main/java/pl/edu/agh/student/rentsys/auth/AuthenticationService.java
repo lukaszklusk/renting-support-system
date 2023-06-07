@@ -1,13 +1,15 @@
 package pl.edu.agh.student.rentsys.auth;
 
 import lombok.AllArgsConstructor;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import pl.edu.agh.student.rentsys.auth.email.EmailSenderService;
 import pl.edu.agh.student.rentsys.auth.email.EmailValidator;
+import pl.edu.agh.student.rentsys.auth.requests.SignInRequest;
+import pl.edu.agh.student.rentsys.auth.requests.SignUpRequest;
+import pl.edu.agh.student.rentsys.auth.responses.SignInResponse;
 import pl.edu.agh.student.rentsys.auth.token.ConfirmationToken;
 import pl.edu.agh.student.rentsys.auth.token.ConfirmationTokenService;
 import pl.edu.agh.student.rentsys.security.UserRole;
@@ -35,12 +37,14 @@ public class AuthenticationService {
         if(!isEmailValid) {
             throw new IllegalStateException(String.format("%s in not a valid email", request.getEmail()));
         }
+
+        UserRole userRole = request.getRole().equals("client") ? UserRole.CLIENT : UserRole.OWNER;
         String token = userService.signUp(
                 User.builder()
                         .username(request.getUsername())
                         .email(request.getEmail())
                         .password(request.getPassword())
-                        .userRole(UserRole.USER)
+                        .userRole(userRole)
                         .enabled(false)
                         .locked(false)
                         .build()

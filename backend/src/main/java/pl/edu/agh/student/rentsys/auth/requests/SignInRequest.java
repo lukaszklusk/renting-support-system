@@ -1,4 +1,4 @@
-package pl.edu.agh.student.rentsys.auth;
+package pl.edu.agh.student.rentsys.auth.requests;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

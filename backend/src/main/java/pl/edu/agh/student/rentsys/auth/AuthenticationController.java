@@ -4,7 +4,11 @@ import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+import pl.edu.agh.student.rentsys.auth.requests.SignInRequest;
+import pl.edu.agh.student.rentsys.auth.requests.SignUpRequest;
+import pl.edu.agh.student.rentsys.auth.responses.SignInResponse;
 
 @RestController
 @RequestMapping(path = "/auth")
@@ -14,7 +18,12 @@ public class AuthenticationController {
     private final AuthenticationService authenticationService;
 
     @PostMapping(path = "/signUp")
-    public ResponseEntity<?> signUp(@Valid @RequestBody SignUpRequest request) {
+    public ResponseEntity<?> signUp(@Valid @RequestBody SignUpRequest request, BindingResult bindingResult) {
+        if(bindingResult.hasErrors()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body("Invalid request");
+        }
+
         try {
             authenticationService.register(request);
             return ResponseEntity.status(HttpStatus.CREATED)
