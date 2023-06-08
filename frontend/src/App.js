@@ -1,9 +1,11 @@
 import Register from './components/auth/Register';
+import Login from './components/auth/Login';
 
 function App() {
   return (
     <main className="App">
-      <Register />
+      {/* <Register /> */}
+      <Login />
     </main>
   );
 }
