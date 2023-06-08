@@ -3,6 +3,9 @@ import { Nav, Container, Row, Col, Card, Form, Button, Alert, InputGroup } from 
 import { Envelope, Person, Gear, Lock, Key } from "react-bootstrap-icons"; 
 import 'bootstrap/dist/css/bootstrap.css';
 import '../../styles/custom-styles.css';
+import axios from '../../services/axios';
+
+const REGISTER_URL = "/sign-up";
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const USERNAME_REGEX = /^[A-z][A-z0-9-_]{3,23}$/;
@@ -18,7 +21,7 @@ const Register = () => {
   const [username, setUsername] = useState('');
   const [isUsernameValid, setIsUsernameValid] = useState(false);
 
-  const [userType, setUserType] = useState('client');
+  const [role, setRole] = useState('client');
 
   const [password, setPassword] = useState('');
   const [isPasswordValid, setIsPasswordValid] = useState(false);
@@ -64,12 +67,24 @@ const Register = () => {
       setErrMsg('Invalid Entry');
       return;
     }
-
-    console.log('Registering...');
-    console.log('Email:', email);
-    console.log('Username:', username);
-    console.log('Password:', password);
-    console.log('Repeat Password:', repeatPassword);
+    try {
+      const response = await axios.post(REGISTER_URL,
+        JSON.stringify({email, username, role, password}),
+        {
+          headers: {'Content-Type': 'application/json'},
+          withCredentials: true
+        }
+      );
+      console.log(response.data);
+      console.log(JSON.stringify(response));
+    } catch (err) {
+      if(!err?.response) {
+        setErrMsg('Server did not respond');
+      } else {
+        console.log(err.response);
+      }
+    }
+ 
   };
 
   return (
@@ -127,7 +142,7 @@ const Register = () => {
                   </InputGroup>
                 </Form.Group>
 
-                <Form.Group controlId="formUserType" className='my-3'>
+                <Form.Group controlId="formRole" className='my-3'>
                   <InputGroup>
                     <InputGroup.Text className='transparent-input-group-text'>
                       <Gear />
@@ -138,8 +153,8 @@ const Register = () => {
                         id="client"
                         label="client"
                         value="client"
-                        checked={userType === 'client'}
-                        onChange={e => setUserType(e.target.value)}
+                        checked={role === 'client'}
+                        onChange={e => setRole(e.target.value)}
                         className="custom-radio-input w-100"
                       />
                       <Form.Check
@@ -147,8 +162,8 @@ const Register = () => {
                         id="owner"
                         label="owner"
                         value="owner"
-                        checked={userType === 'owner'}
-                        onChange={e => setUserType(e.target.value)}
+                        checked={role === 'owner'}
+                        onChange={e => setRole(e.target.value)}
                         className="custom-radio-input w-100"
                       />
                     </div>
