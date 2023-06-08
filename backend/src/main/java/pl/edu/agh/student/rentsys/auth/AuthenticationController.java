@@ -13,6 +13,7 @@ import pl.edu.agh.student.rentsys.auth.responses.SignInResponse;
 @RestController
 @RequestMapping(path = "/auth")
 @AllArgsConstructor
+@CrossOrigin(origins = "http://localhost:3000")
 public class AuthenticationController {
 
     private final AuthenticationService authenticationService;
