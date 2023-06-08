@@ -11,14 +11,14 @@ import pl.edu.agh.student.rentsys.auth.requests.SignUpRequest;
 import pl.edu.agh.student.rentsys.auth.responses.SignInResponse;
 
 @RestController
-@RequestMapping(path = "/auth")
+@RequestMapping()
 @AllArgsConstructor
 @CrossOrigin(origins = "http://localhost:3000")
 public class AuthenticationController {
 
     private final AuthenticationService authenticationService;
 
-    @PostMapping(path = "/signUp")
+    @PostMapping(path = "/sign-up")
     public ResponseEntity<?> signUp(@Valid @RequestBody SignUpRequest request, BindingResult bindingResult) {
         if(bindingResult.hasErrors()) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
@@ -35,7 +35,7 @@ public class AuthenticationController {
         }
     }
 
-    @PostMapping(path = "/signIn")
+    @PostMapping(path = "/sign-in")
     public ResponseEntity<SignInResponse> signIn(@RequestBody SignInRequest request) {
         try {
             SignInResponse response = authenticationService.login(request);
