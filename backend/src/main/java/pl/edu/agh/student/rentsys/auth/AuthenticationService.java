@@ -89,7 +89,7 @@ public class AuthenticationService {
         UserDetails user = userService.loadUserByUsername(request.getUsername());
         String jwtToken = jwtService.generateToken(user);
         return SignInResponse.builder()
-                .token(jwtToken)
+                .accessToken(jwtToken)
                 .build();
 
     }

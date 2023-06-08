@@ -8,5 +8,5 @@ import lombok.Data;
 @Builder
 @AllArgsConstructor
 public class SignInResponse {
-    private String token;
+    private String accessToken;
 }
