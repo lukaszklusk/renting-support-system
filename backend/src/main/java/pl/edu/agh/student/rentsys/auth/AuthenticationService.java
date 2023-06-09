@@ -3,6 +3,7 @@ package pl.edu.agh.student.rentsys.auth;
 import lombok.AllArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import pl.edu.agh.student.rentsys.auth.email.EmailSenderService;
@@ -18,6 +19,7 @@ import pl.edu.agh.student.rentsys.user.User;
 import pl.edu.agh.student.rentsys.user.UserService;
 
 import java.time.LocalDateTime;
+import java.util.Collection;
 
 import static pl.edu.agh.student.rentsys.auth.AuthenticationConfig.*;
 
@@ -87,9 +89,11 @@ public class AuthenticationService {
                 )
         );
         UserDetails user = userService.loadUserByUsername(request.getUsername());
+        String[] roles = userService.getUserRolesAsStringArray(user);
         String jwtToken = jwtService.generateToken(user);
         return SignInResponse.builder()
                 .accessToken(jwtToken)
+                .roles(roles)
                 .build();
 
     }

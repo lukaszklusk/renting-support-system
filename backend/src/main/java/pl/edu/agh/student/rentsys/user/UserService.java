@@ -1,6 +1,7 @@
 package pl.edu.agh.student.rentsys.user;
 
 import lombok.AllArgsConstructor;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -11,6 +12,7 @@ import pl.edu.agh.student.rentsys.auth.token.ConfirmationToken;
 import pl.edu.agh.student.rentsys.auth.token.ConfirmationTokenService;
 
 import java.time.LocalDateTime;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -82,5 +84,17 @@ public class UserService implements UserDetailsService {
         confirmationTokenService.save(token);
 
         return token.getToken();
+    }
+
+    public String[] getUserRolesAsStringArray(UserDetails user) {
+        Collection<? extends GrantedAuthority> authorities = user.getAuthorities();
+        String[] roles = new String[authorities.size()];
+
+        int i = 0;
+        for (GrantedAuthority authority : authorities) {
+            roles[i] = authority.getAuthority();
+            i++;
+        }
+        return roles;
     }
 }
