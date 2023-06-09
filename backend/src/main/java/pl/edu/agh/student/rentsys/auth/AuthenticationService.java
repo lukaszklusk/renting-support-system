@@ -1,16 +1,19 @@
 package pl.edu.agh.student.rentsys.auth;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.AllArgsConstructor;
+import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import pl.edu.agh.student.rentsys.auth.email.EmailSenderService;
 import pl.edu.agh.student.rentsys.auth.email.EmailValidator;
 import pl.edu.agh.student.rentsys.auth.requests.SignInRequest;
 import pl.edu.agh.student.rentsys.auth.requests.SignUpRequest;
-import pl.edu.agh.student.rentsys.auth.responses.SignInResponse;
+import pl.edu.agh.student.rentsys.auth.responses.AuthorizationResponse;
 import pl.edu.agh.student.rentsys.auth.token.ConfirmationToken;
 import pl.edu.agh.student.rentsys.auth.token.ConfirmationTokenService;
 import pl.edu.agh.student.rentsys.security.UserRole;
@@ -18,8 +21,8 @@ import pl.edu.agh.student.rentsys.security.jwt.JwtService;
 import pl.edu.agh.student.rentsys.user.User;
 import pl.edu.agh.student.rentsys.user.UserService;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
-import java.util.Collection;
 
 import static pl.edu.agh.student.rentsys.auth.AuthenticationConfig.*;
 
@@ -81,7 +84,7 @@ public class AuthenticationService {
         userService.save(user);
     }
 
-    public SignInResponse login(SignInRequest request) {
+    public AuthorizationResponse login(SignInRequest request) {
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         request.getUsername(),
@@ -90,11 +93,36 @@ public class AuthenticationService {
         );
         UserDetails user = userService.loadUserByUsername(request.getUsername());
         String[] roles = userService.getUserRolesAsStringArray(user);
-        String jwtToken = jwtService.generateToken(user);
-        return SignInResponse.builder()
-                .accessToken(jwtToken)
+        String accessToken = jwtService.generateAccessToken(user);
+        String refreshToken = jwtService.generateRefreshToken(user);
+        return AuthorizationResponse.builder()
+                .accessToken(accessToken)
+                .refreshToken(refreshToken)
                 .roles(roles)
                 .build();
 
+    }
+
+    public void refreshToken(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
+        if(authHeader == null || !authHeader.startsWith("Bearer ")) {
+            return;
+        }
+
+        String refreshToken = jwtService.extractToken(request);
+        String username = jwtService.extractUsername(refreshToken);
+        if(username != null) {
+            UserDetails user = userService.loadUserByUsername(username);
+            if(jwtService.validate(refreshToken, user)) {
+                String accessToken = jwtService.generateAccessToken(user);
+                String[] roles = userService.getUserRolesAsStringArray(user);
+                AuthorizationResponse authorizationResponse = AuthorizationResponse.builder()
+                        .accessToken(accessToken)
+                        .refreshToken(refreshToken)
+                        .roles(roles)
+                        .build();
+                new ObjectMapper().writeValue(response.getOutputStream(), authorizationResponse);
+            }
+        }
     }
 }

@@ -1,5 +1,7 @@
 package pl.edu.agh.student.rentsys.auth;
 
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -8,7 +10,9 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import pl.edu.agh.student.rentsys.auth.requests.SignInRequest;
 import pl.edu.agh.student.rentsys.auth.requests.SignUpRequest;
-import pl.edu.agh.student.rentsys.auth.responses.SignInResponse;
+import pl.edu.agh.student.rentsys.auth.responses.AuthorizationResponse;
+
+import java.io.IOException;
 
 @RestController
 @RequestMapping()
@@ -36,9 +40,9 @@ public class AuthenticationController {
     }
 
     @PostMapping(path = "/sign-in")
-    public ResponseEntity<SignInResponse> signIn(@RequestBody SignInRequest request) {
+    public ResponseEntity<AuthorizationResponse> signIn(@RequestBody SignInRequest request) {
         try {
-            SignInResponse response = authenticationService.login(request);
+            AuthorizationResponse response = authenticationService.login(request);
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
@@ -54,5 +58,10 @@ public class AuthenticationController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("Error occurred during account activation.");
         }
+    }
+
+    @GetMapping("/refresh-token")
+    public void activateUser(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        authenticationService.refreshToken(request, response);
     }
 }

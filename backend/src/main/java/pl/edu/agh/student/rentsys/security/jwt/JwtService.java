@@ -3,14 +3,19 @@ package pl.edu.agh.student.rentsys.security.jwt;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.AllArgsConstructor;
+import org.springframework.http.HttpHeaders;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
+import pl.edu.agh.student.rentsys.user.UserService;
 
-import java.time.LocalDate;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Function;
 
 import static pl.edu.agh.student.rentsys.security.jwt.JwtConfig.*;
@@ -18,6 +23,8 @@ import static pl.edu.agh.student.rentsys.security.jwt.JwtConfig.*;
 @Service
 @AllArgsConstructor
 public class JwtService {
+
+    private final UserService userService;
 
     public String extractToken(HttpServletRequest request) {
         String authorizationHeader = request.getHeader("Authorization");
@@ -27,16 +34,24 @@ public class JwtService {
         return authorizationHeader.replace(TOKEN_HEADER, "");
     }
 
-    public String generateToken(UserDetails userDetails) {
-        return generateToken(new HashMap<>(), userDetails);
+    public String generateAccessToken(UserDetails userDetails) {
+        return generateAccessToken(new HashMap<>(), userDetails);
     }
-    public String generateToken(Map<String, Object> claims, UserDetails userDetails) {
+    public String generateAccessToken(Map<String, Object> claims, UserDetails userDetails) {
+        return buildToken(claims, userDetails, JWT_ACCESS_TOKEN_VALID_TIME_IN_MS);
+    }
+
+    public String generateRefreshToken( UserDetails userDetails) {
+        return buildToken(new HashMap<>(), userDetails, JWT_REFRESH_TOKEN_VALID_TIME_IN_MS);
+    }
+
+    public String buildToken(Map<String, Object> claims, UserDetails userDetails, long expirationTimeInMs) {
         return Jwts
                 .builder()
                 .setClaims(claims)
                 .setSubject(userDetails.getUsername())
                 .setIssuedAt(new Date())
-                .setExpiration(java.sql.Date.valueOf(LocalDate.now().plusDays(JWT_TOKEN_VALID_TIME_IN_DAYS)))
+                .setExpiration(new Date(System.currentTimeMillis() + expirationTimeInMs))
                 .signWith(getEncryptionKey(), ENCRYPTION_ALGORITHM)
                 .compact();
     }
