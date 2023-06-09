@@ -9,6 +9,12 @@ import Apartments from "./components/Apartments";
 import NotFound from "./components/NotFound";
 import RequireAuth from "./components/auth/RequireAuth";
 
+const ROLES = {
+  client: "ROLE_CLIENT",
+  owner: "ROLE_OWNER",
+  admin: "ROLE_ADMIN",
+};
+
 function App() {
   return (
     <Routes>
@@ -20,8 +26,14 @@ function App() {
         <Route path="sign-in" element={<Login />} />
 
         {/* secured routes */}
-        <Route element={<RequireAuth />}>
+        <Route
+          element={
+            <RequireAuth roles={[ROLES.client, ROLES.owner, ROLES.admin]} />
+          }
+        >
           <Route path="dashboard" element={<Dashboard />} />
+        </Route>
+        <Route element={<RequireAuth roles={[ROLES.owner, ROLES.admin]} />}>
           <Route path="apartments" element={<Apartments />} />
         </Route>
 
