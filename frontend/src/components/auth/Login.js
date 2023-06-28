@@ -53,9 +53,8 @@ const Login = () => {
       setUsername("");
       setPassword("");
       console.log(JSON.stringify(response?.data));
-      const accessToken = response?.data?.accessToken;
       const roles = response?.data?.roles;
-      setAuth({ username, roles, accessToken, isLoggedIn: true });
+      setAuth({ username, roles, isLoggedIn: true });
       navigate(from, { replace: true });
     } catch (err) {
       if (!err?.response) {
