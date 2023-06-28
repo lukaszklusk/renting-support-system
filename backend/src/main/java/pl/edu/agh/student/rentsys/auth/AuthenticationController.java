@@ -49,7 +49,7 @@ public class AuthenticationController {
         }
     }
 
-    @GetMapping("/confirm")
+    @GetMapping("/activate")
     public ResponseEntity<?> activateUser(@RequestParam String token) {
         try {
             authenticationService.activateUser(token);
@@ -60,8 +60,8 @@ public class AuthenticationController {
         }
     }
 
-    @GetMapping("/refresh-token")
-    public void activateUser(HttpServletRequest request, HttpServletResponse response) throws IOException {
+    @GetMapping("/refresh")
+    public void refreshToken(HttpServletRequest request, HttpServletResponse response) {
         authenticationService.refreshToken(request, response);
     }
 }

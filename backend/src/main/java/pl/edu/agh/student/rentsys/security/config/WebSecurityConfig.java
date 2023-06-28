@@ -44,7 +44,7 @@ public class WebSecurityConfig {
                 .authenticationProvider(daoAuthenticationProvider())
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .authorizeHttpRequests()
-                    .requestMatchers("sign-up", "sign-in", "confirm", "refresh-token").permitAll()
+                    .requestMatchers("sign-up", "sign-in", "activate", "refresh").permitAll()
                     .requestMatchers(HttpMethod.GET, "/demo/client").hasRole(UserRole.CLIENT.name())
                     .requestMatchers(HttpMethod.GET, "/demo/owner").hasRole(UserRole.OWNER.name())
                     .requestMatchers(HttpMethod.GET, "/demo/admin").hasRole(UserRole.ADMIN.name())
