@@ -10,9 +10,6 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import pl.edu.agh.student.rentsys.auth.requests.SignInRequest;
 import pl.edu.agh.student.rentsys.auth.requests.SignUpRequest;
-import pl.edu.agh.student.rentsys.auth.responses.AuthorizationResponse;
-
-import java.io.IOException;
 
 @RestController
 @RequestMapping()
@@ -24,40 +21,26 @@ public class AuthenticationController {
 
     @PostMapping(path = "/sign-up")
     public ResponseEntity<?> signUp(@Valid @RequestBody SignUpRequest request, BindingResult bindingResult) {
+//        TODO
         if(bindingResult.hasErrors()) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body("Invalid request");
         }
 
-        try {
-            authenticationService.register(request);
-            return ResponseEntity.status(HttpStatus.CREATED)
-                    .body("Registration successful.");
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("Error occurred during registration.");
-        }
+        authenticationService.signUp(request);
+        return ResponseEntity.status(HttpStatus.CREATED)
+                    .body("Registration successful");
     }
 
     @PostMapping(path = "/sign-in")
-    public ResponseEntity<AuthorizationResponse> signIn(@RequestBody SignInRequest request) {
-        try {
-            AuthorizationResponse response = authenticationService.login(request);
-            return ResponseEntity.ok(response);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-        }
+    public void signIn(@RequestBody SignInRequest request, HttpServletResponse response) {
+        authenticationService.signIn(request, response);
     }
 
     @GetMapping("/activate")
     public ResponseEntity<?> activateUser(@RequestParam String token) {
-        try {
-            authenticationService.activateUser(token);
-            return ResponseEntity.ok("Account activated successfully.");
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("Error occurred during account activation.");
-        }
+        authenticationService.activateUser(token);
+        return ResponseEntity.ok("Account activated successfully.");
     }
 
     @GetMapping("/refresh")
