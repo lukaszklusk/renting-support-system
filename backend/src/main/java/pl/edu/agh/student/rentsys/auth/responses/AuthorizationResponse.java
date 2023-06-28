@@ -8,7 +8,5 @@ import lombok.Data;
 @Builder
 @AllArgsConstructor
 public class AuthorizationResponse {
-    private String accessToken;
-    private String refreshToken;
     private String[] roles;
 }

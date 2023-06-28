@@ -2,12 +2,9 @@ package pl.edu.agh.student.rentsys.security.jwt;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 import lombok.AllArgsConstructor;
-import org.springframework.http.HttpHeaders;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import pl.edu.agh.student.rentsys.user.UserService;
@@ -26,13 +23,9 @@ public class JwtService {
 
     private final UserService userService;
 
-    public String extractToken(HttpServletRequest request) {
-        String authorizationHeader = request.getHeader("Authorization");
-        if(authorizationHeader == null || !authorizationHeader.startsWith(TOKEN_HEADER)) {
-            return null;
-        }
-        return authorizationHeader.replace(TOKEN_HEADER, "");
-    }
+    public Optional<String> extractTokenByName(HttpServletRequest request, String tokenName) {
+        return getCookieValueByName(request, tokenName);
+   }
 
     public String generateAccessToken(UserDetails userDetails) {
         return generateAccessToken(new HashMap<>(), userDetails);
@@ -41,7 +34,7 @@ public class JwtService {
         return buildToken(claims, userDetails, JWT_ACCESS_TOKEN_VALID_TIME_IN_MS);
     }
 
-    public String generateRefreshToken( UserDetails userDetails) {
+    public String generateRefreshToken(UserDetails userDetails) {
         return buildToken(new HashMap<>(), userDetails, JWT_REFRESH_TOKEN_VALID_TIME_IN_MS);
     }
 
@@ -83,5 +76,18 @@ public class JwtService {
                 .build()
                 .parseClaimsJws(token)
                 .getBody();
+    }
+
+    private Optional<String> getCookieValueByName(HttpServletRequest request, String cookieName) {
+        Cookie[] cookies = request.getCookies();
+
+        if (cookies != null) {
+            for (Cookie cookie : cookies) {
+                if (cookie.getName().equals(cookieName)) {
+                    return Optional.of(cookie.getValue());
+                }
+            }
+        }
+        return Optional.empty();
     }
 }
