@@ -3,9 +3,9 @@ package pl.edu.agh.student.rentsys.service;
 import org.springframework.stereotype.Service;
 import pl.edu.agh.student.rentsys.model.Agreement;
 import pl.edu.agh.student.rentsys.model.AgreementChange;
-import pl.edu.agh.student.rentsys.model.User;
 import pl.edu.agh.student.rentsys.repository.AgreementChangeRepository;
 import pl.edu.agh.student.rentsys.repository.AgreementRepository;
+import pl.edu.agh.student.rentsys.user.User;
 
 import java.time.LocalDate;
 import java.util.List;

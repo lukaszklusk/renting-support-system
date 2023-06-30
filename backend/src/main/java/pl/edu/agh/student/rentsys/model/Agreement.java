@@ -1,6 +1,7 @@
 package pl.edu.agh.student.rentsys.model;
 
 import jakarta.persistence.*;
+import pl.edu.agh.student.rentsys.user.User;
 
 import java.time.LocalDate;
 import java.util.HashSet;
@@ -15,7 +16,7 @@ public class Agreement {
     private User owner;
     private LocalDate signingDate;
     private LocalDate expirationDate;
-    private Set<Client> tenants;
+    private Set<User> tenants;
 
 
     public void setId(Long id) {
@@ -78,12 +79,12 @@ public class Agreement {
         this.expirationDate = expirationDate;
     }
 
-    @OneToMany
-    public Set<Client> getTenants() {
+    @ManyToMany
+    public Set<User> getTenants() {
         return tenants;
     }
 
-    public void setTenants(Set<Client> tenants) {
+    public void setTenants(Set<User> tenants) {
         this.tenants = new HashSet<>(tenants);
     }
 }

@@ -1,15 +1,16 @@
 package pl.edu.agh.student.rentsys.controller;
 
-import jakarta.persistence.criteria.CriteriaBuilder;
+
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import pl.edu.agh.student.rentsys.model.*;
+import pl.edu.agh.student.rentsys.security.UserRole;
 import pl.edu.agh.student.rentsys.service.AgreementService;
 import pl.edu.agh.student.rentsys.service.ApartmentService;
-import pl.edu.agh.student.rentsys.service.ClientService;
-import pl.edu.agh.student.rentsys.service.UserService;
+import pl.edu.agh.student.rentsys.user.User;
+import pl.edu.agh.student.rentsys.user.UserService;
 
-import java.lang.reflect.Array;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
@@ -20,16 +21,17 @@ public class UserController {
     private UserService userService;
     private ApartmentService apartmentService;
     private AgreementService agreementService;
-    private ClientService clientService;
+    private final PasswordEncoder passwordEncoder;
+
 
     public UserController(UserService userService,
                           ApartmentService apartmentService,
                           AgreementService agreementService,
-                          ClientService clientService) {
+                          PasswordEncoder passwordEncoder) {
         this.userService = userService;
         this.apartmentService = apartmentService;
         this.agreementService = agreementService;
-        this.clientService = clientService;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @GetMapping("/a")
@@ -42,24 +44,24 @@ public class UserController {
         return ResponseEntity.ok(userService.getAllUsers());
     }
 
-    @GetMapping("/user/{uid}")
-    public ResponseEntity<User> getUserById(@PathVariable long uid){
-        Optional<User> userOptional = userService.getUserById(uid);
+    @GetMapping("/user/{username}")
+    public ResponseEntity<User> getUserById(@PathVariable String username){
+        Optional<User> userOptional = userService.getUserByUsername(username);
         if(userOptional.isPresent()) return ResponseEntity.ok(userOptional.get());
         else return ResponseEntity.notFound().build();
     }
 
-    @GetMapping("/user/{uid}/apartment")
-    public ResponseEntity<List<Apartment>> getAllApartmentsForUser(@PathVariable long uid){
-        Optional<User> userOptional = userService.getUserById(uid);
+    @GetMapping("/user/{username}/apartment")
+    public ResponseEntity<List<Apartment>> getAllApartmentsForUser(@PathVariable String username){
+        Optional<User> userOptional = userService.getUserByUsername(username);
         if(userOptional.isPresent()){
             return ResponseEntity.ok(apartmentService.getApartmentsForUser(userOptional.get()));
         }else return ResponseEntity.notFound().build();
     }
 
-    @GetMapping("/user/{uid}/apartment/{aid}")
-    public ResponseEntity<Apartment> getUserApartment(@PathVariable long uid, @PathVariable long aid){
-        Optional<User> userOptional = userService.getUserById(uid);
+    @GetMapping("/user/{username}/apartment/{aid}")
+    public ResponseEntity<Apartment> getUserApartment(@PathVariable String username, @PathVariable long aid){
+        Optional<User> userOptional = userService.getUserByUsername(username);
         if (userOptional.isPresent()) {
             Optional<Apartment> apartmentOptional = apartmentService.getApartment(aid);
             if(apartmentOptional.isPresent()) return ResponseEntity.ok(apartmentOptional.get());
@@ -68,18 +70,18 @@ public class UserController {
         else return ResponseEntity.notFound().build();
     }
 
-    @GetMapping("/user/{uid}/agreement")
-    public ResponseEntity<List<Agreement>> getAllAgreementsForUser(@PathVariable long uid){
-        Optional<User> userOptional = userService.getUserById(uid);
+    @GetMapping("/user/{username}/agreement")
+    public ResponseEntity<List<Agreement>> getAllAgreementsForUser(@PathVariable String username){
+        Optional<User> userOptional = userService.getUserByUsername(username);
         if(userOptional.isPresent()){
             return ResponseEntity.ok(agreementService.getAgreementForUser(userOptional.get()));
         }else return ResponseEntity.notFound().build();
     }
 
-    @GetMapping("/user/{uid}/agreement/{agid}")
-    public ResponseEntity<Agreement> getAgreementForUserById(@PathVariable long uid,
+    @GetMapping("/user/{username}/agreement/{agid}")
+    public ResponseEntity<Agreement> getAgreementForUserById(@PathVariable String username,
                                                              @PathVariable long agid){
-        Optional<User> userOptional = userService.getUserById(uid);
+        Optional<User> userOptional = userService.getUserByUsername(username);
         if(userOptional.isPresent()){
             Optional<Agreement> agreementOptional = agreementService.getAgreementById(agid);
             if(agreementOptional.isPresent()) return ResponseEntity.ok(agreementOptional.get());
@@ -88,26 +90,34 @@ public class UserController {
     }
 
     @PostMapping("/user")
-    public ResponseEntity<User> createUser(@RequestBody Map<String, Object> payload){
+    public ResponseEntity<Map<String,Object>> createUser(@RequestBody Map<String, Object> payload){
         if(!payload.containsKey("username") || !payload.containsKey("password") ||
-                !payload.containsKey("email") || !payload.containsKey("phoneNumber")){
+                !payload.containsKey("email") || !payload.containsKey("phoneNumber") ||
+                !payload.containsKey("role")){
             return ResponseEntity.badRequest().build();
         }
-        User newUser = new User();
-        newUser.setUsername((String) payload.get("username"));
-        newUser.setPassword((String) payload.get("password"));
-        newUser.setEmail((String) payload.get("email"));
-        newUser.setPhoneNumber((String) payload.get("phoneNumber"));
-        User user = userService.createNewUser(newUser);
-        if(user != null){
-            return ResponseEntity.ok(user);
+
+        Map<String, Object> response = new HashMap<>();
+        User newUser = User.builder()
+                .username((String) payload.get("username"))
+                .password(passwordEncoder.encode((String) payload.get("password")))
+                .email((String) payload.get("email"))
+                .userRole(UserRole.valueOf((String) payload.get("role")))
+                .locked(false)
+                .enabled(true)
+                .build();
+        response.put("user", newUser);
+        String token = userService.signUp(newUser);
+        if(token != null){
+            response.put("token", token);
+            return ResponseEntity.ok(response);
         }else{
-            return ResponseEntity.internalServerError().build();
+            return ResponseEntity.badRequest().build();
         }
     }
 
-    @PostMapping("/user/{uid}/apartment")
-    public ResponseEntity<Apartment> createApartment(@PathVariable long uid,
+    @PostMapping("/user/{username}/apartment")
+    public ResponseEntity<Apartment> createApartment(@PathVariable String username,
                                                      @RequestBody Map<String, Object> payload){
         if(!payload.containsKey("apartmentName") || !payload.containsKey("address") ||
                 !payload.containsKey("coordinatesX") || !payload.containsKey("coordinatesY") ||
@@ -118,7 +128,7 @@ public class UserController {
         if(!(payload.get("pictures") instanceof ArrayList)) //TODO finish json validation
             return ResponseEntity.badRequest().build();
         Apartment newApartment = new Apartment();
-        Optional<User> owner = userService.getUserById(uid);
+        Optional<User> owner = userService.getUserByUsername(username);
         if(owner.isEmpty()) return ResponseEntity.notFound().build();
         newApartment.setOwner(owner.get());
         newApartment.setAddress((String) payload.get("address"));
@@ -164,8 +174,8 @@ public class UserController {
         else return ResponseEntity.internalServerError().build();
     }
 
-    @PostMapping("/user/{uid}/agreement")
-    public ResponseEntity<Agreement> createAgreement(@PathVariable long uid,
+    @PostMapping("/user/{username}/agreement")
+    public ResponseEntity<Agreement> createAgreement(@PathVariable String username,
                                                      @RequestBody Map<String, Object> payload){
         if(!payload.containsKey("name") || !payload.containsKey("monthlyPayment") ||
                 !payload.containsKey("apartment") || !payload.containsKey("signingDate") ||
@@ -173,7 +183,7 @@ public class UserController {
             return ResponseEntity.badRequest().build();
         }
         Agreement newAgreement = new Agreement();
-        Optional<User> owner = userService.getUserById(uid);
+        Optional<User> owner = userService.getUserByUsername(username);
         if(owner.isEmpty()) return ResponseEntity.notFound().build();
         newAgreement.setOwner(owner.get());
         newAgreement.setName((String) payload.get("name"));
@@ -186,10 +196,10 @@ public class UserController {
                 DateTimeFormatter.ofPattern("yyyy-MM-dd")));
         newAgreement.setExpirationDate(LocalDate.parse((String) payload.get("expirationDate"),
                 DateTimeFormatter.ofPattern("yyyy-MM-dd")));
-        Set<Client> tenantSet = new HashSet<>();
+        Set<User> tenantSet = new HashSet<>();
         for(Map<String,Object> payloadClient: (List<Map<String,Object>>) payload.get("tenants")){
-            if(!payloadClient.containsKey("id")) return ResponseEntity.badRequest().build();
-            Optional<Client> client = clientService.getClientById(Long.valueOf((Integer)payloadClient.get("id")));
+            if(!payloadClient.containsKey("username")) return ResponseEntity.badRequest().build();
+            Optional<User> client = userService.getUserByUsername(((String) payloadClient.get("username")));
             if(client.isEmpty()) return ResponseEntity.notFound().build();
             tenantSet.add(client.get());
         }

@@ -1,6 +1,7 @@
 package pl.edu.agh.student.rentsys.model;
 
 import jakarta.persistence.*;
+import pl.edu.agh.student.rentsys.user.User;
 
 import java.util.HashSet;
 import java.util.Set;

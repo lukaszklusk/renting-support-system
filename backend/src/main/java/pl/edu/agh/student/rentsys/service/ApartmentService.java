@@ -6,6 +6,7 @@ import pl.edu.agh.student.rentsys.repository.ApartmentPropertyRepository;
 import pl.edu.agh.student.rentsys.repository.ApartmentRepository;
 import pl.edu.agh.student.rentsys.repository.EquipmentRepository;
 import pl.edu.agh.student.rentsys.repository.PictureRepository;
+import pl.edu.agh.student.rentsys.user.User;
 
 import java.util.List;
 import java.util.Optional;
