@@ -8,20 +8,18 @@ import Dashboard from "./components/Dashboard";
 import Apartments from "./components/Apartments";
 import NotFound from "./components/NotFound";
 import RequireAuth from "./components/auth/RequireAuth";
-
-const ROLES = {
-  client: "ROLE_CLIENT",
-  owner: "ROLE_OWNER",
-  admin: "ROLE_ADMIN",
-};
+import Contact from "./components/Contact";
+import Agreements from "./components/Agreements";
+import { ROLES } from "./config/roles";
 
 function App() {
   return (
     <Routes>
       <Route path="/" element={<Layout />}>
         {/* // public routes */}
-        <Route path="home" element={<Home />} />
+        <Route path="" element={<Home />} />
         <Route path="about" element={<About />} />
+        <Route path="contact" element={<Contact />} />
         <Route path="sign-up" element={<Register />} />
         <Route path="sign-in" element={<Login />} />
 
@@ -35,6 +33,12 @@ function App() {
         </Route>
         <Route element={<RequireAuth roles={[ROLES.owner, ROLES.admin]} />}>
           <Route path="apartments" element={<Apartments />} />
+        </Route>
+        <Route element={<RequireAuth roles={[ROLES.owner, ROLES.admin]} />}>
+          <Route path="agreements" element={<Agreements />} />
+        </Route>
+        <Route element={<RequireAuth roles={[ROLES.owner, ROLES.admin]} />}>
+          <Route path="reports" element={<Apartments />} />
         </Route>
 
         {/* default route */}
