@@ -1,19 +1,37 @@
 import { Routes, Route } from "react-router-dom";
-import Register from "./components/auth/Register";
-import Login from "./components/auth/Login";
-import Layout from "./components/Layout";
-import Home from "./components/Home";
-import About from "./components/About";
-import Dashboard from "./components/Dashboard";
-import Apartments from "./components/Apartments";
-import NotFound from "./components/NotFound";
-import RequireAuth from "./components/auth/RequireAuth";
-import Contact from "./components/Contact";
-import Agreements from "./components/Agreements";
-import Reports from "./components/Reports";
+
 import { ROLES } from "./config/roles";
 
+import useAuth from "./hooks/useAuth";
+
+import Layout from "./components/common/Layout";
+import Home from "./components/common/Home";
+import About from "./components/common/About";
+import Contact from "./components/common/Contact";
+import NotFound from "./components/common/NotFound";
+
+import Register from "./components/common/auth/Register";
+import Login from "./components/common/auth/Login";
+import RequireAuth from "./components/common/auth/RequireAuth";
+
+import OwnerDashboard from "./components/owner/OwnerDashboard";
+import OwnerApartments from "./components/owner/OwnerApartments";
+import OwnerAgreements from "./components/owner/OwnerAgreements";
+import OwnerReports from "./components/owner/OwnerReports";
+
+import ClientDashboard from "./components/client/ClientDashboard";
+import ClientAgreement from "./components/client/ClientAgreement";
+import ClientApartment from "./components/client/ClientApartment";
+
+import AdminDashboard from "./components/admin/AdminDashboard";
+
 function App() {
+  const { auth } = useAuth();
+  const isLoggedIn = auth.isLoggedIn;
+  const isClient = isLoggedIn && auth.roles?.includes(ROLES.client);
+  const isOwner = isLoggedIn && auth.roles?.includes(ROLES.owner);
+  const isAdmin = isLoggedIn && auth.roles?.includes(ROLES.admin);
+
   return (
     <Routes>
       <Route path="/" element={<Layout />}>
@@ -24,23 +42,31 @@ function App() {
         <Route path="sign-up" element={<Register />} />
         <Route path="sign-in" element={<Login />} />
 
-        {/* secured routes */}
-        <Route
-          element={
-            <RequireAuth roles={[ROLES.client, ROLES.owner, ROLES.admin]} />
-          }
-        >
-          <Route path="dashboard" element={<Dashboard />} />
-        </Route>
-        <Route element={<RequireAuth roles={[ROLES.owner, ROLES.admin]} />}>
-          <Route path="apartments" element={<Apartments />} />
-        </Route>
-        <Route element={<RequireAuth roles={[ROLES.owner, ROLES.admin]} />}>
-          <Route path="agreements" element={<Agreements />} />
-        </Route>
-        <Route element={<RequireAuth roles={[ROLES.owner, ROLES.admin]} />}>
-          <Route path="reports" element={<Reports />} />
-        </Route>
+        {/* client secured routes */}
+        {isClient && (
+          <Route element={<RequireAuth roles={[ROLES.client]} />}>
+            <Route path="dashboard" element={<ClientDashboard />} />
+            <Route path="apartment" element={<ClientApartment />} />
+            <Route path="agreement" element={<ClientAgreement />} />
+          </Route>
+        )}
+
+        {/* owner secured routes */}
+        {isOwner && (
+          <Route element={<RequireAuth roles={[ROLES.owner]} />}>
+            <Route path="dashboard" element={<OwnerDashboard />} />
+            <Route path="apartments" element={<OwnerApartments />} />
+            <Route path="agreements" element={<OwnerAgreements />} />
+            <Route path="reports" element={<OwnerReports />} />
+          </Route>
+        )}
+
+        {/* admin secured routes */}
+        {isAdmin && (
+          <Route element={<RequireAuth roles={[ROLES.admin]} />}>
+            <Route path="dashboard" element={<AdminDashboard />} />
+          </Route>
+        )}
 
         {/* default route */}
         <Route path="*" element={<NotFound />} />
