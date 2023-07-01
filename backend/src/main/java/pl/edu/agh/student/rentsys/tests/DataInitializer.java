@@ -5,11 +5,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
-import pl.edu.agh.student.rentsys.model.Apartment;
-import pl.edu.agh.student.rentsys.model.ApartmentProperty;
-import pl.edu.agh.student.rentsys.model.Equipment;
-import pl.edu.agh.student.rentsys.model.Picture;
+import org.springframework.util.ResourceUtils;
+import pl.edu.agh.student.rentsys.model.*;
 import pl.edu.agh.student.rentsys.security.UserRole;
+import pl.edu.agh.student.rentsys.service.AgreementService;
 import pl.edu.agh.student.rentsys.service.ApartmentService;
 import pl.edu.agh.student.rentsys.user.User;
 import pl.edu.agh.student.rentsys.user.UserRepository;
@@ -17,6 +16,8 @@ import pl.edu.agh.student.rentsys.user.UserRepository;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Random;
 import java.util.Set;
@@ -30,6 +31,7 @@ public class DataInitializer implements CommandLineRunner {
     private final UserRepository userRepository;
     private final ApartmentService apartmentService;
     private final PasswordEncoder passwordEncoder;
+    private final AgreementService agreementService;
 
     @SneakyThrows
     @Override
@@ -43,7 +45,14 @@ public class DataInitializer implements CommandLineRunner {
                 50.017741,19.953718,owner);
         createRandApartment("Apartment 2", "ul. Dde 49",
                 50.077285,19.872920,owner);
-
+        Set<User> tenants = new HashSet<>();
+        tenants.add(client);
+        tenants.add(client2);
+        createAgreement("Agreement 1", apartment, owner,
+                LocalDate.of(2023,3, 13),
+                LocalDate.of(2026, 3,1),
+                tenants);
+        System.out.println("----- FINISHED DATA INITIALIZATION -----");
     }
 
     private User createUser(String email, String username, String password, UserRole role) {
@@ -72,7 +81,7 @@ public class DataInitializer implements CommandLineRunner {
                 Integer.toString(randomNum)));
         apartment.setProperties(properties);
         Set<Picture> pictures = new HashSet<>();
-        byte[] testImg = Files.readAllBytes(Path.of("./testImg.png"));
+        byte[] testImg = this.getClass().getResourceAsStream("/testImg.png").readAllBytes();
         pictures.add(new Picture("Picture 1", testImg));
         pictures.add(new Picture("Picture 2", testImg));
         apartment.setPictures(pictures);
@@ -88,6 +97,19 @@ public class DataInitializer implements CommandLineRunner {
         return apartmentService.createApartment(apartment);
     }
 
-
+    public Agreement createAgreement(String name, Apartment apartment, User owner,
+                                     LocalDate signDate, LocalDate expiryDate,
+                                     Set<User> tenant){
+        Agreement agreement = new Agreement();
+        agreement.setName(name);
+        int randomNum = ThreadLocalRandom.current().nextInt(100000, 400000 + 1);
+        agreement.setMonthlyPayment(randomNum/100.);
+        agreement.setOwner(owner);
+        agreement.setApartment(apartment);
+        agreement.setTenants(tenant);
+        agreement.setSigningDate(signDate);
+        agreement.setExpirationDate(expiryDate);
+        return agreementService.createAgreement(agreement);
+    }
 }
 

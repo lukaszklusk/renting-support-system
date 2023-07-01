@@ -39,7 +39,7 @@ public class Payment {
         this.status = status;
     }
 
-    @OneToOne
+    @ManyToOne
     public Agreement getAgreement() {
         return agreement;
     }

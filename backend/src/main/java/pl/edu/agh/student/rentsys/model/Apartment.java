@@ -37,7 +37,7 @@ public class Apartment {
         return id;
     }
 
-    @OneToOne
+    @ManyToOne
     public User getOwner() {
         return owner;
     }

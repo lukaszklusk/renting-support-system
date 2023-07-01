@@ -45,7 +45,7 @@ public class Agreement {
         this.monthlyPayment = monthlyPayment;
     }
 
-    @OneToOne
+    @ManyToOne
     public Apartment getApartment() {
         return apartment;
     }
@@ -54,7 +54,7 @@ public class Agreement {
         this.apartment = apartment;
     }
 
-    @OneToOne
+    @ManyToOne
     public User getOwner() {
         return owner;
     }
