@@ -17,6 +17,15 @@ public class ApartmentProperty {
         this.id = id;
     }
 
+    public ApartmentProperty() {
+    }
+
+    public ApartmentProperty(String name, String valueType, String value) {
+        this.name = name;
+        this.valueType = valueType;
+        this.value = value;
+    }
+
     @Id
     @GeneratedValue
     public Long getId() {

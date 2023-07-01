@@ -120,7 +120,7 @@ public class UserController {
     public ResponseEntity<Apartment> createApartment(@PathVariable String username,
                                                      @RequestBody Map<String, Object> payload){
         if(!payload.containsKey("apartmentName") || !payload.containsKey("address") ||
-                !payload.containsKey("coordinatesX") || !payload.containsKey("coordinatesY") ||
+                !payload.containsKey("latitude") || !payload.containsKey("longitude") ||
                 !payload.containsKey("equipment") || !payload.containsKey("properties") ||
                 !payload.containsKey("pictures")){
             return ResponseEntity.badRequest().build();
@@ -133,8 +133,8 @@ public class UserController {
         newApartment.setOwner(owner.get());
         newApartment.setAddress((String) payload.get("address"));
         newApartment.setName((String) payload.get("apartmentName"));
-        newApartment.setCoordinatesX((Double) payload.get("coordinatesX"));
-        newApartment.setCoordinatesY((Double) payload.get("coordinatesY"));
+        newApartment.setLatitude((Double) payload.get("latitude"));
+        newApartment.setLongitude((Double) payload.get("longitude"));
         Set<Picture> pictureSet = new HashSet<>();
         for(Map<String, Object> payloadPic: (List<Map<String, Object>>) payload.get("pictures")){
             if(!payloadPic.containsKey("name") || !payloadPic.containsKey("image"))

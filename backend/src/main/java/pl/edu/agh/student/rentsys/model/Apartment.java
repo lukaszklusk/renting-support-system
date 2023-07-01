@@ -12,8 +12,8 @@ public class Apartment {
     private User owner;
     private String name;
     private String address;
-    private double coordinatesX;
-    private double coordinatesY;
+    private double latitude;
+    private double longitude;
     private Set<Equipment> equipment;
     private Set<ApartmentProperty> properties;
     private Set<Picture> pictures;
@@ -62,20 +62,20 @@ public class Apartment {
         this.address = address;
     }
 
-    public double getCoordinatesX() {
-        return coordinatesX;
+    public double getLatitude() {
+        return latitude;
     }
 
-    public void setCoordinatesX(double coordinatesX) {
-        this.coordinatesX = coordinatesX;
+    public void setLatitude(double latitude) {
+        this.latitude = latitude;
     }
 
-    public double getCoordinatesY() {
-        return coordinatesY;
+    public double getLongitude() {
+        return longitude;
     }
 
-    public void setCoordinatesY(double coordinatesY) {
-        this.coordinatesY = coordinatesY;
+    public void setLongitude(double longitude) {
+        this.longitude = longitude;
     }
 
     @OneToMany

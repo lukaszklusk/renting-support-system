@@ -14,6 +14,14 @@ public class Picture {
         this.id = id;
     }
 
+    public Picture() {
+    }
+
+    public Picture(String name, byte[] image) {
+        this.name = name;
+        this.image = image;
+    }
+
     @Id
     @GeneratedValue
     public Long getId() {

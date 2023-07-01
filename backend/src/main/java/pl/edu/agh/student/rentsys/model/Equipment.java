@@ -16,6 +16,14 @@ public class Equipment {
         this.id = id;
     }
 
+    public Equipment() {
+    }
+
+    public Equipment(String name, String description) {
+        this.name = name;
+        this.description = description;
+    }
+
     @Id
     @GeneratedValue
     public Long getId() {
