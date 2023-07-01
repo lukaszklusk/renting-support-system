@@ -48,6 +48,7 @@ public class WebSecurityConfig {
                     .requestMatchers(HttpMethod.GET, "/demo/client").hasRole(UserRole.CLIENT.name())
                     .requestMatchers(HttpMethod.GET, "/demo/owner").hasRole(UserRole.OWNER.name())
                     .requestMatchers(HttpMethod.GET, "/demo/admin").hasRole(UserRole.ADMIN.name())
+                    .requestMatchers(HttpMethod.POST, "sign-out").hasAnyRole(UserRole.CLIENT.name(), UserRole.OWNER.name(), UserRole.ADMIN.name())
                 .anyRequest().authenticated();
         return http.build();
     }

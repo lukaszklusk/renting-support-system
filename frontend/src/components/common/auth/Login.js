@@ -10,8 +10,8 @@ import {
   InputGroup,
 } from "react-bootstrap";
 import { PersonFill, LockFill } from "react-bootstrap-icons";
-import axios from "../../services/axios";
-import useAuth from "../../hooks/useAuth";
+import axios from "../../../services/axios";
+import useAuth from "../../../hooks/useAuth";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 
 const LOGIN_URL = "/sign-in";

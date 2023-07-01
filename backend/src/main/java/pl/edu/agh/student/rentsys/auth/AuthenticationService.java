@@ -127,6 +127,19 @@ public class AuthenticationService {
         }
     }
 
+    public void signOut(HttpServletRequest request, HttpServletResponse response) {
+        Cookie accessTokenCookie = new Cookie("access_token", "");
+        accessTokenCookie.setHttpOnly(true);
+        accessTokenCookie.setMaxAge(0); // Set max age to 0 to delete the cookie
+        response.addCookie(accessTokenCookie);
+
+        // Clear refresh token cookie
+        Cookie refreshTokenCookie = new Cookie("refresh_token", "");
+        refreshTokenCookie.setHttpOnly(true);
+        refreshTokenCookie.setMaxAge(0); // Set max age to 0 to delete the cookie
+        response.addCookie(refreshTokenCookie);
+    }
+
     public void refreshToken(HttpServletRequest request, HttpServletResponse response) {
 //        TODO: add "refresh_token" to config
         String refreshToken = jwtService.extractTokenByName(request, "refresh_token")

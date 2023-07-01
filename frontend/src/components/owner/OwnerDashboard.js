@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
-import useAxiosUser from "../hooks/useAxiosUser";
+import useAxiosUser from "../../hooks/useAxiosUser";
 import { useNavigate, useLocation } from "react-router-dom";
 
-const Dashboard = () => {
+const OwnerDashboard = () => {
   const [text, setText] = useState("");
   const axiosUser = useAxiosUser();
   const navigate = useNavigate();
@@ -52,4 +52,4 @@ const Dashboard = () => {
   );
 };
 
-export default Dashboard;
+export default OwnerDashboard;

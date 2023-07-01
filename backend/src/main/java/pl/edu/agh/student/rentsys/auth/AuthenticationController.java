@@ -29,7 +29,13 @@ public class AuthenticationController {
 
         authenticationService.signUp(request);
         return ResponseEntity.status(HttpStatus.CREATED)
-                    .body("Registration successful");
+                    .body("User signed up successful");
+    }
+
+    @GetMapping("/activate")
+    public ResponseEntity<?> activateUser(@RequestParam String token) {
+        authenticationService.activateUser(token);
+        return ResponseEntity.ok("Account activated successfully");
     }
 
     @PostMapping(path = "/sign-in")
@@ -37,10 +43,9 @@ public class AuthenticationController {
         authenticationService.signIn(request, response);
     }
 
-    @GetMapping("/activate")
-    public ResponseEntity<?> activateUser(@RequestParam String token) {
-        authenticationService.activateUser(token);
-        return ResponseEntity.ok("Account activated successfully.");
+    @PostMapping("/sign-out")
+    public void signOut(HttpServletRequest request, HttpServletResponse response) {
+        authenticationService.signOut(request, response);
     }
 
     @GetMapping("/refresh")

@@ -1,4 +1,8 @@
 .transparent-input-group-text {
-    background-color: transparent;
-    border: none;
+  background-color: transparent;
+  border: none;
+}
+
+.custom-navbar-link {
+  margin-left: 0.5rem;
 }

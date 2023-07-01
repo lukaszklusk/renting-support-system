@@ -11,8 +11,8 @@ import {
 } from "react-bootstrap";
 import { Envelope, Person, Gear, Lock, Key } from "react-bootstrap-icons";
 import "bootstrap/dist/css/bootstrap.css";
-import "../../styles/custom-styles.css";
-import axios from "../../services/axios";
+import "../../../styles/custom-styles.css";
+import axios from "../../../services/axios";
 
 const REGISTER_URL = "/sign-up";
 
