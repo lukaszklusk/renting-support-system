@@ -3,6 +3,7 @@ import { Navbar, Nav } from "react-bootstrap";
 import { Link } from "react-router-dom";
 import useAuth from "../hooks/useAuth";
 import { ROLES } from "../config/roles";
+import useLogout from "../hooks/useLogout";
 
 const AppNavbar = () => {
   const { auth } = useAuth();
@@ -10,6 +11,7 @@ const AppNavbar = () => {
   const isClient = isLoggedIn && auth.roles?.includes(ROLES.client);
   const isOwner = isLoggedIn && auth.roles?.includes(ROLES.owner);
   const isAdmin = isLoggedIn && auth.roles?.includes(ROLES.admin);
+  const logout = useLogout();
 
   return (
     <Navbar bg="dark" variant="dark" expand="sm">
@@ -64,6 +66,18 @@ const AppNavbar = () => {
                 Sign In
               </Nav.Link>
             </>
+          )}
+          {isLoggedIn && (
+            <Nav.Link
+              as={Link}
+              to="sign-in"
+              className="custom-navbar-link"
+              onClick={() => {
+                logout();
+              }}
+            >
+              Logout
+            </Nav.Link>
           )}
         </Nav>
       </Navbar.Collapse>

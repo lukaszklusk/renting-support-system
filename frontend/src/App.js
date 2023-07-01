@@ -10,6 +10,7 @@ import NotFound from "./components/NotFound";
 import RequireAuth from "./components/auth/RequireAuth";
 import Contact from "./components/Contact";
 import Agreements from "./components/Agreements";
+import Reports from "./components/Reports";
 import { ROLES } from "./config/roles";
 
 function App() {
@@ -38,7 +39,7 @@ function App() {
           <Route path="agreements" element={<Agreements />} />
         </Route>
         <Route element={<RequireAuth roles={[ROLES.owner, ROLES.admin]} />}>
-          <Route path="reports" element={<Apartments />} />
+          <Route path="reports" element={<Reports />} />
         </Route>
 
         {/* default route */}
