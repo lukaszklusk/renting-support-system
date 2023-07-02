@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
-import useAxiosUser from "../../hooks/useAxiosUser";
 import { useNavigate, useLocation } from "react-router-dom";
+import useAxiosUser from "../../hooks/useAxiosUser";
+import OwnerDashboardApartments from "./OwnerDashboardApartments";
 
 const OwnerDashboard = () => {
   const [text, setText] = useState("");
@@ -46,8 +47,7 @@ const OwnerDashboard = () => {
 
   return (
     <div>
-      <h1>Dashboard</h1>
-      <h2>{text}</h2>
+      <OwnerDashboardApartments />
     </div>
   );
 };
