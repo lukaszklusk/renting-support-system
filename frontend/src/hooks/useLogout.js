@@ -1,4 +1,3 @@
-import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import useAxiosUser from "./useAxiosUser";
 import useAuth from "./useAuth";
@@ -11,7 +10,7 @@ const useLogout = () => {
   const logout = async () => {
     if (auth.isLoggedIn) {
       try {
-        const response = await axiosUser.post("/sign-out");
+        await axiosUser.post("/sign-out");
         setAuth({ isLoggedIn: false });
         navigate("/sign-in");
       } catch (error) {
