@@ -26,9 +26,12 @@ const useApartments = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const fetchApartments = async (username) => {
+  const fetchApartments = async (username, id = null) => {
     try {
-      const response = await axiosUser.get(`/user/${username}/apartment`);
+      const url = id
+        ? `/user/${username}/apartment/${id}`
+        : `/user/${username}/apartment`;
+      const response = await axiosUser.get(url);
       console.log(response.data);
       return response.data;
     } catch (err) {
