@@ -81,9 +81,10 @@ public class DataInitializer implements CommandLineRunner {
                 Integer.toString(randomNum)));
         apartment.setProperties(properties);
         Set<Picture> pictures = new HashSet<>();
-        byte[] testImg = this.getClass().getResourceAsStream("/testImg.png").readAllBytes();
-        pictures.add(new Picture("Picture 1", testImg));
-        pictures.add(new Picture("Picture 2", testImg));
+        byte[] testImg1 = this.getClass().getResourceAsStream("/img1.png").readAllBytes();
+        byte[] testImg2 = this.getClass().getResourceAsStream("/img2.png").readAllBytes();
+        pictures.add(new Picture("Picture 1", testImg1));
+        pictures.add(new Picture("Picture 2", testImg2));
         apartment.setPictures(pictures);
         Set<Equipment> equipment = new HashSet<>();
         equipment.add(new Equipment("Fridge", "SAMSUNG RB38T774DB1 EF No frost 203cm"));
