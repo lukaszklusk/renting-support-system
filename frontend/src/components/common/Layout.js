@@ -1,11 +1,16 @@
 import { Outlet } from "react-router-dom";
 import AppNavbar from "./AppNavbar";
+import Footer from "./Footer";
+import "../../styles/custom-styles.css";
 
 const Layout = () => {
   return (
     <main className="App">
       <AppNavbar />
-      <Outlet />
+      <div className="main-component">
+        <Outlet />
+      </div>
+      <Footer />
     </main>
   );
 };

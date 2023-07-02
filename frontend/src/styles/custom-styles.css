@@ -6,3 +6,11 @@
 .custom-navbar-link {
   margin-left: 0.5rem;
 }
+
+.custom-navbar-link.active {
+  font-weight: bold;
+}
+
+.main-component {
+  min-height: 87vh;
+}
