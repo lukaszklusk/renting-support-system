@@ -4,19 +4,19 @@ import jakarta.persistence.*;
 import pl.edu.agh.student.rentsys.user.User;
 
 import java.time.LocalDate;
-import java.util.HashSet;
-import java.util.Set;
 
 @Entity
 public class Agreement {
     private Long id;
     private String name;
     private double monthlyPayment;
+    private double administrationFee;
     private Apartment apartment;
     private User owner;
     private LocalDate signingDate;
     private LocalDate expirationDate;
-    private Set<User> tenants;
+    private User tenant;
+    private String ownerAccountNo;
 
 
     public void setId(Long id) {
@@ -79,12 +79,28 @@ public class Agreement {
         this.expirationDate = expirationDate;
     }
 
-    @ManyToMany
-    public Set<User> getTenants() {
-        return tenants;
+    @ManyToOne
+    public User getTenant() {
+        return tenant;
     }
 
-    public void setTenants(Set<User> tenants) {
-        this.tenants = new HashSet<>(tenants);
+    public void setTenant(User tenant) {
+        this.tenant = tenant;
+    }
+
+    public double getAdministrationFee() {
+        return administrationFee;
+    }
+
+    public void setAdministrationFee(double administrationFee) {
+        this.administrationFee = administrationFee;
+    }
+
+    public String getOwnerAccountNo() {
+        return ownerAccountNo;
+    }
+
+    public void setOwnerAccountNo(String ownerAccountNo) {
+        this.ownerAccountNo = ownerAccountNo;
     }
 }

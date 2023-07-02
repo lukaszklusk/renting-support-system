@@ -87,6 +87,6 @@ public class AgreementService {
     }
 
     public List<Agreement> getAgreementsForClient(User client){
-        return agreementRepository.findAllByTenantsContaining(client);
+        return agreementRepository.findAllByTenant(client);
     }
 }

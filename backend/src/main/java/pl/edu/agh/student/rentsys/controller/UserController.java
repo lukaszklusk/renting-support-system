@@ -222,7 +222,7 @@ public class UserController {
             if(client.isEmpty()) return ResponseEntity.notFound().build();
             tenantSet.add(client.get());
         }
-        newAgreement.setTenants(tenantSet);
+        //newAgreement.setTenant(tenantSet);
         Agreement agreement = agreementService.createAgreement(newAgreement);
         if(agreement != null) return ResponseEntity.ok(agreement);
         else return ResponseEntity.internalServerError().build();

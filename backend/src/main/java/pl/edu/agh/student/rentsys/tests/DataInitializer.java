@@ -1,11 +1,9 @@
 package pl.edu.agh.student.rentsys.tests;
 import lombok.AllArgsConstructor;
 import lombok.SneakyThrows;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
-import org.springframework.util.ResourceUtils;
 import pl.edu.agh.student.rentsys.model.*;
 import pl.edu.agh.student.rentsys.security.UserRole;
 import pl.edu.agh.student.rentsys.service.AgreementService;
@@ -14,12 +12,8 @@ import pl.edu.agh.student.rentsys.user.User;
 import pl.edu.agh.student.rentsys.user.UserRepository;
 
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.HashSet;
-import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -45,13 +39,11 @@ public class DataInitializer implements CommandLineRunner {
                 50.017741,19.953718,owner);
         createRandApartment("Apartment 2", "ul. Dde 49",
                 50.077285,19.872920,owner);
-        Set<User> tenants = new HashSet<>();
-        tenants.add(client);
-        tenants.add(client2);
+
         createAgreement("Agreement 1", apartment, owner,
                 LocalDate.of(2023,3, 13),
                 LocalDate.of(2026, 3,1),
-                tenants);
+                client);
         System.out.println("----- FINISHED DATA INITIALIZATION -----");
     }
 
@@ -99,14 +91,14 @@ public class DataInitializer implements CommandLineRunner {
 
     public Agreement createAgreement(String name, Apartment apartment, User owner,
                                      LocalDate signDate, LocalDate expiryDate,
-                                     Set<User> tenant){
+                                     User tenant){
         Agreement agreement = new Agreement();
         agreement.setName(name);
         int randomNum = ThreadLocalRandom.current().nextInt(100000, 400000 + 1);
         agreement.setMonthlyPayment(randomNum/100.);
         agreement.setOwner(owner);
         agreement.setApartment(apartment);
-        agreement.setTenants(tenant);
+        agreement.setTenant(tenant);
         agreement.setSigningDate(signDate);
         agreement.setExpirationDate(expiryDate);
         return agreementService.createAgreement(agreement);
