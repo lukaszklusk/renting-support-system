@@ -18,6 +18,7 @@ import OwnerDashboard from "./components/owner/OwnerDashboard";
 import OwnerApartments from "./components/owner/OwnerApartments";
 import OwnerAgreements from "./components/owner/OwnerAgreements";
 import OwnerReports from "./components/owner/OwnerReports";
+import OwnerApartmentDetails from "./components/owner/OwnerApartmentDetails";
 
 import ClientDashboard from "./components/client/ClientDashboard";
 import ClientAgreement from "./components/client/ClientAgreement";
@@ -55,7 +56,8 @@ function App() {
         {isOwner && (
           <Route element={<RequireAuth roles={[ROLES.owner]} />}>
             <Route path="dashboard" element={<OwnerDashboard />} />
-            <Route path="apartments" element={<OwnerApartments />} />
+            <Route exact path="apartments" element={<OwnerApartments />} />
+            <Route path="apartments/:id" element={<OwnerApartmentDetails />} />
             <Route path="agreements" element={<OwnerAgreements />} />
             <Route path="reports" element={<OwnerReports />} />
           </Route>
