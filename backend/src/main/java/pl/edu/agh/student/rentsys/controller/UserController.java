@@ -74,7 +74,11 @@ public class UserController {
     public ResponseEntity<List<Agreement>> getAllAgreementsForUser(@PathVariable String username){
         Optional<User> userOptional = userService.getUserByUsername(username);
         if(userOptional.isPresent()){
-            return ResponseEntity.ok(agreementService.getAgreementForUser(userOptional.get()));
+            if(userOptional.get().getUserRole().equals(UserRole.OWNER))
+                return ResponseEntity.ok(agreementService.getAgreementForUser(userOptional.get()));
+            else if(userOptional.get().getUserRole().equals(UserRole.CLIENT))
+                return ResponseEntity.ok(agreementService.getAgreementsForClient(userOptional.get()));
+            else return ResponseEntity.badRequest().build();
         }else return ResponseEntity.notFound().build();
     }
 
@@ -88,6 +92,21 @@ public class UserController {
             else return ResponseEntity.notFound().build();
         }else return ResponseEntity.notFound().build();
     }
+
+    @GetMapping("/user/{username}/apartment/{aid}/agreement")
+    public ResponseEntity<List<Agreement>> getAgreementsForApartment(@PathVariable String username,
+                                                                     @PathVariable long aid){
+        Optional<User> userOptional = userService.getUserByUsername(username);
+        if(userOptional.isEmpty()) return ResponseEntity.notFound().build();
+        else{
+            Optional<Apartment> apartmentOptional = apartmentService.getApartment(aid);
+            if(apartmentOptional.isPresent()){
+                return ResponseEntity.ok(agreementService.getAgreementsForApartment(apartmentOptional.get()));
+            }else return ResponseEntity.notFound().build();
+        }
+    }
+
+
 
     @PostMapping("/user")
     public ResponseEntity<Map<String,Object>> createUser(@RequestBody Map<String, Object> payload){

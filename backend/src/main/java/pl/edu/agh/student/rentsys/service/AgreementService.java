@@ -3,6 +3,7 @@ package pl.edu.agh.student.rentsys.service;
 import org.springframework.stereotype.Service;
 import pl.edu.agh.student.rentsys.model.Agreement;
 import pl.edu.agh.student.rentsys.model.AgreementChange;
+import pl.edu.agh.student.rentsys.model.Apartment;
 import pl.edu.agh.student.rentsys.repository.AgreementChangeRepository;
 import pl.edu.agh.student.rentsys.repository.AgreementRepository;
 import pl.edu.agh.student.rentsys.user.User;
@@ -79,5 +80,13 @@ public class AgreementService {
 
     public List<AgreementChange> getAgreementChangesForAgreement(Agreement agreement){
         return agreementChangeRepository.getAgreementChangesByAgreement(agreement);
+    }
+
+    public List<Agreement> getAgreementsForApartment(Apartment apartment){
+        return agreementRepository.findAllByApartment(apartment);
+    }
+
+    public List<Agreement> getAgreementsForClient(User client){
+        return agreementRepository.findAllByTenantsContaining(client);
     }
 }
