@@ -112,7 +112,9 @@ public class UserController {
     public ResponseEntity<Map<String,Object>> createUser(@RequestBody Map<String, Object> payload){
         if(!payload.containsKey("username") || !payload.containsKey("password") ||
                 !payload.containsKey("email") || !payload.containsKey("phoneNumber") ||
-                !payload.containsKey("role")){
+                !payload.containsKey("role") || !payload.containsKey("firstName") ||
+                !payload.containsKey("lastName") || !payload.containsKey("pesel") ||
+                !payload.containsKey("personalIdNumber")){
             return ResponseEntity.badRequest().build();
         }
 
@@ -122,6 +124,10 @@ public class UserController {
                 .password(passwordEncoder.encode((String) payload.get("password")))
                 .email((String) payload.get("email"))
                 .userRole(UserRole.valueOf((String) payload.get("role")))
+                .firstName((String) payload.get("firstName"))
+                .lastName((String) payload.get("lastName"))
+                .pesel((String) payload.get("pesel"))
+                .personalIdNumber((String) payload.get("personalIdNumber"))
                 .locked(false)
                 .enabled(true)
                 .build();
@@ -139,7 +145,9 @@ public class UserController {
     public ResponseEntity<Apartment> createApartment(@PathVariable String username,
                                                      @RequestBody Map<String, Object> payload){
         if(!payload.containsKey("apartmentName") || !payload.containsKey("address") ||
+                !payload.containsKey("city") || !payload.containsKey("postalCode") ||
                 !payload.containsKey("latitude") || !payload.containsKey("longitude") ||
+                !payload.containsKey("size") || !payload.containsKey("description") ||
                 !payload.containsKey("equipment") || !payload.containsKey("properties") ||
                 !payload.containsKey("pictures")){
             return ResponseEntity.badRequest().build();
@@ -154,6 +162,10 @@ public class UserController {
         newApartment.setName((String) payload.get("apartmentName"));
         newApartment.setLatitude((Double) payload.get("latitude"));
         newApartment.setLongitude((Double) payload.get("longitude"));
+        newApartment.setCity((String) payload.get("city"));
+        newApartment.setPostalCode((String) payload.get("postalCode"));
+        newApartment.setSize((Double) payload.get("size"));
+        newApartment.setDescription((String) payload.get("description"));
         Set<Picture> pictureSet = new HashSet<>();
         for(Map<String, Object> payloadPic: (List<Map<String, Object>>) payload.get("pictures")){
             if(!payloadPic.containsKey("name") || !payloadPic.containsKey("image"))
@@ -197,8 +209,9 @@ public class UserController {
     public ResponseEntity<Agreement> createAgreement(@PathVariable String username,
                                                      @RequestBody Map<String, Object> payload){
         if(!payload.containsKey("name") || !payload.containsKey("monthlyPayment") ||
+                !payload.containsKey("administrationFee") || !payload.containsKey("ownerAccountNo") ||
                 !payload.containsKey("apartment") || !payload.containsKey("signingDate") ||
-                !payload.containsKey("expirationDate") || !payload.containsKey("tenants")){
+                !payload.containsKey("expirationDate") || !payload.containsKey("tenant")){
             return ResponseEntity.badRequest().build();
         }
         Agreement newAgreement = new Agreement();
@@ -215,14 +228,12 @@ public class UserController {
                 DateTimeFormatter.ofPattern("yyyy-MM-dd")));
         newAgreement.setExpirationDate(LocalDate.parse((String) payload.get("expirationDate"),
                 DateTimeFormatter.ofPattern("yyyy-MM-dd")));
-        Set<User> tenantSet = new HashSet<>();
-        for(Map<String,Object> payloadClient: (List<Map<String,Object>>) payload.get("tenants")){
-            if(!payloadClient.containsKey("username")) return ResponseEntity.badRequest().build();
-            Optional<User> client = userService.getUserByUsername(((String) payloadClient.get("username")));
-            if(client.isEmpty()) return ResponseEntity.notFound().build();
-            tenantSet.add(client.get());
-        }
-        //newAgreement.setTenant(tenantSet);
+        newAgreement.setMonthlyPayment((Double) payload.get("monthlyPayment"));
+        newAgreement.setAdministrationFee((Double) payload.get("administrationFee"));
+        newAgreement.setOwnerAccountNo((String) payload.get("ownerAccountNo"));
+        Optional<User> tenant = userService.getUserByUsername((String) payload.get("tenant"));
+        if(tenant.isPresent()) newAgreement.setTenant(tenant.get());
+        else return ResponseEntity.notFound().build();
         Agreement agreement = agreementService.createAgreement(newAgreement);
         if(agreement != null) return ResponseEntity.ok(agreement);
         else return ResponseEntity.internalServerError().build();
