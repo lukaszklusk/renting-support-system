@@ -45,10 +45,13 @@ public class User implements UserDetails {
     @Column(nullable = false)
     private boolean enabled;
 
+    @Column(nullable = false)
     private String firstName;
+
+    @Column(nullable = false)
     private String lastName;
-    private String pesel;
-    private String personalIdNumber;
+
+    @Column(nullable = false)
     private String phoneNumber;
 
     @Override

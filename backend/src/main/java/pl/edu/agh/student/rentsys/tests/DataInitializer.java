@@ -32,13 +32,13 @@ public class DataInitializer implements CommandLineRunner {
     public void run(String... args) {
         // Create three example users
         User client = createUser("client@mail.com", "client", "client", UserRole.CLIENT,
-                "Jan", "Kowalski", "93031515755", "XOD351830", "+48465234098");
+                "Jan", "Kowalski",  "+48465234098");
         User client2 = createUser("client2@mail.com", "client2", "client2", UserRole.CLIENT,
-                "Ala", "Kowalska", "91052241282", "CWT559721", "+48557832997");
+                "Ala", "Kowalska", "+48557832997");
         User owner = createUser("owner@mail.com", "owner", "owner", UserRole.OWNER,
-                "Adam", "Mickiewicz", "80091876799", "KXM646726", "+48774623921");
+                "Adam", "Mickiewicz", "+48774623921");
         createUser("admin@mail.com", "admin", "admin", UserRole.ADMIN,
-                "Admin", "Admiński", "99052947375", "OGD944653", "+48666420123");
+                "Admin", "Admiński", "+48666420123");
         Apartment apartment = createRandApartment("Apartment 1", "ul. Abc 15",
                 "Kraków", "30-349",
                 50.017741,19.953718,owner);
@@ -54,8 +54,7 @@ public class DataInitializer implements CommandLineRunner {
     }
 
     private User createUser(String email, String username, String password, UserRole role,
-                            String firstname, String lastname, String pesel,
-                            String personalIdNumber, String phoneNumber) {
+                            String firstname, String lastname,String phoneNumber) {
         User user = User.builder()
                 .email(email)
                 .username(username)
@@ -63,8 +62,6 @@ public class DataInitializer implements CommandLineRunner {
                 .password(passwordEncoder.encode(password))
                 .firstName(firstname)
                 .lastName(lastname)
-                .pesel(pesel)
-                .personalIdNumber(personalIdNumber)
                 .phoneNumber(phoneNumber)
                 .locked(false)
                 .enabled(true)

@@ -113,8 +113,7 @@ public class UserController {
         if(!payload.containsKey("username") || !payload.containsKey("password") ||
                 !payload.containsKey("email") || !payload.containsKey("phoneNumber") ||
                 !payload.containsKey("role") || !payload.containsKey("firstName") ||
-                !payload.containsKey("lastName") || !payload.containsKey("pesel") ||
-                !payload.containsKey("personalIdNumber")){
+                !payload.containsKey("lastName")){
             return ResponseEntity.badRequest().build();
         }
 
@@ -126,8 +125,6 @@ public class UserController {
                 .userRole(UserRole.valueOf((String) payload.get("role")))
                 .firstName((String) payload.get("firstName"))
                 .lastName((String) payload.get("lastName"))
-                .pesel((String) payload.get("pesel"))
-                .personalIdNumber((String) payload.get("personalIdNumber"))
                 .locked(false)
                 .enabled(true)
                 .build();
