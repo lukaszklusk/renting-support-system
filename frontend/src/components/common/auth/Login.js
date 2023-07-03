@@ -121,7 +121,7 @@ const Login = () => {
                 <p className="text-start mb-0">
                   Need an Account? <br />
                   <span className="line">
-                    <a href="#">Sign Up</a>
+                    <Link to="/sign-up">Sign Up</Link>
                   </span>
                 </p>
               </Row>

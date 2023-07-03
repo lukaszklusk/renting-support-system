@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
+import { Link } from "react-router-dom";
 import {
   Container,
   Row,
@@ -273,7 +274,7 @@ const Register = () => {
                 <p className="text-start mb-0">
                   Already registered? <br />
                   <span className="line">
-                    <a href="#">Sign In</a>
+                    <Link to="/sign-in">Sign In</Link>
                   </span>
                 </p>
               </Row>
