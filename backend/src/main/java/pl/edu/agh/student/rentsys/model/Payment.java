@@ -11,6 +11,7 @@ public class Payment {
     private PaymentStatus status;
     private Agreement agreement;
     private LocalDate dueDate;
+    private PaymentMethod paymentMethod;
 
     public void setId(Long id) {
         this.id = id;

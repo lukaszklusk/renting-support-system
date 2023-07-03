@@ -45,6 +45,12 @@ public class User implements UserDetails {
     @Column(nullable = false)
     private boolean enabled;
 
+    private String firstName;
+    private String lastName;
+    private String pesel;
+    private String personalIdNumber;
+    private String phoneNumber;
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         SimpleGrantedAuthority authority = new SimpleGrantedAuthority(getUserRole().getRole());

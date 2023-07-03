@@ -1,11 +1,9 @@
 package pl.edu.agh.student.rentsys.tests;
 import lombok.AllArgsConstructor;
 import lombok.SneakyThrows;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
-import org.springframework.util.ResourceUtils;
 import pl.edu.agh.student.rentsys.model.*;
 import pl.edu.agh.student.rentsys.security.UserRole;
 import pl.edu.agh.student.rentsys.service.AgreementService;
@@ -14,12 +12,8 @@ import pl.edu.agh.student.rentsys.user.User;
 import pl.edu.agh.student.rentsys.user.UserRepository;
 
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.HashSet;
-import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -37,30 +31,41 @@ public class DataInitializer implements CommandLineRunner {
     @Override
     public void run(String... args) {
         // Create three example users
-        User client = createUser("client@mail.com", "client", "client", UserRole.CLIENT);
-        User client2 = createUser("client2@mail.com", "client2", "client2", UserRole.CLIENT);
-        User owner = createUser("owner@mail.com", "owner", "owner", UserRole.OWNER);
-        createUser("admin@mail.com", "admin", "admin", UserRole.ADMIN);
+        User client = createUser("client@mail.com", "client", "client", UserRole.CLIENT,
+                "Jan", "Kowalski", "93031515755", "XOD351830", "+48465234098");
+        User client2 = createUser("client2@mail.com", "client2", "client2", UserRole.CLIENT,
+                "Ala", "Kowalska", "91052241282", "CWT559721", "+48557832997");
+        User owner = createUser("owner@mail.com", "owner", "owner", UserRole.OWNER,
+                "Adam", "Mickiewicz", "80091876799", "KXM646726", "+48774623921");
+        createUser("admin@mail.com", "admin", "admin", UserRole.ADMIN,
+                "Admin", "Admiński", "99052947375", "OGD944653", "+48666420123");
         Apartment apartment = createRandApartment("Apartment 1", "ul. Abc 15",
+                "Kraków", "30-349",
                 50.017741,19.953718,owner);
         createRandApartment("Apartment 2", "ul. Dde 49",
+                "Kraków", "30-349",
                 50.077285,19.872920,owner);
-        Set<User> tenants = new HashSet<>();
-        tenants.add(client);
-        tenants.add(client2);
+
         createAgreement("Agreement 1", apartment, owner,
                 LocalDate.of(2023,3, 13),
                 LocalDate.of(2026, 3,1),
-                tenants);
+                client, "PL84109024029425764271319137");
         System.out.println("----- FINISHED DATA INITIALIZATION -----");
     }
 
-    private User createUser(String email, String username, String password, UserRole role) {
+    private User createUser(String email, String username, String password, UserRole role,
+                            String firstname, String lastname, String pesel,
+                            String personalIdNumber, String phoneNumber) {
         User user = User.builder()
                 .email(email)
                 .username(username)
                 .userRole(role)
                 .password(passwordEncoder.encode(password))
+                .firstName(firstname)
+                .lastName(lastname)
+                .pesel(pesel)
+                .personalIdNumber(personalIdNumber)
+                .phoneNumber(phoneNumber)
                 .locked(false)
                 .enabled(true)
                 .build();
@@ -69,13 +74,15 @@ public class DataInitializer implements CommandLineRunner {
     }
 
     private Apartment createRandApartment(String name, String address,
+                                     String city, String postalCode,
                                      double latitude, double longitude,
                                      User owner) throws IOException {
         Apartment apartment = new Apartment();
         Set<ApartmentProperty> properties = new HashSet<>();
-        int randomNum = ThreadLocalRandom.current().nextInt(30, 60 + 1);
-        properties.add(new ApartmentProperty("Size", "number",
-                Integer.toString(randomNum)));
+        int randomNum = ThreadLocalRandom.current().nextInt(300, 600 + 1);
+        apartment.setSize(randomNum/10.);
+        apartment.setCity(city);
+        apartment.setPostalCode(postalCode);
         randomNum = ThreadLocalRandom.current().nextInt(100000, 1000000 + 1);
         properties.add(new ApartmentProperty("Price", "pln",
                 Integer.toString(randomNum)));
@@ -95,21 +102,26 @@ public class DataInitializer implements CommandLineRunner {
         apartment.setLatitude(latitude);
         apartment.setLongitude(longitude);
         apartment.setOwner(owner);
+        randomNum = ThreadLocalRandom.current().nextInt(1000000, 10000000);
+        apartment.setDescription("Oto apartament abc" + randomNum);
         return apartmentService.createApartment(apartment);
     }
 
     public Agreement createAgreement(String name, Apartment apartment, User owner,
                                      LocalDate signDate, LocalDate expiryDate,
-                                     Set<User> tenant){
+                                     User tenant, String ownerAccountNo){
         Agreement agreement = new Agreement();
         agreement.setName(name);
         int randomNum = ThreadLocalRandom.current().nextInt(100000, 400000 + 1);
         agreement.setMonthlyPayment(randomNum/100.);
+        randomNum = ThreadLocalRandom.current().nextInt(30000, 150000 + 1);
+        agreement.setAdministrationFee(randomNum/100.);
         agreement.setOwner(owner);
         agreement.setApartment(apartment);
-        agreement.setTenants(tenant);
+        agreement.setTenant(tenant);
         agreement.setSigningDate(signDate);
         agreement.setExpirationDate(expiryDate);
+        agreement.setOwnerAccountNo(ownerAccountNo);
         return agreementService.createAgreement(agreement);
     }
 }

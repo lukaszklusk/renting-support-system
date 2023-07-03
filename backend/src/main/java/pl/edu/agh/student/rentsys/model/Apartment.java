@@ -12,8 +12,12 @@ public class Apartment {
     private User owner;
     private String name;
     private String address;
+    private String city;
+    private String postalCode;
     private double latitude;
     private double longitude;
+    private double size;
+    private String description;
     private Set<Equipment> equipment;
     private Set<ApartmentProperty> properties;
     private Set<Picture> pictures;
@@ -94,5 +98,37 @@ public class Apartment {
 
     public void setProperties(Set<ApartmentProperty> properties) {
         this.properties = new HashSet<>(properties);
+    }
+
+    public String getCity() {
+        return city;
+    }
+
+    public void setCity(String city) {
+        this.city = city;
+    }
+
+    public String getPostalCode() {
+        return postalCode;
+    }
+
+    public void setPostalCode(String postalCode) {
+        this.postalCode = postalCode;
+    }
+
+    public double getSize() {
+        return size;
+    }
+
+    public void setSize(double size) {
+        this.size = size;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 }

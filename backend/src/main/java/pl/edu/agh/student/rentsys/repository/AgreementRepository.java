@@ -11,5 +11,5 @@ import java.util.Set;
 public interface AgreementRepository extends JpaRepository<Agreement, Long> {
     List<Agreement> getAgreementsByOwner(User owner);
     List<Agreement> findAllByApartment(Apartment apartment);
-    List<Agreement> findAllByTenantsContaining(User client);
+    List<Agreement> findAllByTenant(User client);
 }
