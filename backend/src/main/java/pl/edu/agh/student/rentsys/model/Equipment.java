@@ -1,17 +1,16 @@
 package pl.edu.agh.student.rentsys.model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 
 import java.util.Objects;
+import java.util.Set;
 
 @Entity
 public class Equipment {
     private Long id;
     private String name;
     private String description;
-
+    private Set<Message> issues;
     public void setId(Long id) {
         this.id = id;
     }
@@ -22,6 +21,10 @@ public class Equipment {
     public Equipment(String name, String description) {
         this.name = name;
         this.description = description;
+    }
+
+    public Equipment(long id){
+        this.id = id;
     }
 
     @Id
@@ -44,6 +47,15 @@ public class Equipment {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    @OneToMany
+    public Set<Message> getIssues() {
+        return issues;
+    }
+
+    public void setIssues(Set<Message> issues) {
+        this.issues = issues;
     }
 
     @Override

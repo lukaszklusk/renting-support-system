@@ -2,9 +2,9 @@ package pl.edu.agh.student.rentsys.controller;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import pl.edu.agh.student.rentsys.model.Message;
-import pl.edu.agh.student.rentsys.model.MessagePriority;
-import pl.edu.agh.student.rentsys.model.MessageType;
+import pl.edu.agh.student.rentsys.model.*;
+import pl.edu.agh.student.rentsys.service.AgreementService;
+import pl.edu.agh.student.rentsys.service.ApartmentService;
 import pl.edu.agh.student.rentsys.service.MessageService;
 import pl.edu.agh.student.rentsys.user.User;
 import pl.edu.agh.student.rentsys.user.UserService;
@@ -12,19 +12,19 @@ import pl.edu.agh.student.rentsys.user.UserService;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 @RestController
 public class MessagesController {
 
     private final MessageService messageService;
     private final UserService userService;
+    private final ApartmentService apartmentService;
 
-    public MessagesController(MessageService messageService, UserService userService) {
+    public MessagesController(MessageService messageService, UserService userService, ApartmentService apartmentService) {
         this.messageService = messageService;
         this.userService = userService;
+        this.apartmentService = apartmentService;
     }
 
     @GetMapping("/messages/{id}")
@@ -162,5 +162,61 @@ public class MessagesController {
             messageService.deleteMessage(messageOptional.get());
             return ResponseEntity.ok(messageOptional.get());
         }else return ResponseEntity.notFound().build();
+    }
+
+    @PostMapping("/user/{username}/apartment/{aid}/equipment/{eqid}")
+    public ResponseEntity<Message> createIssue(@PathVariable String username,
+                                               @PathVariable long aid,
+                                               @PathVariable long eqid,
+                                               @RequestBody Map<String,Object> payload){
+        if(!payload.containsKey("issueDescription") || !payload.containsKey("issueCreationDatetime")){
+            return ResponseEntity.badRequest().build();
+        }
+        Optional<User> userOptional = userService.getUserByUsername(username);
+        if(userOptional.isPresent()){
+            Optional<Apartment> apartmentOptional = apartmentService.getApartment(aid);
+            if(apartmentOptional.isPresent()){
+                if(!apartmentOptional.get().getEquipment().contains(new Equipment(eqid)))
+                    return ResponseEntity.notFound().build();
+                Map<Long, Equipment> equipmentMap = new HashMap<>();
+                apartmentOptional.get().getEquipment().forEach(t -> equipmentMap.put(t.getId(),t));
+                Equipment eq = equipmentMap.get(eqid);
+                Message message = messageService.createMessage(userOptional.get(),apartmentOptional.get().getOwner(),
+                        "Issue: " + eq.getName(),
+                        LocalDateTime.parse((String) payload.get("issueCreationDatetime"),DateTimeFormatter.ISO_LOCAL_DATE_TIME),
+                        MessageType.issue, (String) payload.get("issueDescription"), MessagePriority.important);
+                apartmentOptional.get().getEquipment().remove(eq);
+                eq.getIssues().add(message);
+                apartmentOptional.get().getEquipment().add(eq);
+                apartmentService.changeApartment(apartmentOptional.get());
+                return ResponseEntity.ok(message);
+            } else return ResponseEntity.notFound().build();
+        } else return ResponseEntity.notFound().build();
+    }
+
+    @DeleteMapping("/user/{username}/apartment/{aid}/equipment/{eqid}/issue/{iid}")
+    public ResponseEntity<Message> removeIssue(@PathVariable String username,
+                                               @PathVariable long aid,
+                                               @PathVariable long eqid,
+                                               @PathVariable long iid) {
+        Optional<User> userOptional = userService.getUserByUsername(username);
+        if(userOptional.isPresent()){
+            Optional<Apartment> apartmentOptional = apartmentService.getApartment(aid);
+            if(apartmentOptional.isPresent()){
+                Optional<Message> messageOptional = messageService.getMessageById(iid);
+                if(messageOptional.isPresent()) {
+                    if (!apartmentOptional.get().getEquipment().contains(new Equipment(eqid)))
+                        return ResponseEntity.notFound().build();
+                    Map<Long, Equipment> equipmentMap = new HashMap<>();
+                    apartmentOptional.get().getEquipment().forEach(t -> equipmentMap.put(t.getId(), t));
+                    Equipment eq = equipmentMap.get(eqid);
+                    apartmentOptional.get().getEquipment().remove(eq);
+                    eq.getIssues().remove(messageOptional.get());
+                    apartmentOptional.get().getEquipment().add(eq);
+                    apartmentService.changeApartment(apartmentOptional.get());
+                    return ResponseEntity.ok(messageOptional.get());
+                }else return ResponseEntity.notFound().build();
+            } else return ResponseEntity.notFound().build();
+        } else return ResponseEntity.notFound().build();
     }
 }
