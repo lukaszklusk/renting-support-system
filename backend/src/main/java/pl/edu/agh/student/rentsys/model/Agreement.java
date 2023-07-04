@@ -17,6 +17,7 @@ public class Agreement {
     private LocalDate expirationDate;
     private User tenant;
     private String ownerAccountNo;
+    private AgreementStatus agreementStatus;
 
 
     public void setId(Long id) {
@@ -102,5 +103,13 @@ public class Agreement {
 
     public void setOwnerAccountNo(String ownerAccountNo) {
         this.ownerAccountNo = ownerAccountNo;
+    }
+
+    public AgreementStatus getAgreementStatus() {
+        return agreementStatus;
+    }
+
+    public void setAgreementStatus(AgreementStatus agreementStatus) {
+        this.agreementStatus = agreementStatus;
     }
 }
