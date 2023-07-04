@@ -17,12 +17,12 @@ import java.util.Map;
 import java.util.Optional;
 
 @RestController
-public class MessageController {
+public class MessagesController {
 
     private final MessageService messageService;
     private final UserService userService;
 
-    public MessageController(MessageService messageService, UserService userService) {
+    public MessagesController(MessageService messageService, UserService userService) {
         this.messageService = messageService;
         this.userService = userService;
     }
@@ -42,7 +42,7 @@ public class MessageController {
         } else return ResponseEntity.notFound().build();
     }
 
-    @GetMapping("/user/{username}/messages/received")
+    @GetMapping("/user/{username}/messages/sent")
     public ResponseEntity<List<Message>> getSentMessages(@PathVariable String username){
         Optional<User> userOptional = userService.getUserByUsername(username);
         if(userOptional.isPresent()){
@@ -50,9 +50,9 @@ public class MessageController {
         } else return ResponseEntity.notFound().build();
     }
 
-    @GetMapping("/user/{username}/messages/received")
+    @GetMapping("/user/{username}/messages/received/{type}")
     public ResponseEntity<List<Message>> getReceivedMessagesWithType(@PathVariable String username,
-                                                             @RequestParam String type){
+                                                             @PathVariable String type){
         Optional<User> userOptional = userService.getUserByUsername(username);
         if(userOptional.isPresent()){
             try{
@@ -65,9 +65,9 @@ public class MessageController {
         } else return ResponseEntity.notFound().build();
     }
 
-    @GetMapping("/user/{username}/messages/received")
+    @GetMapping("/user/{username}/messages/sent/{type}")
     public ResponseEntity<List<Message>> getSentMessagesWithType(@PathVariable String username,
-                                                                 @RequestParam String type){
+                                                                 @PathVariable String type){
         Optional<User> userOptional = userService.getUserByUsername(username);
         if(userOptional.isPresent()){
             try{
@@ -142,18 +142,16 @@ public class MessageController {
     }
 
     @PatchMapping("/messages/{id}")
-    public ResponseEntity<Message> setMessageAsRead(@PathVariable long id){
+    public ResponseEntity<Message> setMessageAsRead(@PathVariable long id,
+                                                    @RequestParam String status){
         Optional<Message> messageOptional = messageService.getMessageById(id);
         if(messageOptional.isPresent()){
-            return ResponseEntity.ok(messageService.markAsRead(messageOptional.get()));
-        } else return ResponseEntity.notFound().build();
-    }
-
-    @PatchMapping("/messages/{id}")
-    public ResponseEntity<Message> setMessageAsUnread(@PathVariable long id){
-        Optional<Message> messageOptional = messageService.getMessageById(id);
-        if(messageOptional.isPresent()){
-            return ResponseEntity.ok(messageService.markAsUnread(messageOptional.get()));
+            if(status.equals("read"))
+                return ResponseEntity.ok(messageService.markAsRead(messageOptional.get()));
+            else if(status.equals("unread"))
+                return ResponseEntity.ok(messageService.markAsUnread(messageOptional.get()));
+            else
+                return ResponseEntity.badRequest().build();
         } else return ResponseEntity.notFound().build();
     }
 }

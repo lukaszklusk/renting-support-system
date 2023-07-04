@@ -1,13 +1,16 @@
 package pl.edu.agh.student.rentsys.model;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.NoArgsConstructor;
 import pl.edu.agh.student.rentsys.user.User;
 
 import java.time.LocalDateTime;
 
 @Entity
 @Builder
+@AllArgsConstructor
 public class Message {
     private Long id;
     private User sender;
