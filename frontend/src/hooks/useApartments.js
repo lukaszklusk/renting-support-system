@@ -5,22 +5,6 @@ export function getImageData(encodedBase64) {
   return `data:image/png;base64,${encodedBase64}`;
 }
 
-export function getApartmentSize(apartment) {
-  const sizeProps = apartment.properties.filter((prop) => prop.name == "Size");
-  if (sizeProps.length != 1) {
-    return null;
-  }
-  return sizeProps[0].value;
-}
-
-export function getApartmentPrice(apartment) {
-  const sizeProps = apartment.properties.filter((prop) => prop.name == "Price");
-  if (sizeProps.length != 1) {
-    return null;
-  }
-  return sizeProps[0].value + " " + sizeProps[0].valueType.toUpperCase();
-}
-
 const useApartments = () => {
   const axiosUser = useAxiosUser();
   const navigate = useNavigate();

@@ -1,13 +1,10 @@
 import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import Card from "react-bootstrap/Card";
 import ListGroup from "react-bootstrap/ListGroup";
 
 import useAuth from "../../hooks/useAuth";
-import {
-  getImageData,
-  getApartmentPrice,
-  getApartmentSize,
-} from "../../hooks/useApartments";
+import { getImageData } from "../../hooks/useApartments";
 import useApartments from "../../hooks/useApartments";
 
 const OwnerApartments = () => {
@@ -40,16 +37,19 @@ const OwnerApartments = () => {
               <Card.Title>{apartment.name}</Card.Title>
             </Card.Body>
             <ListGroup className="list-group-flush">
-              <ListGroup.Item>Address: {apartment.address}</ListGroup.Item>
               <ListGroup.Item>
-                Size: {getApartmentSize(apartment)} m²{" "}
+                <strong>Address:</strong> {apartment.address}, {apartment.city}
               </ListGroup.Item>
               <ListGroup.Item>
-                Price: {getApartmentPrice(apartment)}
+                <strong> Size: </strong> {apartment.size} m²{" "}
               </ListGroup.Item>
             </ListGroup>
             <Card.Body className="d-flex">
-              <Card.Link className="flex-grow-1" href="#">
+              <Card.Link
+                className="flex-grow-1"
+                as={Link}
+                to={`/apartments/${apartment.id}`}
+              >
                 Details
               </Card.Link>
               <Card.Link className="flex-grow-1" href="#">

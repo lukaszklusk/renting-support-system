@@ -1,11 +1,8 @@
 import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import { Carousel } from "react-bootstrap";
 import useAuth from "../../hooks/useAuth";
-import {
-  getImageData,
-  getApartmentPrice,
-  getApartmentSize,
-} from "../../hooks/useApartments";
+import { getImageData } from "../../hooks/useApartments";
 import useApartments from "../../hooks/useApartments";
 
 const OwnerDashboardApartments = () => {
@@ -37,16 +34,12 @@ const OwnerDashboardApartments = () => {
               alt="Apartment PNG"
               src={getImageData(apartment.pictures[0].image)}
             />
-            <Carousel.Caption>
-              <h3>{apartment.name}</h3>
-              <p>{apartment.address}</p>
-              {getApartmentSize(apartment) && getApartmentPrice(apartment) && (
-                <p>
-                  {getApartmentSize(apartment)} m² /{" "}
-                  {getApartmentPrice(apartment)}
-                </p>
-              )}
-            </Carousel.Caption>
+            <Link to={`/apartments/${apartment.id}`}>
+              <Carousel.Caption>
+                <h3>{apartment.name}</h3>
+                <p>{apartment.description}</p>
+              </Carousel.Caption>
+            </Link>
           </Carousel.Item>
         ))}
     </Carousel>

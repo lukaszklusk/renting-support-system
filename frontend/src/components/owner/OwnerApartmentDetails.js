@@ -1,16 +1,12 @@
 import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
-import { Carousel, Row, Col } from "react-bootstrap";
+import { Carousel } from "react-bootstrap";
 import Card from "react-bootstrap/Card";
 import ListGroup from "react-bootstrap/ListGroup";
 import { ExclamationCircleFill } from "react-bootstrap-icons";
 
 import useAuth from "../../hooks/useAuth";
-import {
-  getImageData,
-  getApartmentPrice,
-  getApartmentSize,
-} from "../../hooks/useApartments";
+import { getImageData } from "../../hooks/useApartments";
 import useApartments from "../../hooks/useApartments";
 
 const OwnerApartmentDetails = () => {
@@ -18,10 +14,7 @@ const OwnerApartmentDetails = () => {
   const [apartment, setApartment] = useState(null);
   const { auth } = useAuth();
   const fetchApartments = useApartments();
-  const olStyle = {
-    margin: 0,
-    padding: 0,
-  };
+
   useEffect(() => {
     const username = auth.username;
     if (username) {
@@ -51,15 +44,17 @@ const OwnerApartmentDetails = () => {
         </Carousel>
         <Card.Body>
           <Card.Title>{apartment.name}</Card.Title>
-          <Card.Text> desc </Card.Text>
+          <Card.Text> {apartment.description} </Card.Text>
         </Card.Body>
         <ListGroup className="list-group-flush">
           <ListGroup.Item>
-            {" "}
-            <strong>Address:</strong> {apartment.address}
+            <strong>Address:</strong> {apartment.address}, {apartment.city}
           </ListGroup.Item>
           <ListGroup.Item>
-            <strong> Size: </strong> {getApartmentSize(apartment)} m²{" "}
+            <strong> Postal Code: </strong> {apartment.postalCode}
+          </ListGroup.Item>
+          <ListGroup.Item>
+            <strong> Size: </strong> {apartment.size} m²{" "}
           </ListGroup.Item>
           {Array.isArray(apartment.equipment) && (
             <>
