@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { Link } from "react-router-dom";
+import { useLocation, Link } from "react-router-dom";
 import {
   Container,
   Row,
@@ -10,7 +10,16 @@ import {
   Alert,
   InputGroup,
 } from "react-bootstrap";
-import { Envelope, Person, Gear, Lock, Key } from "react-bootstrap-icons";
+import {
+  EnvelopeFill,
+  PersonFill,
+  PeopleFill,
+  TelephoneFill,
+  GearFill,
+  LockFill,
+  KeyFill,
+  PersonCircle,
+} from "react-bootstrap-icons";
 import "bootstrap/dist/css/bootstrap.css";
 import "../../../styles/custom-styles.css";
 import axios from "../../../services/axios";
@@ -19,10 +28,14 @@ const REGISTER_URL = "/sign-up";
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const USERNAME_REGEX = /^[A-z][A-z0-9-_]{3,23}$/;
+const NAME_REGEX = /^[A-Z][a-zA-Z]{1,19}$/;
+const PHONE_NUMBER_REGEX = /^\(?([0-9]{3})\)?[-. ]?([0-9]{3})[-. ]?([0-9]{3})$/;
 const PASSWORD_REGEX =
   /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%]).{8,24}$/;
 
 const Register = () => {
+  const location = useLocation();
+
   const emailRef = useRef();
 
   const [email, setEmail] = useState("");
@@ -30,6 +43,15 @@ const Register = () => {
 
   const [username, setUsername] = useState("");
   const [isUsernameValid, setIsUsernameValid] = useState(false);
+
+  const [firstName, setFirstName] = useState("");
+  const [isFirstNameValid, setIsFirstNameValid] = useState(false);
+
+  const [lastName, setLastName] = useState("");
+  const [isLastNameValid, setIsLastNameValid] = useState(false);
+
+  const [phoneNumber, setPhoneNumber] = useState("");
+  const [isPhoneNumberValid, setIsPhoneNumberValid] = useState(false);
 
   const [role, setRole] = useState("client");
 
@@ -50,7 +72,16 @@ const Register = () => {
 
   useEffect(() => {
     setErrMsg("");
-  }, [email, username, password, repeatPassword]);
+  }, [
+    email,
+    username,
+    firstName,
+    lastName,
+    phoneNumber,
+    role,
+    password,
+    repeatPassword,
+  ]);
 
   useEffect(() => {
     const isValid = EMAIL_REGEX.test(email);
@@ -67,6 +98,27 @@ const Register = () => {
   }, [username]);
 
   useEffect(() => {
+    const isValid = NAME_REGEX.test(firstName);
+    console.log(isValid);
+    console.log(firstName);
+    setIsFirstNameValid(isValid);
+  }, [firstName]);
+
+  useEffect(() => {
+    const isValid = NAME_REGEX.test(lastName);
+    console.log(isValid);
+    console.log(lastName);
+    setIsLastNameValid(isValid);
+  }, [lastName]);
+
+  useEffect(() => {
+    const isValid = PHONE_NUMBER_REGEX.test(phoneNumber);
+    console.log(isValid);
+    console.log(phoneNumber);
+    setIsPhoneNumberValid(isValid);
+  }, [phoneNumber]);
+
+  useEffect(() => {
     const isValid = PASSWORD_REGEX.test(password);
     console.log(isValid);
     console.log(password);
@@ -81,15 +133,37 @@ const Register = () => {
     if (
       !EMAIL_REGEX.test(email) ||
       !USERNAME_REGEX.test(username) ||
+      !NAME_REGEX.test(firstName) ||
+      !NAME_REGEX.test(lastName) ||
+      !PHONE_NUMBER_REGEX.test(phoneNumber) ||
       !PASSWORD_REGEX.test(password)
     ) {
       setErrMsg("Invalid Entry");
       return;
     }
     try {
+      console.log(
+        JSON.stringify({
+          email,
+          username,
+          firstName,
+          lastName,
+          phoneNumber,
+          role,
+          password,
+        })
+      );
       const response = await axios.post(
         REGISTER_URL,
-        JSON.stringify({ email, username, role, password }),
+        JSON.stringify({
+          email,
+          username,
+          firstName,
+          lastName,
+          phoneNumber,
+          role,
+          password,
+        }),
         {
           headers: { "Content-Type": "application/json" },
           withCredentials: true,
@@ -123,7 +197,7 @@ const Register = () => {
                 <Form.Group controlId="formEmail" className="my-3">
                   <InputGroup>
                     <InputGroup.Text className="transparent-input-group-text">
-                      <Envelope />
+                      <EnvelopeFill />
                     </InputGroup.Text>
                     <Form.Control
                       ref={emailRef}
@@ -145,7 +219,7 @@ const Register = () => {
                 <Form.Group controlId="formUsername" className="my-3">
                   <InputGroup>
                     <InputGroup.Text className="transparent-input-group-text">
-                      <Person />
+                      <PersonCircle />
                     </InputGroup.Text>
                     <Form.Control
                       type="text"
@@ -167,10 +241,83 @@ const Register = () => {
                   </InputGroup>
                 </Form.Group>
 
+                <Form.Group controlId="formFirstName" className="my-3">
+                  <InputGroup>
+                    <InputGroup.Text className="transparent-input-group-text">
+                      <PersonFill />
+                    </InputGroup.Text>
+                    <Form.Control
+                      type="text"
+                      placeholder="Enter first name"
+                      value={firstName}
+                      onChange={(e) => setFirstName(e.target.value)}
+                      required
+                      autoComplete="off"
+                      isValid={isFirstNameValid}
+                      isInvalid={firstName && !isFirstNameValid}
+                    />
+                    <Form.Control.Feedback type="invalid" className="ms-5">
+                      Please enter a first name with following restrictions:
+                      <br />- beggining with uppercase <br />- between 2 and 20
+                      characters <br />- no special characters{" "}
+                    </Form.Control.Feedback>
+                  </InputGroup>
+                </Form.Group>
+
+                <Form.Group controlId="formLastName" className="my-3">
+                  <InputGroup>
+                    <InputGroup.Text className="transparent-input-group-text">
+                      <PeopleFill />
+                    </InputGroup.Text>
+                    <Form.Control
+                      type="text"
+                      placeholder="Enter last name"
+                      value={lastName}
+                      onChange={(e) => setLastName(e.target.value)}
+                      required
+                      autoComplete="off"
+                      isValid={isLastNameValid}
+                      isInvalid={lastName && !isLastNameValid}
+                    />
+                    <Form.Control.Feedback type="invalid" className="ms-5">
+                      Please enter a last name with following restrictions:
+                      <br />- beggining with uppercase <br />- between 2 and 20
+                      characters <br />- no special characters{" "}
+                    </Form.Control.Feedback>
+                  </InputGroup>
+                </Form.Group>
+
+                <Form.Group controlId="formPhoneNumber" className="my-3">
+                  <InputGroup>
+                    <InputGroup.Text className="transparent-input-group-text">
+                      <TelephoneFill />
+                    </InputGroup.Text>
+                    <Form.Control
+                      type="text"
+                      placeholder="Enter phone number"
+                      value={phoneNumber}
+                      onChange={(e) => setPhoneNumber(e.target.value)}
+                      required
+                      autoComplete="off"
+                      isValid={isPhoneNumberValid}
+                      isInvalid={phoneNumber && !isPhoneNumberValid}
+                    />
+                    <Form.Control.Feedback type="invalid" className="ms-5">
+                      Please enter a phone number in one of following formats:
+                      <br />
+                      XXX XXX XXX
+                      <br />
+                      XXX-XXX-XXX
+                      <br />
+                      XXX.XXX.XXX
+                    </Form.Control.Feedback>
+                  </InputGroup>
+                </Form.Group>
+
                 <Form.Group controlId="formRole" className="my-3">
                   <InputGroup>
                     <InputGroup.Text className="transparent-input-group-text">
-                      <Gear />
+                      <GearFill />
                     </InputGroup.Text>
                     <div className="d-flex justify-content-between flex-grow-1 align-items-end">
                       <Form.Check
@@ -198,7 +345,7 @@ const Register = () => {
                 <Form.Group controlId="formPassword" className="my-3">
                   <InputGroup>
                     <InputGroup.Text className="transparent-input-group-text">
-                      <Lock />
+                      <LockFill />
                     </InputGroup.Text>
                     <Form.Control
                       type="password"
@@ -222,7 +369,7 @@ const Register = () => {
                 <Form.Group controlId="formRepeatPassword" className="my-3">
                   <InputGroup>
                     <InputGroup.Text className="transparent-input-group-text">
-                      <Key />
+                      <KeyFill />
                     </InputGroup.Text>
                     <Form.Control
                       type="password"
@@ -258,6 +405,9 @@ const Register = () => {
                     disabled={
                       isEmailValid &&
                       isUsernameValid &&
+                      isFirstNameValid &&
+                      isLastNameValid &&
+                      isPhoneNumberValid &&
                       isPasswordValid &&
                       isRepeatPasswordValid &&
                       isAgreeTerms

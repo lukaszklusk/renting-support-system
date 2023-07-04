@@ -9,8 +9,11 @@ import pl.edu.agh.student.rentsys.auth.validators.ValidRole;
 @Builder
 @AllArgsConstructor
 public class SignUpRequest {
-    private String username;
     private String email;
+    private String username;
+    private String firstName;
+    private String lastName;
+    private String phoneNumber;
     @ValidRole
     private String role;
     private String password;

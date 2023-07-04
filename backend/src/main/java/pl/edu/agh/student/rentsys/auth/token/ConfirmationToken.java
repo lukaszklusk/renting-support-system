@@ -13,7 +13,7 @@ import java.util.UUID;
 @AllArgsConstructor
 @Builder
 @Entity
-@Table(name = "confirmation_tokens")
+@Table(name = "activation_tokens")
 public class ConfirmationToken {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)

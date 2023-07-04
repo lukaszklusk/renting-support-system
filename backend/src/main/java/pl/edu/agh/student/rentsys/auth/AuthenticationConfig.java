@@ -9,7 +9,7 @@ public class AuthenticationConfig {
     public static final int ACTIVATION_TOKEN_VALID_TIME_IN_MINUTES = 15;
 
     public static String buildActivationLink(String token) {
-        return String.format("http://localhost:8080/auth/confirm?token=%s", token);
+        return String.format("http://localhost:8080/activate?token=%s", token);
     }
     public static String buildEmailBody(String username, String link) {
         return String.format("""
