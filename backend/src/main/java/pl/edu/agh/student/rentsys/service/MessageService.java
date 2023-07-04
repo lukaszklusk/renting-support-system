@@ -33,6 +33,10 @@ public class MessageService {
         return messageRepository.findAllBySender(user);
     }
 
+    public void deleteMessage(Message message){
+        messageRepository.delete(message);
+    }
+
     public List<Message> getReceivedMessagesWithType(User user, MessageType type){
         return messageRepository.findAllByReceiverAndMessageType(user,type);
     }

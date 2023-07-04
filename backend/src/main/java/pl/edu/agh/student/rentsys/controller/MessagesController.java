@@ -46,7 +46,7 @@ public class MessagesController {
     public ResponseEntity<List<Message>> getSentMessages(@PathVariable String username){
         Optional<User> userOptional = userService.getUserByUsername(username);
         if(userOptional.isPresent()){
-            return ResponseEntity.ok(messageService.getReceivedMessages(userOptional.get()));
+            return ResponseEntity.ok(messageService.getSentMessages(userOptional.get()));
         } else return ResponseEntity.notFound().build();
     }
 
@@ -153,5 +153,14 @@ public class MessagesController {
             else
                 return ResponseEntity.badRequest().build();
         } else return ResponseEntity.notFound().build();
+    }
+
+    @DeleteMapping("/messages/{id}")
+    public ResponseEntity<Message> deleteMessage(@PathVariable long id){
+        Optional<Message> messageOptional = messageService.getMessageById(id);
+        if(messageOptional.isPresent()){
+            messageService.deleteMessage(messageOptional.get());
+            return ResponseEntity.ok(messageOptional.get());
+        }else return ResponseEntity.notFound().build();
     }
 }
