@@ -33,9 +33,9 @@ const OwnerApartments = () => {
               variant="top"
               src={getImageData(apartment.pictures[0].image)}
             />
-            <Card.Body>
+            <Card.Header>
               <Card.Title>{apartment.name}</Card.Title>
-            </Card.Body>
+            </Card.Header>
             <ListGroup className="list-group-flush">
               <ListGroup.Item>
                 <strong>Address:</strong> {apartment.address}, {apartment.city}
@@ -44,7 +44,7 @@ const OwnerApartments = () => {
                 <strong> Size: </strong> {apartment.size} m²{" "}
               </ListGroup.Item>
             </ListGroup>
-            <Card.Body className="d-flex">
+            <Card.Footer className="d-flex">
               <Card.Link
                 className="flex-grow-1"
                 as={Link}
@@ -52,10 +52,11 @@ const OwnerApartments = () => {
               >
                 Details
               </Card.Link>
+              {/* TODO */}
               <Card.Link className="flex-grow-1" href="#">
                 Agreement
               </Card.Link>
-            </Card.Body>
+            </Card.Footer>
           </Card>
         ))}
     </div>

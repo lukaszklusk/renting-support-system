@@ -25,6 +25,7 @@ import ClientAgreement from "./components/client/ClientAgreement";
 import ClientApartment from "./components/client/ClientApartment";
 
 import AdminDashboard from "./components/admin/AdminDashboard";
+import OwnerAgreementDetails from "./components/owner/OwnerAgreementDetails";
 
 function App() {
   const { auth } = useAuth();
@@ -59,6 +60,7 @@ function App() {
             <Route exact path="apartments" element={<OwnerApartments />} />
             <Route path="apartments/:id" element={<OwnerApartmentDetails />} />
             <Route path="agreements" element={<OwnerAgreements />} />
+            <Route path="agreements/:id" element={<OwnerAgreementDetails />} />
             <Route path="reports" element={<OwnerReports />} />
           </Route>
         )}

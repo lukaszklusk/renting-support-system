@@ -42,10 +42,10 @@ const OwnerApartmentDetails = () => {
               </Carousel.Item>
             ))}
         </Carousel>
-        <Card.Body>
+        <Card.Header>
           <Card.Title>{apartment.name}</Card.Title>
           <Card.Text> {apartment.description} </Card.Text>
-        </Card.Body>
+        </Card.Header>
         <ListGroup className="list-group-flush">
           <ListGroup.Item>
             <strong>Address:</strong> {apartment.address}, {apartment.city}
