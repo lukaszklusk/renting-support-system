@@ -80,12 +80,20 @@ public class AgreementService {
         return agreementRepository.getAgreementsByOwner(user);
     }
 
+    public List<Agreement> getAgreementsForOwnerWithStatus(User owner, AgreementStatus status){
+        return agreementRepository.findAllByOwnerAndAgreementStatus(owner,status);
+    }
+
     public List<AgreementChange> getAgreementChangesForAgreement(Agreement agreement){
         return agreementChangeRepository.getAgreementChangesByAgreement(agreement);
     }
 
     public List<Agreement> getAgreementsForApartment(Apartment apartment){
         return agreementRepository.findAllByApartment(apartment);
+    }
+
+    public List<Agreement> getAgreementsForClientWithStatus(User client, AgreementStatus status){
+        return agreementRepository.findAllByTenantAndAgreementStatus(client,status);
     }
 
     public List<Agreement> getAgreementsForClient(User client){

@@ -103,6 +103,24 @@ public class UserController {
         }else return ResponseEntity.notFound().build();
     }
 
+    @GetMapping("/user/{username}/agreement/status/{status}")
+    public ResponseEntity<List<Agreement>> getAllAgreementsForUserWithStatus(@PathVariable String username,
+                                                                             @PathVariable String status){
+        Optional<User> userOptional = userService.getUserByUsername(username);
+        if(userOptional.isPresent()){
+            try {
+                AgreementStatus agreementStatus = AgreementStatus.valueOf(status);
+                if (userOptional.get().getUserRole().equals(UserRole.OWNER))
+                    return ResponseEntity.ok(agreementService.getAgreementsForOwnerWithStatus(userOptional.get(),agreementStatus));
+                else if (userOptional.get().getUserRole().equals(UserRole.CLIENT))
+                    return ResponseEntity.ok(agreementService.getAgreementsForClientWithStatus(userOptional.get(),agreementStatus));
+                else return ResponseEntity.badRequest().build();
+            }catch (IllegalArgumentException e){
+                return ResponseEntity.badRequest().build();
+            }
+        }else return ResponseEntity.notFound().build();
+    }
+
     @GetMapping("/user/{username}/agreement/{agid}")
     public ResponseEntity<Agreement> getAgreementForUserById(@PathVariable String username,
                                                              @PathVariable long agid){
