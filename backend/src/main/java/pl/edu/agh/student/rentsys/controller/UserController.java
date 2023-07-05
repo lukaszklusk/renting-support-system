@@ -70,6 +70,27 @@ public class UserController {
         else return ResponseEntity.notFound().build();
     }
 
+    @PatchMapping("/user/{username}/agreement/{aid}")
+    public ResponseEntity<Agreement> changeAgreementStatus(@PathVariable String username,
+                                                           @PathVariable long aid,
+                                                           @RequestBody Map<String, Object> payload){
+        if(!payload.containsKey("agreementStatus")) return ResponseEntity.badRequest().build();
+        Optional<User> userOptional = userService.getUserByUsername(username);
+        if(userOptional.isPresent()){
+            Optional<Agreement> agreementOptional = agreementService.getAgreementById(aid);
+            if(agreementOptional.isPresent()){
+                try {
+                    AgreementStatus agreementStatus =
+                            AgreementStatus.valueOf((String) payload.get("agreementStatus"));
+                    return ResponseEntity.ok(agreementService.changeAgreementStatus(
+                            agreementOptional.get(), agreementStatus));
+                }catch (IllegalArgumentException e){
+                    return ResponseEntity.badRequest().build();
+                }
+            } else return ResponseEntity.notFound().build();
+        } else return ResponseEntity.notFound().build();
+    }
+
     @GetMapping("/user/{username}/agreement")
     public ResponseEntity<List<Agreement>> getAllAgreementsForUser(@PathVariable String username){
         Optional<User> userOptional = userService.getUserByUsername(username);
@@ -234,5 +255,53 @@ public class UserController {
         Agreement agreement = agreementService.createAgreement(newAgreement);
         if(agreement != null) return ResponseEntity.ok(agreement);
         else return ResponseEntity.internalServerError().build();
+    }
+
+    @PutMapping("/user/{username}/agreement/{agid}")
+    public ResponseEntity<Agreement> changeAgreement(@PathVariable String username,
+                                                     @PathVariable long agid,
+                                                     @RequestBody Map<String,Object> payload){
+        if(!payload.containsKey("name") && !payload.containsKey("monthlyPayment") &&
+                !payload.containsKey("administrationFee") && !payload.containsKey("ownerAccountNo") &&
+                !payload.containsKey("apartment") && !payload.containsKey("signingDate") &&
+                !payload.containsKey("expirationDate") && !payload.containsKey("tenant")){
+            return ResponseEntity.badRequest().build();
+        }
+        Optional<User> userOptional = userService.getUserByUsername(username);
+        if(userOptional.isPresent()){
+            if(userOptional.get().getUserRole().equals(UserRole.CLIENT)){
+                return ResponseEntity.badRequest().build();
+            }else {
+                Optional<Agreement> agreementOptional = agreementService.getAgreementById(agid);
+                if(agreementOptional.isPresent()){
+                    Agreement agreement = agreementOptional.get();
+                    if(payload.containsKey("name")) agreement.setName((String) payload.get("name"));
+                    if(payload.containsKey("apartment")) {
+                        if (!((Map<String, Object>) payload.get("apartment")).containsKey("id"))
+                            return ResponseEntity.badRequest().build();
+                        Optional<Apartment> apartment = apartmentService.getApartment(
+                                Long.valueOf((Integer) ((Map<String, Object>) payload.get("apartment")).get("id")));
+                        if (apartment.isEmpty()) return ResponseEntity.notFound().build();
+                        agreement.setApartment(apartment.get());
+                    }
+                    if(payload.containsKey("signingDate")) agreement.setSigningDate(
+                            LocalDate.parse((String) payload.get("signingDate"),
+                                    DateTimeFormatter.ofPattern("yyyy-MM-dd")));
+                    if(payload.containsKey("expirationDate")) agreement.setExpirationDate(
+                            LocalDate.parse((String) payload.get("expirationDate"),
+                            DateTimeFormatter.ofPattern("yyyy-MM-dd")));
+                    if(payload.containsKey("monthlyPayment"))
+                        agreement.setMonthlyPayment((Double) payload.get("monthlyPayment"));
+                    if(payload.containsKey("administrationFee"))
+                        agreement.setAdministrationFee((Double) payload.get("administrationFee"));
+                    if(payload.containsKey("tenant")) {
+                        Optional<User> tenant = userService.getUserByUsername((String) payload.get("tenant"));
+                        if (tenant.isPresent()) agreement.setTenant(tenant.get());
+                        else return ResponseEntity.notFound().build();
+                    }
+                    return ResponseEntity.ok(agreementService.changeAgreement(agreement));
+                } else return ResponseEntity.notFound().build();
+            }
+        } else return ResponseEntity.notFound().build();
     }
 }

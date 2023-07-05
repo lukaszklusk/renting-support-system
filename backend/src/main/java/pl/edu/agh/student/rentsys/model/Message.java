@@ -1,11 +1,16 @@
 package pl.edu.agh.student.rentsys.model;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.NoArgsConstructor;
 import pl.edu.agh.student.rentsys.user.User;
 
 import java.time.LocalDateTime;
 
 @Entity
+@Builder
+@AllArgsConstructor
 public class Message {
     private Long id;
     private User sender;
@@ -16,7 +21,11 @@ public class Message {
     private String readStatus;
     private String messageBody;
     private MessagePriority priority;
-    private long responseMessageId;
+    private Message responseMessage;
+
+    public Message() {
+
+    }
 
     public void setId(Long id) {
         this.id = id;
@@ -62,12 +71,13 @@ public class Message {
         this.priority = priority;
     }
 
-    public long getResponseMessageId() {
-        return responseMessageId;
+    @ManyToOne
+    public Message getResponseMessage() {
+        return responseMessage;
     }
 
-    public void setResponseMessageId(long responseMessageId) {
-        this.responseMessageId = responseMessageId;
+    public void setResponseMessage(Message responseMessage) {
+        this.responseMessage = responseMessage;
     }
 
     public String getTopic() {
