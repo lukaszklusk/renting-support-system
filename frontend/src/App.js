@@ -14,11 +14,11 @@ import Register from "./components/common/auth/Register";
 import Login from "./components/common/auth/Login";
 import RequireAuth from "./components/common/auth/RequireAuth";
 
-import OwnerDashboard from "./components/owner/OwnerDashboard";
-import OwnerApartments from "./components/owner/OwnerApartments";
+import OwnerDashboard from "./pages/owner/OwnerDashboard";
+import OwnerApartments from "./pages/owner/OwnerApartments";
 import OwnerAgreements from "./components/owner/OwnerAgreements";
 import OwnerReports from "./components/owner/OwnerReports";
-import OwnerApartmentDetails from "./components/owner/OwnerApartmentDetails";
+import OwnerApartmentDetails from "./pages/owner/OwnerApartmentDetails";
 
 import ClientDashboard from "./components/client/ClientDashboard";
 import ClientAgreement from "./components/client/ClientAgreement";
