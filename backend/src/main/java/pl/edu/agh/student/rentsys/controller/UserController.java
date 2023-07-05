@@ -70,6 +70,24 @@ public class UserController {
         }else return ResponseEntity.notFound().build();
     }
 
+    @GetMapping("/user/{username}/apartment/{aid}/rented")
+    public ResponseEntity<Map<String,Boolean>> checkIfApartmentRented(@PathVariable String username,
+                                                                     @PathVariable long aid){
+        Optional<User> userOptional = userService.getUserByUsername(username);
+        if(userOptional.isPresent()){
+            Optional<Apartment> apartmentOptional = apartmentService.getApartment(aid);
+            if(apartmentOptional.isPresent()){
+                List<Agreement> agreements = agreementService.getAgreementsForApartment(apartmentOptional.get());
+                for(Agreement a: agreements){
+                    if(a.getAgreementStatus().equals(AgreementStatus.active) || a.getAgreementStatus().equals(AgreementStatus.accepted)) {
+                        return ResponseEntity.ok(new HashMap<>(){{put("rented",true);}});
+                    }
+                }
+                return ResponseEntity.ok(new HashMap<>(){{put("rented",false);}});
+            } else return ResponseEntity.notFound().build();
+        } else return ResponseEntity.notFound().build();
+    }
+
     @GetMapping("/user/{username}/apartment/{aid}")
     public ResponseEntity<Apartment> getUserApartment(@PathVariable String username, @PathVariable long aid){
         Optional<User> userOptional = userService.getUserByUsername(username);
