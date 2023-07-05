@@ -1,16 +1,15 @@
 import { useNavigate } from "react-router-dom";
-import useAxiosUser from "./useAxiosUser";
+import axios from "../services/axios";
 import useAuth from "./useAuth";
 
 const useLogout = () => {
   const navigate = useNavigate();
-  const axiosUser = useAxiosUser();
   const { auth, setAuth } = useAuth();
 
   const logout = async () => {
     if (auth.isLoggedIn) {
       try {
-        await axiosUser.post("/sign-out");
+        await axios.post("/sign-out");
         setAuth({ isLoggedIn: false });
         navigate("/sign-in");
       } catch (error) {
