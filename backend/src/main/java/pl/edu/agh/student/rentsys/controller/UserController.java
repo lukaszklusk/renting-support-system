@@ -225,11 +225,11 @@ public class UserController {
         newApartment.setOwner(owner.get());
         newApartment.setAddress((String) payload.get("address"));
         newApartment.setName((String) payload.get("apartmentName"));
-        newApartment.setLatitude((Double) payload.get("latitude"));
-        newApartment.setLongitude((Double) payload.get("longitude"));
+        newApartment.setLatitude(Double.parseDouble((String) payload.get("latitude")));
+        newApartment.setLongitude(Double.parseDouble((String) payload.get("longitude")));
+        newApartment.setSize(Double.parseDouble((String) payload.get("size")));
         newApartment.setCity((String) payload.get("city"));
         newApartment.setPostalCode((String) payload.get("postalCode"));
-        newApartment.setSize((Double) payload.get("size"));
         newApartment.setDescription((String) payload.get("description"));
         Set<Picture> pictureSet = new HashSet<>();
         for(Map<String, Object> payloadPic: (List<Map<String, Object>>) payload.get("pictures")){
@@ -237,7 +237,7 @@ public class UserController {
                 return ResponseEntity.badRequest().build();
             Picture picture = new Picture();
             picture.setName((String) payloadPic.get("name"));
-            picture.setImage(Base64.getDecoder().decode((String) payloadPic.get("image")));
+            picture.setImage(Base64.getMimeDecoder().decode((String) payloadPic.get("image")));
             pictureSet.add(picture);
         }
         newApartment.setPictures(pictureSet);

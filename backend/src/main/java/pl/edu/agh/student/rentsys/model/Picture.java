@@ -2,6 +2,7 @@ package pl.edu.agh.student.rentsys.model;
 
 import jakarta.persistence.*;
 
+import java.util.Base64;
 import java.util.Objects;
 
 @Entity

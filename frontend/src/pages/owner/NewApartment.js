@@ -21,8 +21,7 @@ import {
 } from "react-bootstrap-icons";
 import "bootstrap/dist/css/bootstrap.css";
 import axios from "../../services/axios";
-
-const APARTMENT_POST_URL = "/sign-up";
+import useAuth from "../../hooks/useAuth";
 
 const PRESENT_REGEX = /.+/;
 const DESCRIPTION_REGEX = /^(?!(\S+\s+){101})((\S+\s+){9,100}\S+)$/;
@@ -33,6 +32,10 @@ const NewApartment = () => {
   const location = useLocation();
 
   const nameRef = useRef();
+
+  const { auth } = useAuth();
+  const username = auth.username;
+  const APARTMENT_POST_URL = `/user/${username}/apartment`;
 
   const [name, setName] = useState("");
   const [isNameValid, setIsNameValid] = useState(false);
@@ -49,12 +52,19 @@ const NewApartment = () => {
   const [size, setSize] = useState("");
   const [isSizeValid, setIsSizeValid] = useState(false);
 
-  const [pictures, setPictures] = useState([]);
+  //   const [imageArray, setImageArray] = useState([""]);
+  const [imageArray, setImageArray] = useState("");
+
   const [isPicturesValid, setIsPicturesValid] = useState(false);
   const [isFilesUpload, setIsFilesUpload] = useState(false);
 
-  const [equipments, setEquipments] = useState([""]);
-  const [properties, setProperties] = useState([""]);
+  const [propertiesName, setPropertiesName] = useState([""]);
+  const [propertiesDescription, setPropertiesDescription] = useState([""]);
+  const [isPropertyNameValid, setIsPropertyNameValid] = useState(false);
+
+  const [equipmentsName, setEquipmentsName] = useState([""]);
+  const [equipmentsDescription, setEquipmentsDescription] = useState([""]);
+  const [isEquipmentNameValid, setIsEquipmentNameValid] = useState(false);
 
   const [submitMsg, setSubmitMsg] = useState("");
   const [errMsg, setErrMsg] = useState("");
@@ -102,57 +112,154 @@ const NewApartment = () => {
     setIsSizeValid(isValid);
   }, [size]);
 
-  useEffect(() => {
-    const isValid = pictures.length > 0;
-    console.log(isValid);
-    setIsPicturesValid(isValid);
-  }, [pictures]);
+  //   const handleFilesUpload = async (event) => {
+  //     console.log("event");
+  //     console.log(event);
+  //     const files = Array.from(event.target.files);
+  //     console.log("files", files);
 
-  const handleFilesUpload = (event) => {
-    console.log("handler");
+  //     if (files) {
+  //       setIsFilesUpload(true);
+  //     }
+
+  //     setIsPicturesValid(files.length > 0);
+
+  //     console.log("Before reset", imageArray.length);
+  //     console.log(imageArray);
+  //     setImageArray([""]);
+  //     console.log("After reset", imageArray.length);
+  //     console.log(imageArray);
+
+  //     for (const file of files) {
+  //       console.log("***", file);
+  //       const base64 = await convertBase64(file);
+  //       //   setBase64Array(...base64Array, base64);
+  //       console.log("base64", base64.length);
+  //       setImageArray([...imageArray, base64]);
+  //       console.log("base64Array", imageArray.length);
+  //       console.log(imageArray);
+  //     }
+  //   };
+
+  const handleFilesUpload = async (event) => {
+    const file = event.target.files[0];
     setIsFilesUpload(true);
-    const files = event.target.files;
-    const selectedPngFiles = Array.from(files).filter(
-      (file) => file.type === "image/png"
+    if (!file) {
+      setIsPicturesValid(false);
+      setImageArray("");
+      return;
+    }
+    setIsPicturesValid(true);
+    console.log(file);
+    // console.log("file", file);
+    const base64 = await convertBase64(file);
+    setImageArray(base64);
+    console.log("base64");
+    console.log(base64);
+  };
+
+  const convertBase64 = (file) => {
+    return new Promise((resolve, reject) => {
+      const fileReader = new FileReader();
+      fileReader.readAsDataURL(file);
+      fileReader.onload = () => {
+        resolve(fileReader.result);
+      };
+      fileReader.onerror = (error) => {
+        console.log("Error");
+        reject(error);
+      };
+    });
+  };
+
+  const handleListChange = (
+    index,
+    event,
+    list,
+    listSetter,
+    isLastListElementValidSetter = null
+  ) => {
+    console.log("+");
+    const newValues = [...list];
+    newValues[index] = event.target.value;
+    listSetter(newValues);
+    if (isLastListElementValidSetter) {
+      isLastListElementValidSetter(PRESENT_REGEX.test(event.target.value));
+    }
+  };
+
+  const handleListAdd = (
+    names,
+    namesSetter,
+    descriptions,
+    descriptionsSetter,
+    isLastNameElementValidSetter
+  ) => {
+    namesSetter([...names, ""]);
+    descriptionsSetter([...descriptions, ""]);
+    isLastNameElementValidSetter(false);
+  };
+
+  const handleListRemove = (
+    index,
+    names,
+    namesSetter,
+    descriptions,
+    descriptionsSetter
+  ) => {
+    const newNames = [...names];
+    newNames.splice(index, 1);
+    namesSetter(newNames);
+
+    const newDescriptions = [...descriptions];
+    newDescriptions.splice(index, 1);
+    descriptionsSetter(newDescriptions);
+  };
+
+  const createRequestEquipments = (equipmentsName, equipmentsDescription) => {
+    const validNames = equipmentsName.filter((element) => element !== "");
+    const validDescriptions = equipmentsDescription.filter(
+      (element) => element !== ""
     );
-    setPictures(selectedPngFiles);
-    console.log(pictures);
+
+    const requestEquipments = validNames.map((value, index) => {
+      return {
+        name: value,
+        description: validDescriptions[index],
+      };
+    });
+    return requestEquipments;
   };
 
-  const handleEquipmentChange = (index, event) => {
-    const newValues = [...equipments];
-    newValues[index] = event.target.value;
-    setEquipments(newValues);
+  const createRequestProperties = (propertiesName, propertiesDescription) => {
+    const validNames = propertiesName.filter((element) => element !== "");
+    const validDescriptions = propertiesDescription.filter(
+      (element) => element !== ""
+    );
+
+    const requestProperties = validNames.map((value, index) => {
+      return {
+        name: value,
+        value: validDescriptions[index],
+        valueType: "String",
+      };
+    });
+    return requestProperties;
   };
 
-  const handlePropertiesChange = (index, event) => {
-    const newValues = [...properties];
-    newValues[index] = event.target.value;
-    setProperties(newValues);
-  };
-
-  const handleAddEquipment = () => {
-    setEquipments([...equipments, ""]);
-  };
-
-  const handleRemoveEquipment = (index) => {
-    const newEquipments = [...equipments];
-    newEquipments.splice(index, 1);
-    setEquipments(newEquipments);
-  };
-
-  const handleAddProperties = () => {
-    setProperties([...properties, ""]);
-  };
-
-  const handleRemoveProperty = (index) => {
-    const newProperties = [...properties];
-    newProperties.splice(index, 1);
-    setProperties(newProperties);
+  const createRequestPictures = (imageArray) => {
+    const requestPictures = imageArray.map((value) => {
+      return {
+        name: "photo",
+        image: value,
+      };
+    });
+    return requestPictures;
   };
 
   const handleCreateApartment = async (e) => {
     e.preventDefault();
+    console.log("To Send");
 
     if (
       !PRESENT_REGEX.test(name) ||
@@ -165,8 +272,7 @@ const NewApartment = () => {
       return;
     }
     try {
-      console.log("properties");
-      console.log(properties);
+      console.log("creating payload");
       const payload = JSON.stringify({
         apartmentName: name,
         description: decription,
@@ -174,6 +280,17 @@ const NewApartment = () => {
         city: "city",
         postalCode: zipCode,
         size: size,
+        equipment: createRequestEquipments(
+          equipmentsName,
+          equipmentsDescription
+        ),
+        properties: createRequestProperties(
+          propertiesName,
+          propertiesDescription
+        ),
+        pictures: createRequestPictures([imageArray]),
+        latitude: "0",
+        longitude: "0",
       });
 
       console.log(payload);
@@ -198,6 +315,17 @@ const NewApartment = () => {
 
   return (
     <section>
+      {/* {imageArray.map((image, index) => {
+        <>
+          <img src={image} height="200px" />
+          <br /> <br />
+          <p>Test</p>
+          <p>{imageArray.length}</p>
+        </>;
+      })} */}
+      <img src={imageArray} height="200px" />
+      <br></br>
+      <img src="" alt="" />
       <Row className="justify-content-center mt-5">
         <Col md={6}>
           <Card>
@@ -208,7 +336,7 @@ const NewApartment = () => {
               {errMsg && <Alert variant="danger">{errMsg}</Alert>}
               {submitMsg && <Alert variant="success">{submitMsg}</Alert>}
               <Form onSubmit={handleCreateApartment}>
-                <Form.Group controlId="formEmail" className="my-3">
+                <Form.Group controlId="formApartmentName" className="my-3">
                   <InputGroup>
                     <InputGroup.Text className="transparent-input-group-text">
                       <HouseFill />
@@ -230,7 +358,10 @@ const NewApartment = () => {
                   </InputGroup>
                 </Form.Group>
 
-                <Form.Group controlId="formUsername" className="my-3">
+                <Form.Group
+                  controlId="formApartmentDescription"
+                  className="my-3"
+                >
                   <InputGroup>
                     <InputGroup.Text className="transparent-input-group-text">
                       <List />
@@ -253,7 +384,7 @@ const NewApartment = () => {
                   </InputGroup>
                 </Form.Group>
 
-                <Form.Group controlId="formFirstName" className="my-3">
+                <Form.Group controlId="formApartmentAddress" className="my-3">
                   <InputGroup>
                     <InputGroup.Text className="transparent-input-group-text">
                       <GeoAltFill />
@@ -274,7 +405,7 @@ const NewApartment = () => {
                   </InputGroup>
                 </Form.Group>
 
-                <Form.Group controlId="formLastName" className="my-3">
+                <Form.Group controlId="formZipCode" className="my-3">
                   <InputGroup>
                     <InputGroup.Text className="transparent-input-group-text">
                       <EnvelopeFill />
@@ -297,7 +428,7 @@ const NewApartment = () => {
                   </InputGroup>
                 </Form.Group>
 
-                <Form.Group controlId="formPhoneNumber" className="my-3">
+                <Form.Group controlId="formApartmentSize" className="my-3">
                   <InputGroup>
                     <InputGroup.Text className="transparent-input-group-text">
                       <ArrowsFullscreen />
@@ -318,7 +449,7 @@ const NewApartment = () => {
                   </InputGroup>
                 </Form.Group>
 
-                <Form.Group controlId="formPhoneNumber2" className="my-3">
+                <Form.Group controlId="formPictures" className="my-3">
                   <InputGroup>
                     <InputGroup.Text className="transparent-input-group-text">
                       <ImageFill />
@@ -326,9 +457,8 @@ const NewApartment = () => {
                     <Form.Control
                       type="file"
                       placeholder="Select png"
-                      value={pictures}
                       onChange={handleFilesUpload}
-                      //   required
+                      required
                       isValid={isPicturesValid}
                       isInvalid={isFilesUpload && !isPicturesValid}
                       accept=".png"
@@ -340,30 +470,74 @@ const NewApartment = () => {
                   </InputGroup>
                 </Form.Group>
 
-                {equipments.map((equipment, index) => (
+                {equipmentsName.map((equipmentName, index) => (
                   <InputGroup className={index === 0 && "mt-3"}>
                     <InputGroup.Text className="transparent-input-group-text">
                       <ListCheck />
                     </InputGroup.Text>
-                    <Form.Group controlId={`equipment${index}`} key={index}>
-                      <Form.Control
-                        type="text"
-                        value={equipment}
-                        onChange={(event) =>
-                          handleEquipmentChange(index, event)
-                        }
-                        placeholder="Enter equipment"
-                        autoComplete="off"
-                        disabled={equipments.length !== index + 1}
-                        isValid={equipment.length > 0}
-                      />
-                    </Form.Group>
-                    {equipments.length !== index + 1 ? (
+                    <div>
+                      <Form.Group
+                        controlId={`equipment_name_id_${index}`}
+                        key={`equipment_name_key_${index}`}
+                      >
+                        <Form.Control
+                          type="text"
+                          value={equipmentName}
+                          onChange={(e) =>
+                            handleListChange(
+                              index,
+                              e,
+                              equipmentsName,
+                              setEquipmentsName,
+                              setIsEquipmentNameValid
+                            )
+                          }
+                          placeholder="Enter equimpent name"
+                          autoComplete="off"
+                          isValid={
+                            equipmentsName.length !== index + 1 ||
+                            isEquipmentNameValid
+                          }
+                          disabled={equipmentsName.length !== index + 1}
+                        />
+                      </Form.Group>
+                      <Form.Group
+                        controlId={`equipment_description_id_${index}`}
+                        key={`equipment_description_key_${index}`}
+                      >
+                        <Form.Control
+                          type="text"
+                          value={equipmentsDescription[index]}
+                          onChange={(e) =>
+                            handleListChange(
+                              index,
+                              e,
+                              equipmentsDescription,
+                              setEquipmentsDescription
+                            )
+                          }
+                          placeholder="Enter optional equimpent description"
+                          autoComplete="off"
+                          isValid={true}
+                          disabled={equipmentsDescription.length !== index + 1}
+                        />
+                      </Form.Group>
+                    </div>
+
+                    {equipmentsName.length !== index + 1 ? (
                       <div>
                         <Button
                           variant="danger"
                           //   className="py-1"
-                          onClick={() => handleRemoveEquipment(index)}
+                          onClick={() => {
+                            handleListRemove(
+                              index,
+                              equipmentsName,
+                              setEquipmentsName,
+                              equipmentsDescription,
+                              setEquipmentsDescription
+                            );
+                          }}
                         >
                           -
                         </Button>
@@ -372,43 +546,98 @@ const NewApartment = () => {
                       <div>
                         <Button
                           variant="success"
-                          onClick={handleAddEquipment}
+                          onClick={() => {
+                            handleListAdd(
+                              equipmentsName,
+                              setEquipmentsName,
+                              equipmentsDescription,
+                              setEquipmentsDescription,
+                              setIsEquipmentNameValid
+                            );
+                          }}
+                          className="mx-2"
+                          disabled={!isEquipmentNameValid}
                           //   className="py-1"
                         >
                           +
                         </Button>
                       </div>
                     )}
+
                     <Form.Control.Feedback type="invalid" className="ms-5">
-                      Please enter apartment equipment
+                      Please enter equipment equipment
                     </Form.Control.Feedback>
                   </InputGroup>
                 ))}
 
-                {properties.map((property, index) => (
+                {propertiesName.map((propertyName, index) => (
                   <InputGroup className={index === 0 && "mt-3"}>
                     <InputGroup.Text className="transparent-input-group-text">
                       <Tools />
                     </InputGroup.Text>
-                    <Form.Group controlId={`properties${index}`} key={index}>
-                      <Form.Control
-                        type="text"
-                        value={property}
-                        onChange={(event) =>
-                          handlePropertiesChange(index, event)
-                        }
-                        placeholder="Enter property"
-                        autoComplete="off"
-                        isValid={property.length > 0}
-                        disabled={properties.length !== index + 1}
-                      />
-                    </Form.Group>
-                    {properties.length !== index + 1 ? (
+                    <div>
+                      <Form.Group
+                        controlId={`properties_name_id_${index}`}
+                        key={`properties_name_key_${index}`}
+                      >
+                        <Form.Control
+                          type="text"
+                          value={propertyName}
+                          onChange={(e) =>
+                            handleListChange(
+                              index,
+                              e,
+                              propertiesName,
+                              setPropertiesName,
+                              setIsPropertyNameValid
+                            )
+                          }
+                          placeholder="Enter property name"
+                          autoComplete="off"
+                          isValid={
+                            propertiesName.length !== index + 1 ||
+                            isPropertyNameValid
+                          }
+                          disabled={propertiesName.length !== index + 1}
+                        />
+                      </Form.Group>
+                      <Form.Group
+                        controlId={`properties_description_id_${index}`}
+                        key={`properties_description_key_${index}`}
+                      >
+                        <Form.Control
+                          type="text"
+                          value={propertiesDescription[index]}
+                          onChange={(e) =>
+                            handleListChange(
+                              index,
+                              e,
+                              propertiesDescription,
+                              setPropertiesDescription
+                            )
+                          }
+                          placeholder="Enter optional property description"
+                          autoComplete="off"
+                          isValid={true}
+                          disabled={propertiesDescription.length !== index + 1}
+                        />
+                      </Form.Group>
+                    </div>
+
+                    {propertiesName.length !== index + 1 ? (
                       <div>
                         <Button
                           variant="danger"
                           //   className="py-1"
-                          onClick={handleRemoveProperty}
+                          onClick={() => {
+                            handleListRemove(
+                              index,
+                              propertiesName,
+                              setPropertiesName,
+                              propertiesDescription,
+                              setPropertiesDescription
+                            );
+                          }}
                         >
                           -
                         </Button>
@@ -417,15 +646,26 @@ const NewApartment = () => {
                       <div>
                         <Button
                           variant="success"
-                          onClick={handleAddProperties}
+                          onClick={() => {
+                            handleListAdd(
+                              propertiesName,
+                              setPropertiesName,
+                              propertiesDescription,
+                              setPropertiesDescription,
+                              setIsPropertyNameValid
+                            );
+                          }}
+                          className="mx-2"
+                          disabled={!isPropertyNameValid}
                           //   className="py-1"
                         >
                           +
                         </Button>
                       </div>
                     )}
+
                     <Form.Control.Feedback type="invalid" className="ms-5">
-                      Please enter apartment equipment
+                      Please enter property equipment
                     </Form.Control.Feedback>
                   </InputGroup>
                 ))}
@@ -439,7 +679,8 @@ const NewApartment = () => {
                       isDescriptionValid &&
                       isAddressValid &&
                       isZipCodeValid &&
-                      isSizeValid
+                      isSizeValid &&
+                      isPicturesValid
                         ? false
                         : true
                     }
