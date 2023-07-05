@@ -55,8 +55,37 @@ public class UserController {
     public ResponseEntity<List<Apartment>> getAllApartmentsForUser(@PathVariable String username){
         Optional<User> userOptional = userService.getUserByUsername(username);
         if(userOptional.isPresent()){
-            return ResponseEntity.ok(apartmentService.getApartmentsForUser(userOptional.get()));
+            if(userOptional.get().getUserRole().equals(UserRole.OWNER))
+                return ResponseEntity.ok(apartmentService.getApartmentsForUser(userOptional.get()));
+            else if(userOptional.get().getUserRole().equals(UserRole.CLIENT)){
+                List<Apartment> apartments = new ArrayList<>();
+                agreementService.getAgreementsForClientWithStatus(
+                        userOptional.get(),AgreementStatus.active).forEach(
+                                t -> apartments.add(t.getApartment()));
+                agreementService.getAgreementsForClientWithStatus(
+                        userOptional.get(),AgreementStatus.accepted).forEach(
+                        t -> apartments.add(t.getApartment()));
+                return ResponseEntity.ok(apartments);
+            } else return ResponseEntity.badRequest().build();
         }else return ResponseEntity.notFound().build();
+    }
+
+    @GetMapping("/user/{username}/apartment/{aid}/rented")
+    public ResponseEntity<Map<String,Boolean>> checkIfApartmentRented(@PathVariable String username,
+                                                                     @PathVariable long aid){
+        Optional<User> userOptional = userService.getUserByUsername(username);
+        if(userOptional.isPresent()){
+            Optional<Apartment> apartmentOptional = apartmentService.getApartment(aid);
+            if(apartmentOptional.isPresent()){
+                List<Agreement> agreements = agreementService.getAgreementsForApartment(apartmentOptional.get());
+                for(Agreement a: agreements){
+                    if(a.getAgreementStatus().equals(AgreementStatus.active) || a.getAgreementStatus().equals(AgreementStatus.accepted)) {
+                        return ResponseEntity.ok(new HashMap<>(){{put("rented",true);}});
+                    }
+                }
+                return ResponseEntity.ok(new HashMap<>(){{put("rented",false);}});
+            } else return ResponseEntity.notFound().build();
+        } else return ResponseEntity.notFound().build();
     }
 
     @GetMapping("/user/{username}/apartment/{aid}")
@@ -100,6 +129,24 @@ public class UserController {
             else if(userOptional.get().getUserRole().equals(UserRole.CLIENT))
                 return ResponseEntity.ok(agreementService.getAgreementsForClient(userOptional.get()));
             else return ResponseEntity.badRequest().build();
+        }else return ResponseEntity.notFound().build();
+    }
+
+    @GetMapping("/user/{username}/agreement/status/{status}")
+    public ResponseEntity<List<Agreement>> getAllAgreementsForUserWithStatus(@PathVariable String username,
+                                                                             @PathVariable String status){
+        Optional<User> userOptional = userService.getUserByUsername(username);
+        if(userOptional.isPresent()){
+            try {
+                AgreementStatus agreementStatus = AgreementStatus.valueOf(status);
+                if (userOptional.get().getUserRole().equals(UserRole.OWNER))
+                    return ResponseEntity.ok(agreementService.getAgreementsForOwnerWithStatus(userOptional.get(),agreementStatus));
+                else if (userOptional.get().getUserRole().equals(UserRole.CLIENT))
+                    return ResponseEntity.ok(agreementService.getAgreementsForClientWithStatus(userOptional.get(),agreementStatus));
+                else return ResponseEntity.badRequest().build();
+            }catch (IllegalArgumentException e){
+                return ResponseEntity.badRequest().build();
+            }
         }else return ResponseEntity.notFound().build();
     }
 
