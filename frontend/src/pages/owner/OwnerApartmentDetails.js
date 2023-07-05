@@ -6,7 +6,6 @@ import ListGroup from "react-bootstrap/ListGroup";
 import { ExclamationCircleFill } from "react-bootstrap-icons";
 
 import useAuth from "../../hooks/useAuth";
-import { getImageData } from "../../hooks/useApartments";
 import useApartments from "../../hooks/useApartments";
 import useApartmentAgreements from "../../hooks/useApartmentAgreements";
 import SectionHeader from "../../components/common/SectionHeader";
@@ -68,7 +67,7 @@ const OwnerApartmentDetails = () => {
                   <img
                     className="d-block w-100"
                     alt="Apartment PNG"
-                    src={getImageData(picture.image)}
+                    src={picture.image}
                   />
                 </Carousel.Item>
               ))}

@@ -2,18 +2,13 @@ import { Link } from "react-router-dom";
 import Card from "react-bootstrap/Card";
 import ListGroup from "react-bootstrap/ListGroup";
 
-import { getImageData } from "../../hooks/useApartments";
-
 const OwnerApartmentsList = ({ apartments }) => {
   return (
     <div className="d-flex flex-wrap justify-content-around">
       {Array.isArray(apartments) &&
         apartments.map((apartment, index) => (
           <Card key={index} style={{ width: "18rem" }} className="my-3 mx-4">
-            <Card.Img
-              variant="top"
-              src={getImageData(apartment.pictures[0].image)}
-            />
+            <Card.Img variant="top" src={apartment.pictures[0].image} />
             <Card.Header>
               <Card.Title>{apartment.name}</Card.Title>
             </Card.Header>

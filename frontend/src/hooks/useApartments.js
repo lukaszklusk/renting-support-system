@@ -1,10 +1,6 @@
 import { useNavigate, useLocation } from "react-router-dom";
 import useAxiosUser from "./useAxiosUser";
 
-export function getImageData(encodedBase64) {
-  return `data:image/png;base64,${encodedBase64}`;
-}
-
 const useApartments = () => {
   const axiosUser = useAxiosUser();
   const navigate = useNavigate();

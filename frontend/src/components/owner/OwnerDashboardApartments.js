@@ -1,6 +1,5 @@
 import { Link } from "react-router-dom";
 import { Carousel } from "react-bootstrap";
-import { getImageData } from "../../hooks/useApartments";
 
 const OwnerDashboardApartments = ({ apartments }) => {
   return (
@@ -13,7 +12,7 @@ const OwnerDashboardApartments = ({ apartments }) => {
               //   height={400}
               className="d-block w-100"
               alt="Apartment PNG"
-              src={getImageData(apartment.pictures[0].image)}
+              src={apartment.pictures[0].image}
             />
             <Link to={`/apartments/${apartment.id}`}>
               <Carousel.Caption>

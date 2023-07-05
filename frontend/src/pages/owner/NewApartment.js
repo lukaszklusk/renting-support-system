@@ -20,7 +20,7 @@ import {
   ListCheck,
 } from "react-bootstrap-icons";
 import "bootstrap/dist/css/bootstrap.css";
-import axios from "../../services/axios";
+import useAxiosUser from "../../hooks/useAxiosUser";
 import useAuth from "../../hooks/useAuth";
 
 const PRESENT_REGEX = /.+/;
@@ -29,6 +29,7 @@ const ZIP_CODE_REGEX = /^\d{2}-\d{3}$/;
 const SIZE_REGEX = /^(?!0\d)\d{1,5}(\.\d{1,2})?$/;
 
 const NewApartment = () => {
+  const axiosUser = useAxiosUser();
   const location = useLocation();
 
   const nameRef = useRef();
@@ -154,8 +155,6 @@ const NewApartment = () => {
     // console.log("file", file);
     const base64 = await convertBase64(file);
     setImageArray(base64);
-    console.log("base64");
-    console.log(base64);
   };
 
   const convertBase64 = (file) => {
@@ -272,7 +271,6 @@ const NewApartment = () => {
       return;
     }
     try {
-      console.log("creating payload");
       const payload = JSON.stringify({
         apartmentName: name,
         description: decription,
@@ -293,8 +291,7 @@ const NewApartment = () => {
         longitude: "0",
       });
 
-      console.log(payload);
-      const response = await axios.post(APARTMENT_POST_URL, payload, {
+      const response = await axiosUser.post(APARTMENT_POST_URL, payload, {
         headers: { "Content-Type": "application/json" },
         withCredentials: true,
       });
@@ -315,17 +312,6 @@ const NewApartment = () => {
 
   return (
     <section>
-      {/* {imageArray.map((image, index) => {
-        <>
-          <img src={image} height="200px" />
-          <br /> <br />
-          <p>Test</p>
-          <p>{imageArray.length}</p>
-        </>;
-      })} */}
-      <img src={imageArray} height="200px" />
-      <br></br>
-      <img src="" alt="" />
       <Row className="justify-content-center mt-5">
         <Col md={6}>
           <Card>

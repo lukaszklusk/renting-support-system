@@ -222,8 +222,7 @@ public class UserController {
         if(!payload.containsKey("username") || !payload.containsKey("password") ||
                 !payload.containsKey("email") || !payload.containsKey("phoneNumber") ||
                 !payload.containsKey("role") || !payload.containsKey("firstName") ||
-                !payload.containsKey("lastName") || !payload.containsKey("pesel") ||
-                !payload.containsKey("personalIdNumber")){
+                !payload.containsKey("lastName")){
             return ResponseEntity.badRequest().build();
         }
 
@@ -235,8 +234,6 @@ public class UserController {
                 .userRole(UserRole.valueOf((String) payload.get("role")))
                 .firstName((String) payload.get("firstName"))
                 .lastName((String) payload.get("lastName"))
-                .pesel((String) payload.get("pesel"))
-                .personalIdNumber((String) payload.get("personalIdNumber"))
                 .locked(false)
                 .enabled(true)
                 .build();
@@ -269,11 +266,11 @@ public class UserController {
         newApartment.setOwner(owner.get());
         newApartment.setAddress((String) payload.get("address"));
         newApartment.setName((String) payload.get("apartmentName"));
-        newApartment.setLatitude((Double) payload.get("latitude"));
-        newApartment.setLongitude((Double) payload.get("longitude"));
+        newApartment.setLatitude(Double.parseDouble((String) payload.get("latitude")));
+        newApartment.setLongitude(Double.parseDouble((String) payload.get("longitude")));
+        newApartment.setSize(Double.parseDouble((String) payload.get("size")));
         newApartment.setCity((String) payload.get("city"));
         newApartment.setPostalCode((String) payload.get("postalCode"));
-        newApartment.setSize((Double) payload.get("size"));
         newApartment.setDescription((String) payload.get("description"));
         Set<Picture> pictureSet = new HashSet<>();
         for(Map<String, Object> payloadPic: (List<Map<String, Object>>) payload.get("pictures")){

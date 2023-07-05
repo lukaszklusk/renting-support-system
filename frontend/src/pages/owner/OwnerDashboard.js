@@ -15,8 +15,6 @@ const OwnerDashboard = () => {
       const fetchData = async () => {
         const data = await fetchApartments(username);
         setApartments(data);
-        console.log("Image");
-        console.log(data[2].pictures[0].image);
       };
 
       fetchData();
@@ -27,15 +25,6 @@ const OwnerDashboard = () => {
     <section>
       <SectionHeader title="Rented Apartments" />
       <OwnerDashboardApartments apartments={apartments} />
-      <SectionHeader title="Test" />
-      {apartments && (
-        <div className="">
-          {/* <img src={apartments[2].pictures[0].image} height="200px" /> */}
-          <br></br>
-          <p>{apartments[2].pictures[0].image}</p>
-        </div>
-      )}
-      <p>Test 2</p>
     </section>
   );
 };
