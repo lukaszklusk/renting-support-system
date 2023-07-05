@@ -70,6 +70,47 @@ public class UserController {
         }else return ResponseEntity.notFound().build();
     }
 
+    @GetMapping("/user/{username}/apartment/status")
+    public ResponseEntity<List<Apartment>> getApartmentsForUserWithStatus(@PathVariable String username,
+                                                                          @RequestParam String status){
+        Optional<User> userOptional = userService.getUserByUsername(username);
+        if(userOptional.isPresent()){
+            if(userOptional.get().getUserRole().equals(UserRole.CLIENT))
+                return ResponseEntity.badRequest().build();
+            List<Apartment> returnList = new ArrayList<>();
+            if(status.equals("rented")){
+                List<Apartment> apartmentList = apartmentService.getApartmentsForUser(userOptional.get());
+                for(Apartment a: apartmentList){
+                    List<Agreement> agreements = agreementService.getAgreementsForApartment(a);
+                    for(Agreement ag: agreements){
+                        if(ag.getAgreementStatus().equals(AgreementStatus.active) || ag.getAgreementStatus().equals(AgreementStatus.accepted)) {
+                            returnList.add(a);
+                            break;
+                        }
+                    }
+                }
+                return ResponseEntity.ok(returnList);
+            } else if(status.equals("vacant")){
+                List<Apartment> apartmentList = apartmentService.getApartmentsForUser(userOptional.get());
+                for(Apartment a: apartmentList){
+                    List<Agreement> agreements = agreementService.getAgreementsForApartment(a);
+                    boolean rented = false;
+                    for(Agreement ag: agreements){
+                        if(ag.getAgreementStatus().equals(AgreementStatus.active) || ag.getAgreementStatus().equals(AgreementStatus.accepted)) {
+                            rented = true;
+                            break;
+                        }
+                    }
+                    if(!rented)
+                        returnList.add(a);
+                }
+                return ResponseEntity.ok(returnList);
+            } else {
+                return ResponseEntity.badRequest().build();
+            }
+        } else return ResponseEntity.notFound().build();
+    }
+
     @GetMapping("/user/{username}/apartment/{aid}/rented")
     public ResponseEntity<Map<String,Boolean>> checkIfApartmentRented(@PathVariable String username,
                                                                      @PathVariable long aid){
