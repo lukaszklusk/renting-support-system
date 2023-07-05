@@ -16,7 +16,8 @@ import RequireAuth from "./components/common/auth/RequireAuth";
 
 import OwnerDashboard from "./pages/owner/OwnerDashboard";
 import OwnerApartments from "./pages/owner/OwnerApartments";
-import OwnerAgreements from "./components/owner/OwnerAgreements";
+import OwnerAgreements from "./pages/owner/OwnerAgreements";
+import NewApartment from "./pages/owner/NewApartment";
 import OwnerReports from "./components/owner/OwnerReports";
 import OwnerApartmentDetails from "./pages/owner/OwnerApartmentDetails";
 
@@ -26,6 +27,8 @@ import ClientApartment from "./components/client/ClientApartment";
 
 import AdminDashboard from "./components/admin/AdminDashboard";
 import OwnerAgreementDetails from "./components/owner/OwnerAgreementDetails";
+
+import FileUploadForm from "./pages/owner/MyForm";
 
 function App() {
   const { auth } = useAuth();
@@ -57,8 +60,10 @@ function App() {
         {isOwner && (
           <Route element={<RequireAuth roles={[ROLES.owner]} />}>
             <Route path="dashboard" element={<OwnerDashboard />} />
+            <Route exact path="test" element={<FileUploadForm />} />
             <Route exact path="apartments" element={<OwnerApartments />} />
             <Route path="apartments/:id" element={<OwnerApartmentDetails />} />
+            <Route path="apartments/new" element={<NewApartment />} />
             <Route path="agreements" element={<OwnerAgreements />} />
             <Route path="agreements/:id" element={<OwnerAgreementDetails />} />
             <Route path="reports" element={<OwnerReports />} />

@@ -1,33 +1,13 @@
-import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import Card from "react-bootstrap/Card";
 import ListGroup from "react-bootstrap/ListGroup";
 
-import useAuth from "../../hooks/useAuth";
-import useAgreements from "../../hooks/useAgreements";
-
-function OwnerAgreements() {
-  const [agreements, setAgreements] = useState(null);
-  const { auth } = useAuth();
-  const fetchAgreements = useAgreements();
-
-  useEffect(() => {
-    const username = auth.username;
-    if (username) {
-      const fetchData = async () => {
-        const data = await fetchAgreements(username);
-        setAgreements(data);
-      };
-
-      fetchData();
-    }
-  }, []);
-
+function OwnerAgreementsList({ agreements }) {
   return (
     <div className="d-flex flex-wrap justify-content-around">
       {Array.isArray(agreements) &&
         agreements.map((agreement, index) => (
-          <Card key={index} style={{ width: "19rem" }} className="my-3 mx-4">
+          <Card key={index} style={{ width: "19rem" }} className="mb-3 mx-4">
             <Card.Header>{agreement.name}</Card.Header>
             <ListGroup variant="flush">
               <ListGroup.Item>
@@ -79,4 +59,4 @@ function OwnerAgreements() {
   );
 }
 
-export default OwnerAgreements;
+export default OwnerAgreementsList;
