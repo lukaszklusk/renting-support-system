@@ -55,7 +55,18 @@ public class UserController {
     public ResponseEntity<List<Apartment>> getAllApartmentsForUser(@PathVariable String username){
         Optional<User> userOptional = userService.getUserByUsername(username);
         if(userOptional.isPresent()){
-            return ResponseEntity.ok(apartmentService.getApartmentsForUser(userOptional.get()));
+            if(userOptional.get().getUserRole().equals(UserRole.OWNER))
+                return ResponseEntity.ok(apartmentService.getApartmentsForUser(userOptional.get()));
+            else if(userOptional.get().getUserRole().equals(UserRole.CLIENT)){
+                List<Apartment> apartments = new ArrayList<>();
+                agreementService.getAgreementsForClientWithStatus(
+                        userOptional.get(),AgreementStatus.active).forEach(
+                                t -> apartments.add(t.getApartment()));
+                agreementService.getAgreementsForClientWithStatus(
+                        userOptional.get(),AgreementStatus.accepted).forEach(
+                        t -> apartments.add(t.getApartment()));
+                return ResponseEntity.ok(apartments);
+            } else return ResponseEntity.badRequest().build();
         }else return ResponseEntity.notFound().build();
     }
 
