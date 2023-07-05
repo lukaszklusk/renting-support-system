@@ -281,7 +281,7 @@ public class UserController {
                 return ResponseEntity.badRequest().build();
             Picture picture = new Picture();
             picture.setName((String) payloadPic.get("name"));
-            picture.setImage(Base64.getDecoder().decode((String) payloadPic.get("image")));
+            picture.setImage((String) payloadPic.get("image"));
             pictureSet.add(picture);
         }
         newApartment.setPictures(pictureSet);

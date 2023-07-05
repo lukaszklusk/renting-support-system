@@ -13,6 +13,7 @@ import pl.edu.agh.student.rentsys.user.UserRepository;
 
 import java.io.IOException;
 import java.time.LocalDate;
+import java.util.Base64;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
@@ -89,8 +90,8 @@ public class DataInitializer implements CommandLineRunner {
         apartment.setProperties(properties);
         Set<Picture> pictures = new HashSet<>();
         byte[] testImg = this.getClass().getResourceAsStream("/testImg.png").readAllBytes();
-        pictures.add(new Picture("Picture 1", testImg));
-        pictures.add(new Picture("Picture 2", testImg));
+        pictures.add(new Picture("Picture 1", Base64.getMimeEncoder().encodeToString(testImg)));
+        pictures.add(new Picture("Picture 2", Base64.getMimeEncoder().encodeToString(testImg)));
         apartment.setPictures(pictures);
         Set<Equipment> equipment = new HashSet<>();
         equipment.add(new Equipment("Fridge", "SAMSUNG RB38T774DB1 EF No frost 203cm"));

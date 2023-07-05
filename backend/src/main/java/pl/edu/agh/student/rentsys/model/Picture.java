@@ -8,7 +8,7 @@ import java.util.Objects;
 public class Picture {
     private Long id;
     private String name;
-    private byte[] image;
+    private String image;
 
     public void setId(Long id) {
         this.id = id;
@@ -17,7 +17,7 @@ public class Picture {
     public Picture() {
     }
 
-    public Picture(String name, byte[] image) {
+    public Picture(String name, String image) {
         this.name = name;
         this.image = image;
     }
@@ -38,11 +38,11 @@ public class Picture {
 
     @Lob
     @Column(length = 10485760)
-    public byte[] getImage() {
+    public String getImage() {
         return image;
     }
 
-    public void setImage(byte[] image) {
+    public void setImage(String image) {
         this.image = image;
     }
 
