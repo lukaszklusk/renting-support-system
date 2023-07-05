@@ -13,6 +13,7 @@ import pl.edu.agh.student.rentsys.user.UserRepository;
 
 import java.io.IOException;
 import java.time.LocalDate;
+import java.util.Base64;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
@@ -32,13 +33,13 @@ public class DataInitializer implements CommandLineRunner {
     public void run(String... args) {
         // Create three example users
         User client = createUser("client@mail.com", "client", "client", UserRole.CLIENT,
-                "Jan", "Kowalski",  "+48465234098");
+                "Jan", "Kowalski", "93031515755", "XOD351830", "+48465234098");
         User client2 = createUser("client2@mail.com", "client2", "client2", UserRole.CLIENT,
-                "Ala", "Kowalska", "+48557832997");
+                "Ala", "Kowalska", "91052241282", "CWT559721", "+48557832997");
         User owner = createUser("owner@mail.com", "owner", "owner", UserRole.OWNER,
-                "Adam", "Mickiewicz", "+48774623921");
+                "Adam", "Mickiewicz", "80091876799", "KXM646726", "+48774623921");
         createUser("admin@mail.com", "admin", "admin", UserRole.ADMIN,
-                "Admin", "Admiński", "+48666420123");
+                "Admin", "Admiński", "99052947375", "OGD944653", "+48666420123");
         Apartment apartment = createRandApartment("Apartment 1", "ul. Abc 15",
                 "Kraków", "30-349",
                 50.017741,19.953718,owner);
@@ -54,7 +55,8 @@ public class DataInitializer implements CommandLineRunner {
     }
 
     private User createUser(String email, String username, String password, UserRole role,
-                            String firstname, String lastname,String phoneNumber) {
+                            String firstname, String lastname, String pesel,
+                            String personalIdNumber, String phoneNumber) {
         User user = User.builder()
                 .email(email)
                 .username(username)
@@ -62,6 +64,8 @@ public class DataInitializer implements CommandLineRunner {
                 .password(passwordEncoder.encode(password))
                 .firstName(firstname)
                 .lastName(lastname)
+                .pesel(pesel)
+                .personalIdNumber(personalIdNumber)
                 .phoneNumber(phoneNumber)
                 .locked(false)
                 .enabled(true)
@@ -85,10 +89,9 @@ public class DataInitializer implements CommandLineRunner {
                 Integer.toString(randomNum)));
         apartment.setProperties(properties);
         Set<Picture> pictures = new HashSet<>();
-        byte[] testImg1 = this.getClass().getResourceAsStream("/img1.png").readAllBytes();
-        byte[] testImg2 = this.getClass().getResourceAsStream("/img2.png").readAllBytes();
-        pictures.add(new Picture("Picture 1", testImg1));
-        pictures.add(new Picture("Picture 2", testImg2));
+        byte[] testImg = this.getClass().getResourceAsStream("/testImg.png").readAllBytes();
+        pictures.add(new Picture("Picture 1", Base64.getMimeEncoder().encodeToString(testImg)));
+        pictures.add(new Picture("Picture 2", Base64.getMimeEncoder().encodeToString(testImg)));
         apartment.setPictures(pictures);
         Set<Equipment> equipment = new HashSet<>();
         equipment.add(new Equipment("Fridge", "SAMSUNG RB38T774DB1 EF No frost 203cm"));

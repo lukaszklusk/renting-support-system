@@ -70,6 +70,47 @@ public class UserController {
         }else return ResponseEntity.notFound().build();
     }
 
+    @GetMapping("/user/{username}/apartment/status")
+    public ResponseEntity<List<Apartment>> getApartmentsForUserWithStatus(@PathVariable String username,
+                                                                          @RequestParam String status){
+        Optional<User> userOptional = userService.getUserByUsername(username);
+        if(userOptional.isPresent()){
+            if(userOptional.get().getUserRole().equals(UserRole.CLIENT))
+                return ResponseEntity.badRequest().build();
+            List<Apartment> returnList = new ArrayList<>();
+            if(status.equals("rented")){
+                List<Apartment> apartmentList = apartmentService.getApartmentsForUser(userOptional.get());
+                for(Apartment a: apartmentList){
+                    List<Agreement> agreements = agreementService.getAgreementsForApartment(a);
+                    for(Agreement ag: agreements){
+                        if(ag.getAgreementStatus().equals(AgreementStatus.active) || ag.getAgreementStatus().equals(AgreementStatus.accepted)) {
+                            returnList.add(a);
+                            break;
+                        }
+                    }
+                }
+                return ResponseEntity.ok(returnList);
+            } else if(status.equals("vacant")){
+                List<Apartment> apartmentList = apartmentService.getApartmentsForUser(userOptional.get());
+                for(Apartment a: apartmentList){
+                    List<Agreement> agreements = agreementService.getAgreementsForApartment(a);
+                    boolean rented = false;
+                    for(Agreement ag: agreements){
+                        if(ag.getAgreementStatus().equals(AgreementStatus.active) || ag.getAgreementStatus().equals(AgreementStatus.accepted)) {
+                            rented = true;
+                            break;
+                        }
+                    }
+                    if(!rented)
+                        returnList.add(a);
+                }
+                return ResponseEntity.ok(returnList);
+            } else {
+                return ResponseEntity.badRequest().build();
+            }
+        } else return ResponseEntity.notFound().build();
+    }
+
     @GetMapping("/user/{username}/apartment/{aid}/rented")
     public ResponseEntity<Map<String,Boolean>> checkIfApartmentRented(@PathVariable String username,
                                                                      @PathVariable long aid){
@@ -181,7 +222,8 @@ public class UserController {
         if(!payload.containsKey("username") || !payload.containsKey("password") ||
                 !payload.containsKey("email") || !payload.containsKey("phoneNumber") ||
                 !payload.containsKey("role") || !payload.containsKey("firstName") ||
-                !payload.containsKey("lastName")){
+                !payload.containsKey("lastName") || !payload.containsKey("pesel") ||
+                !payload.containsKey("personalIdNumber")){
             return ResponseEntity.badRequest().build();
         }
 
@@ -193,6 +235,8 @@ public class UserController {
                 .userRole(UserRole.valueOf((String) payload.get("role")))
                 .firstName((String) payload.get("firstName"))
                 .lastName((String) payload.get("lastName"))
+                .pesel((String) payload.get("pesel"))
+                .personalIdNumber((String) payload.get("personalIdNumber"))
                 .locked(false)
                 .enabled(true)
                 .build();
@@ -225,11 +269,11 @@ public class UserController {
         newApartment.setOwner(owner.get());
         newApartment.setAddress((String) payload.get("address"));
         newApartment.setName((String) payload.get("apartmentName"));
-        newApartment.setLatitude(Double.parseDouble((String) payload.get("latitude")));
-        newApartment.setLongitude(Double.parseDouble((String) payload.get("longitude")));
-        newApartment.setSize(Double.parseDouble((String) payload.get("size")));
+        newApartment.setLatitude((Double) payload.get("latitude"));
+        newApartment.setLongitude((Double) payload.get("longitude"));
         newApartment.setCity((String) payload.get("city"));
         newApartment.setPostalCode((String) payload.get("postalCode"));
+        newApartment.setSize((Double) payload.get("size"));
         newApartment.setDescription((String) payload.get("description"));
         Set<Picture> pictureSet = new HashSet<>();
         for(Map<String, Object> payloadPic: (List<Map<String, Object>>) payload.get("pictures")){
@@ -237,7 +281,7 @@ public class UserController {
                 return ResponseEntity.badRequest().build();
             Picture picture = new Picture();
             picture.setName((String) payloadPic.get("name"));
-            picture.setImage(Base64.getMimeDecoder().decode((String) payloadPic.get("image")));
+            picture.setImage((String) payloadPic.get("image"));
             pictureSet.add(picture);
         }
         newApartment.setPictures(pictureSet);
