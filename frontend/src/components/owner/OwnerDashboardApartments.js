@@ -1,27 +1,8 @@
-import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Carousel } from "react-bootstrap";
-import useAuth from "../../hooks/useAuth";
 import { getImageData } from "../../hooks/useApartments";
-import useApartments from "../../hooks/useApartments";
 
-const OwnerDashboardApartments = () => {
-  const [apartments, setApartments] = useState(null);
-  const { auth } = useAuth();
-  const fetchApartments = useApartments();
-
-  useEffect(() => {
-    const username = auth.username;
-    if (username) {
-      const fetchData = async () => {
-        const data = await fetchApartments(username);
-        setApartments(data);
-      };
-
-      fetchData();
-    }
-  }, []);
-
+const OwnerDashboardApartments = ({ apartments }) => {
   return (
     <Carousel fade>
       {Array.isArray(apartments) &&

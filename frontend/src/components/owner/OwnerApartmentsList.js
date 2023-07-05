@@ -3,27 +3,9 @@ import { Link } from "react-router-dom";
 import Card from "react-bootstrap/Card";
 import ListGroup from "react-bootstrap/ListGroup";
 
-import useAuth from "../../hooks/useAuth";
 import { getImageData } from "../../hooks/useApartments";
-import useApartments from "../../hooks/useApartments";
 
-const OwnerApartments = () => {
-  const [apartments, setApartments] = useState(null);
-  const { auth } = useAuth();
-  const fetchApartments = useApartments();
-
-  useEffect(() => {
-    const username = auth.username;
-    if (username) {
-      const fetchData = async () => {
-        const data = await fetchApartments(username);
-        setApartments(data);
-      };
-
-      fetchData();
-    }
-  }, []);
-
+const OwnerApartmentsList = ({ apartments }) => {
   return (
     <div className="d-flex flex-wrap justify-content-around">
       {Array.isArray(apartments) &&
@@ -63,4 +45,4 @@ const OwnerApartments = () => {
   );
 };
 
-export default OwnerApartments;
+export default OwnerApartmentsList;
