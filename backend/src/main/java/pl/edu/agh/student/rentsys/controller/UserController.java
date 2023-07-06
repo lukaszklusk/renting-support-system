@@ -319,7 +319,7 @@ public class UserController {
                                                      @RequestBody Map<String, Object> payload){
         if(!payload.containsKey("name") || !payload.containsKey("monthlyPayment") ||
                 !payload.containsKey("administrationFee") || !payload.containsKey("ownerAccountNo") ||
-                !payload.containsKey("apartment") || !payload.containsKey("signingDate") ||
+                !payload.containsKey("apartmentId") || !payload.containsKey("signingDate") ||
                 !payload.containsKey("expirationDate") || !payload.containsKey("tenant")){
             return ResponseEntity.badRequest().build();
         }
@@ -328,9 +328,8 @@ public class UserController {
         if(owner.isEmpty()) return ResponseEntity.notFound().build();
         newAgreement.setOwner(owner.get());
         newAgreement.setName((String) payload.get("name"));
-        if(!((Map<String,Object>) payload.get("apartment")).containsKey("id")) return ResponseEntity.badRequest().build();
         Optional<Apartment> apartment = apartmentService.getApartment(
-                Long.valueOf((Integer)((Map<String,Object>) payload.get("apartment")).get("id")));
+                Long.parseLong((String) payload.get("apartmentId")));
         if(apartment.isEmpty()) return ResponseEntity.notFound().build();
         newAgreement.setApartment(apartment.get());
         newAgreement.setSigningDate(LocalDate.parse((String) payload.get("signingDate"),
@@ -354,7 +353,7 @@ public class UserController {
                                                      @RequestBody Map<String,Object> payload){
         if(!payload.containsKey("name") && !payload.containsKey("monthlyPayment") &&
                 !payload.containsKey("administrationFee") && !payload.containsKey("ownerAccountNo") &&
-                !payload.containsKey("apartment") && !payload.containsKey("signingDate") &&
+                !payload.containsKey("apartmentId") && !payload.containsKey("signingDate") &&
                 !payload.containsKey("expirationDate") && !payload.containsKey("tenant")){
             return ResponseEntity.badRequest().build();
         }
@@ -367,11 +366,9 @@ public class UserController {
                 if(agreementOptional.isPresent()){
                     Agreement agreement = agreementOptional.get();
                     if(payload.containsKey("name")) agreement.setName((String) payload.get("name"));
-                    if(payload.containsKey("apartment")) {
-                        if (!((Map<String, Object>) payload.get("apartment")).containsKey("id"))
-                            return ResponseEntity.badRequest().build();
+                    if(payload.containsKey("apartmentId")) {
                         Optional<Apartment> apartment = apartmentService.getApartment(
-                                Long.valueOf((Integer) ((Map<String, Object>) payload.get("apartment")).get("id")));
+                                Long.parseLong((String) payload.get("apartmentId")));
                         if (apartment.isEmpty()) return ResponseEntity.notFound().build();
                         agreement.setApartment(apartment.get());
                     }
