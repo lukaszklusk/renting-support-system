@@ -143,15 +143,14 @@ public class UserController {
     @PatchMapping("/user/{username}/agreement/{aid}")
     public ResponseEntity<Agreement> changeAgreementStatus(@PathVariable String username,
                                                            @PathVariable long aid,
-                                                           @RequestBody Map<String, Object> payload){
-        if(!payload.containsKey("agreementStatus")) return ResponseEntity.badRequest().build();
+                                                           @RequestParam String status){
         Optional<User> userOptional = userService.getUserByUsername(username);
         if(userOptional.isPresent()){
             Optional<Agreement> agreementOptional = agreementService.getAgreementById(aid);
             if(agreementOptional.isPresent()){
                 try {
                     AgreementStatus agreementStatus =
-                            AgreementStatus.valueOf((String) payload.get("agreementStatus"));
+                            AgreementStatus.valueOf(status);
                     return ResponseEntity.ok(agreementService.changeAgreementStatus(
                             agreementOptional.get(), agreementStatus));
                 }catch (IllegalArgumentException e){
