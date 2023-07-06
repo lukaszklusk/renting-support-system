@@ -10,6 +10,7 @@ import useUserApartmentById from "../../hooks/apartment/useUserApartmentById";
 import useUserAgreementsByApartmentId from "../../hooks/agreement/useUserAgreementsByApartmentId";
 import useIsUserApartmentByIdRented from "../../hooks/apartment/useIsUserApartmentByIdRented";
 import SectionHeader from "../../components/common/SectionHeader";
+import { ROLES } from "../../config/roles";
 
 const OwnerApartmentDetails = () => {
   const { id } = useParams();
@@ -25,6 +26,11 @@ const OwnerApartmentDetails = () => {
   const fetchUserApartmentById = useUserApartmentById();
   const fetchUserAgreementsByApartmentId = useUserAgreementsByApartmentId();
   const fetchIsUserApartmentByIdRented = useIsUserApartmentByIdRented();
+
+  const isLoggedIn = auth.isLoggedIn;
+  const isClient = isLoggedIn && auth.roles?.includes(ROLES.client);
+  const isOwner = isLoggedIn && auth.roles?.includes(ROLES.owner);
+  const isAdmin = isLoggedIn && auth.roles?.includes(ROLES.admin);
 
   useEffect(() => {
     const username = auth.username;
@@ -174,7 +180,7 @@ const OwnerApartmentDetails = () => {
                 ))}
               </>
             )}
-            {Array.isArray(finishedAgreements) && (
+            {isOwner && Array.isArray(finishedAgreements) && (
               <>
                 <ListGroup.Item>
                   <strong> Finished Agreements: </strong>

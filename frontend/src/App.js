@@ -22,9 +22,9 @@ import OwnerReports from "./components/owner/OwnerReports";
 import OwnerApartmentDetails from "./pages/owner/OwnerApartmentDetails";
 import AddAgreement from "./pages/owner/AddAgreement";
 
-import ClientDashboard from "./components/client/ClientDashboard";
-import ClientAgreement from "./components/client/ClientAgreement";
-import ClientApartment from "./components/client/ClientApartment";
+import ClientDashboard from "./pages/client/ClientDashboard";
+import ClientAgreements from "./pages/client/ClientAgreements";
+import ClientApartments from "./pages/client/ClientApartments";
 
 import AdminDashboard from "./components/admin/AdminDashboard";
 import OwnerAgreementDetails from "./pages/owner/OwnerAgreementDetails";
@@ -52,8 +52,10 @@ function App() {
         {isClient && (
           <Route element={<RequireAuth roles={[ROLES.client]} />}>
             <Route path="dashboard" element={<ClientDashboard />} />
-            <Route path="apartment" element={<ClientApartment />} />
-            <Route path="agreement" element={<ClientAgreement />} />
+            <Route path="apartments" element={<ClientApartments />} />
+            <Route path="apartments/:id" element={<OwnerApartmentDetails />} />
+            <Route path="agreements" element={<ClientAgreements />} />
+            <Route path="agreements/:id" element={<OwnerAgreementDetails />} />
           </Route>
         )}
 

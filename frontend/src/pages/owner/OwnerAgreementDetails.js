@@ -5,6 +5,7 @@ import { useState, useEffect } from "react";
 import useUserAgreementById from "../../hooks/agreement/useUserAgreementById";
 import useAuth from "../../hooks/useAuth";
 import ListGroup from "react-bootstrap/ListGroup";
+import { ROLES } from "../../config/roles";
 
 const OwnerAgreementDetails = () => {
   const { id } = useParams();
@@ -13,6 +14,11 @@ const OwnerAgreementDetails = () => {
 
   const fetchUserAgreementById = useUserAgreementById();
   const { auth } = useAuth();
+
+  const isLoggedIn = auth.isLoggedIn;
+  const isClient = isLoggedIn && auth.roles?.includes(ROLES.client);
+  const isOwner = isLoggedIn && auth.roles?.includes(ROLES.owner);
+  const isAdmin = isLoggedIn && auth.roles?.includes(ROLES.admin);
 
   useEffect(() => {
     const username = auth.username;
@@ -53,10 +59,31 @@ const OwnerAgreementDetails = () => {
                   agreement.administrationFee + agreement.monthlyPayment
                 ).toFixed(2)}
               </ListGroup.Item>
-              <ListGroup.Item>
-                <strong> Tenant: </strong> {agreement.tenant.firstName}{" "}
-                {agreement.tenant.lastName} ({agreement.tenant.username})
-              </ListGroup.Item>
+              {isOwner ? (
+                <>
+                  <ListGroup.Item>
+                    {" "}
+                    <strong>Tenant:</strong> {agreement.tenant.firstName}{" "}
+                    {agreement.tenant.lastName} ({agreement.tenant.username})
+                  </ListGroup.Item>
+                  <ListGroup.Item>
+                    {" "}
+                    <strong>Contact:</strong> {agreement.tenant.phoneNumber}
+                  </ListGroup.Item>{" "}
+                </>
+              ) : (
+                <>
+                  <ListGroup.Item>
+                    {" "}
+                    <strong>Tenant:</strong> {agreement.owner.firstName}{" "}
+                    {agreement.owner.lastName} ({agreement.owner.username})
+                  </ListGroup.Item>
+                  <ListGroup.Item>
+                    {" "}
+                    <strong>Contact:</strong> {agreement.owner.phoneNumber}
+                  </ListGroup.Item>{" "}
+                </>
+              )}
               <ListGroup.Item>
                 <strong> Duration: </strong> {agreement.signingDate} :{" "}
                 {agreement.expirationDate}

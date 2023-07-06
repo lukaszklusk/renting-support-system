@@ -45,21 +45,21 @@ const AppNavbar = () => {
                 <>
                   <Nav.Link
                     as={Link}
-                    to="/apartment"
+                    to="/apartments"
                     className={`custom-navbar-link ${
-                      activeLink === "apartment" ? "active" : ""
+                      activeLink === "apartments" ? "active" : ""
                     }`}
                   >
-                    Apartment
+                    Apartments
                   </Nav.Link>
                   <Nav.Link
                     as={Link}
-                    to="/agreement"
+                    to="/agreements"
                     className={`custom-navbar-link ${
-                      activeLink === "agreement" ? "active" : ""
+                      activeLink === "agreements" ? "active" : ""
                     }`}
                   >
-                    Agreement
+                    Agreements
                   </Nav.Link>
                 </>
               )}

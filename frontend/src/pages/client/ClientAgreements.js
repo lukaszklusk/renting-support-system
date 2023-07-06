@@ -8,7 +8,7 @@ import useUserAgreementsByStatus from "../../hooks/agreement/useUserAgreementsBy
 import { Link } from "react-router-dom";
 import { Button } from "react-bootstrap";
 
-function OwnerAgreements() {
+function ClientAgreements() {
   const [activeAgreements, setActiveAgreements] = useState(null);
   const [proposedAgreements, setProposedAgreements] = useState(null);
   const [isDataFetched, setIsDataFetched] = useState(false);
@@ -46,10 +46,6 @@ function OwnerAgreements() {
           <OwnerAgreementsList agreements={activeAgreements} />
           <SectionHeader title="Proposed Agreements" />
           <OwnerAgreementsList agreements={proposedAgreements} />
-
-          <Button as={Link} to="new" variant="outline-dark">
-            Propose New Agreement
-          </Button>
           {/* <SectionHeader title="Propose New Agreement" as={Link} to="/new" /> */}
         </>
       ) : (
@@ -59,4 +55,4 @@ function OwnerAgreements() {
   );
 }
 
-export default OwnerAgreements;
+export default ClientAgreements;
