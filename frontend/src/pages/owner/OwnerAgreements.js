@@ -10,6 +10,7 @@ import { Button } from "react-bootstrap";
 
 function OwnerAgreements() {
   const [activeAgreements, setActiveAgreements] = useState(null);
+  const [acceptedAgreements, setAcceptedAgreements] = useState(null);
   const [proposedAgreements, setProposedAgreements] = useState(null);
   const [isDataFetched, setIsDataFetched] = useState(false);
 
@@ -25,6 +26,10 @@ function OwnerAgreements() {
           username,
           "active"
         );
+        const acceptedAgreements = await fetchUserAgreementsByStatus(
+          username,
+          "accepted"
+        );
         const proposedAgreements = await fetchUserAgreementsByStatus(
           username,
           "proposed"
@@ -32,6 +37,7 @@ function OwnerAgreements() {
 
         setActiveAgreements(activeAgreements);
         setProposedAgreements(proposedAgreements);
+        setAcceptedAgreements(acceptedAgreements);
         setIsDataFetched(true);
       };
       fetchData();

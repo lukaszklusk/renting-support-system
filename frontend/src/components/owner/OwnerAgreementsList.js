@@ -16,11 +16,26 @@ function OwnerAgreementsList({ agreements, isProposed }) {
   const isOwner = isLoggedIn && auth.roles?.includes(ROLES.owner);
   const isAdmin = isLoggedIn && auth.roles?.includes(ROLES.admin);
 
-  const acceptOffer = (agreement) => {
-    console.log("agreement", agreement);
-    fetchPatchUserAgreementStatus(username, agreement.id, {
-      status: "accepted",
-    });
+  const acceptOffer = async (agreement) => {
+    const response = await fetchPatchUserAgreementStatus(
+      username,
+      agreement.id,
+      {
+        status: "accepted",
+      }
+    );
+    console.log(response);
+  };
+
+  const rejectOffer = async (agreement) => {
+    const response = await fetchPatchUserAgreementStatus(
+      username,
+      agreement.id,
+      {
+        status: "rejected",
+      }
+    );
+    console.log(response);
   };
 
   return (
@@ -101,8 +116,14 @@ function OwnerAgreementsList({ agreements, isProposed }) {
                 >
                   Accept
                 </Button>
-                <Button className="flex-grow-1" variant="danger">
-                  Decline
+                <Button
+                  className="flex-grow-1"
+                  variant="danger"
+                  onClick={() => {
+                    rejectOffer(agreement);
+                  }}
+                >
+                  Reject
                 </Button>
               </Card.Footer>
             )}

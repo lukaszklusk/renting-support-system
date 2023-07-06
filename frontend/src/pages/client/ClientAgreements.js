@@ -11,6 +11,7 @@ import { Button } from "react-bootstrap";
 function ClientAgreements() {
   const [activeAgreements, setActiveAgreements] = useState(null);
   const [proposedAgreements, setProposedAgreements] = useState(null);
+  const [rejectedAgreements, setRejectedAgreements] = useState(null);
   const [isDataFetched, setIsDataFetched] = useState(false);
 
   const { auth } = useAuth();
@@ -23,15 +24,21 @@ function ClientAgreements() {
       const fetchData = async () => {
         const activeAgreements = await fetchUserAgreementsByStatus(
           username,
-          "active"
+          "accepted"
         );
         const proposedAgreements = await fetchUserAgreementsByStatus(
           username,
           "proposed"
         );
 
+        const rejectedAgreements = await fetchUserAgreementsByStatus(
+          username,
+          "rejected"
+        );
+
         setActiveAgreements(activeAgreements);
         setProposedAgreements(proposedAgreements);
+        setRejectedAgreements(rejectedAgreements);
         setIsDataFetched(true);
       };
       fetchData();
@@ -49,6 +56,8 @@ function ClientAgreements() {
             agreements={proposedAgreements}
             isProposed={true}
           />
+          <SectionHeader title="Rejected Agreements" />
+          <OwnerAgreementsList agreements={rejectedAgreements} />
           {/* <SectionHeader title="Propose New Agreement" as={Link} to="/new" /> */}
         </>
       ) : (
