@@ -3,8 +3,9 @@ import Card from "react-bootstrap/Card";
 import ListGroup from "react-bootstrap/ListGroup";
 import { ROLES } from "../../config/roles";
 import useAuth from "../../hooks/useAuth";
+import { Button } from "react-bootstrap";
 
-function OwnerAgreementsList({ agreements }) {
+function OwnerAgreementsList({ agreements, isProposed }) {
   const { auth } = useAuth();
   const isLoggedIn = auth.isLoggedIn;
   const isClient = isLoggedIn && auth.roles?.includes(ROLES.client);
@@ -77,6 +78,17 @@ function OwnerAgreementsList({ agreements }) {
                 Apartment
               </Card.Link>
             </Card.Footer>
+
+            {isProposed && isClient && (
+              <Card.Footer>
+                <Button className="flex-grow-1" to="new" variant="info">
+                  Accept
+                </Button>
+                <Button className="flex-grow-1" to="new" variant="danger">
+                  Decline
+                </Button>
+              </Card.Footer>
+            )}
           </Card>
         ))}
     </div>

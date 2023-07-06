@@ -45,7 +45,10 @@ function ClientAgreements() {
           <SectionHeader title="Active Agreements" />
           <OwnerAgreementsList agreements={activeAgreements} />
           <SectionHeader title="Proposed Agreements" />
-          <OwnerAgreementsList agreements={proposedAgreements} />
+          <OwnerAgreementsList
+            agreements={proposedAgreements}
+            isProposed={true}
+          />
           {/* <SectionHeader title="Propose New Agreement" as={Link} to="/new" /> */}
         </>
       ) : (

@@ -21,6 +21,7 @@ import {
 import "bootstrap/dist/css/bootstrap.css";
 import useAxiosUser from "../../hooks/useAxiosUser";
 import useAuth from "../../hooks/useAuth";
+import useUserApartments from "../../hooks/apartment/useUserApartments";
 
 const PRESENT_REGEX = /.+/;
 const NUMBER_REGEX = /^(?!0\d)\d{1,5}(\.\d{1,2})?$/;
@@ -29,13 +30,15 @@ const DATE_REGEX = /^\d{4}-\d{2}-\d{2}$/;
 
 const AddAgreement = () => {
   const axiosUser = useAxiosUser();
-  const location = useLocation();
+  const fetchUserApartments = useUserApartments();
 
   const nameRef = useRef();
 
   const { auth } = useAuth();
   const username = auth.username;
   const AGREEMENT_POST_URL = `/user/${username}/agreement`;
+
+  const [ownerApartments, setOwnerApartments] = useState([]);
 
   const [agreementName, setAgreementName] = useState("");
   const [isAgreementNameValid, setIsAgreementNameValid] = useState(false);
@@ -64,6 +67,19 @@ const AddAgreement = () => {
 
   useEffect(() => {
     nameRef.current.focus();
+  }, []);
+
+  useEffect(() => {
+    const username = auth.username;
+
+    if (username) {
+      const fetchData = async () => {
+        const apartments = await fetchUserApartments(username);
+        console.log("apartments", apartments);
+        setOwnerApartments(apartments);
+      };
+      fetchData();
+    }
   }, []);
 
   useEffect(() => {
@@ -125,9 +141,22 @@ const AddAgreement = () => {
     setIsExpirationDateValid(isValid);
   }, [expirationDate]);
 
+  const getApartmentIdByName = (apartements, name) => {
+    const apartmentsByName = apartements.filter((apartment) => {
+      return apartment.name === name;
+    });
+    if (apartmentsByName.length === 0) {
+      console.log("error: ", name, "apartment not found");
+      return null;
+    } else if (apartmentsByName.length > 1) {
+      console.log("error: ", name, "multiple names");
+      return null;
+    }
+    return apartmentsByName[0].id.toString();
+  };
+
   const handleCreateAgreement = async (e) => {
     e.preventDefault();
-    console.log("To Send");
 
     if (
       !PRESENT_REGEX.test(agreementName) ||
@@ -141,10 +170,13 @@ const AddAgreement = () => {
       setErrMsg("Invalid Entry");
       return;
     }
+
+    console.log("To Send");
+
     try {
       const payload = JSON.stringify({
         name: agreementName,
-        apartment: apartmentName,
+        apartmentId: getApartmentIdByName(ownerApartments, apartmentName),
         administrationFee,
         monthlyPayment,
         signingDate,

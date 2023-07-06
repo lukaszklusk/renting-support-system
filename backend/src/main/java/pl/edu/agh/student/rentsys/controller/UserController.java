@@ -334,8 +334,8 @@ public class UserController {
                 DateTimeFormatter.ofPattern("yyyy-MM-dd")));
         newAgreement.setExpirationDate(LocalDate.parse((String) payload.get("expirationDate"),
                 DateTimeFormatter.ofPattern("yyyy-MM-dd")));
-        newAgreement.setMonthlyPayment((Double) payload.get("monthlyPayment"));
-        newAgreement.setAdministrationFee((Double) payload.get("administrationFee"));
+        newAgreement.setMonthlyPayment(Double.parseDouble((String) payload.get("monthlyPayment")));
+        newAgreement.setAdministrationFee(Double.parseDouble((String) payload.get("administrationFee")));
         newAgreement.setOwnerAccountNo((String) payload.get("ownerAccountNo"));
         Optional<User> tenant = userService.getUserByUsername((String) payload.get("tenant"));
         if(tenant.isPresent()) newAgreement.setTenant(tenant.get());
