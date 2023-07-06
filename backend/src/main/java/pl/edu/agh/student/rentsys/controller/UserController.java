@@ -160,6 +160,40 @@ public class UserController {
         } else return ResponseEntity.notFound().build();
     }
 
+    @PatchMapping("/user/{username}/agreement/{aid}/accept")
+    public ResponseEntity<Agreement> setAgreementStatusToActive(@PathVariable String username,
+                                                                @PathVariable long aid){
+        Optional<User> userOptional = userService.getUserByUsername(username);
+        if(userOptional.isPresent()){
+            Optional<Agreement> agreementOptional = agreementService.getAgreementById(aid);
+            if(agreementOptional.isPresent()){
+                try {
+                    return ResponseEntity.ok(agreementService.changeAgreementStatus(
+                            agreementOptional.get(), AgreementStatus.accepted));
+                }catch (IllegalArgumentException e){
+                    return ResponseEntity.badRequest().build();
+                }
+            } else return ResponseEntity.notFound().build();
+        } else return ResponseEntity.notFound().build();
+    }
+
+    @PatchMapping("/user/{username}/agreement/{aid}/reject")
+    public ResponseEntity<Agreement> setAgreementStatusToRejected(@PathVariable String username,
+                                                                @PathVariable long aid){
+        Optional<User> userOptional = userService.getUserByUsername(username);
+        if(userOptional.isPresent()){
+            Optional<Agreement> agreementOptional = agreementService.getAgreementById(aid);
+            if(agreementOptional.isPresent()){
+                try {
+                    return ResponseEntity.ok(agreementService.changeAgreementStatus(
+                            agreementOptional.get(), AgreementStatus.rejected));
+                }catch (IllegalArgumentException e){
+                    return ResponseEntity.badRequest().build();
+                }
+            } else return ResponseEntity.notFound().build();
+        } else return ResponseEntity.notFound().build();
+    }
+
     @GetMapping("/user/{username}/agreement")
     public ResponseEntity<List<Agreement>> getAllAgreementsForUser(@PathVariable String username){
         Optional<User> userOptional = userService.getUserByUsername(username);
