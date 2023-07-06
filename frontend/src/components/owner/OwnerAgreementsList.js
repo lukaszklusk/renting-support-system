@@ -4,13 +4,24 @@ import ListGroup from "react-bootstrap/ListGroup";
 import { ROLES } from "../../config/roles";
 import useAuth from "../../hooks/useAuth";
 import { Button } from "react-bootstrap";
+import usePatchUserAgreementStatus from "../../hooks/agreement/usePatchUserAgreementStatus";
 
 function OwnerAgreementsList({ agreements, isProposed }) {
   const { auth } = useAuth();
+  const username = auth.username;
+  const fetchPatchUserAgreementStatus = usePatchUserAgreementStatus();
+
   const isLoggedIn = auth.isLoggedIn;
   const isClient = isLoggedIn && auth.roles?.includes(ROLES.client);
   const isOwner = isLoggedIn && auth.roles?.includes(ROLES.owner);
   const isAdmin = isLoggedIn && auth.roles?.includes(ROLES.admin);
+
+  const acceptOffer = (agreement) => {
+    console.log("agreement", agreement);
+    fetchPatchUserAgreementStatus(username, agreement.id, {
+      status: "accepted",
+    });
+  };
 
   return (
     <div className="d-flex flex-wrap justify-content-around">
@@ -81,10 +92,16 @@ function OwnerAgreementsList({ agreements, isProposed }) {
 
             {isProposed && isClient && (
               <Card.Footer>
-                <Button className="flex-grow-1" to="new" variant="info">
+                <Button
+                  className="flex-grow-1"
+                  variant="info"
+                  onClick={() => {
+                    acceptOffer(agreement);
+                  }}
+                >
                   Accept
                 </Button>
-                <Button className="flex-grow-1" to="new" variant="danger">
+                <Button className="flex-grow-1" variant="danger">
                   Decline
                 </Button>
               </Card.Footer>
