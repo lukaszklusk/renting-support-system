@@ -36,6 +36,8 @@ public class DataInitializer implements CommandLineRunner {
                 "Jan", "Kowalski", "+48465234098");
         User client2 = createUser("client2@mail.com", "client2", "client2", UserRole.CLIENT,
                 "Ala", "Kowalska", "+48557832997");
+        User client3 = createUser("client3@mail.com", "client3", "client3", UserRole.CLIENT,
+                "Adam", "Nowak", "+48111222333");
         User owner = createUser("owner@mail.com", "owner", "owner", UserRole.OWNER,
                 "Adam", "Mickiewicz", "+48774623921");
         createUser("admin@mail.com", "admin", "admin", UserRole.ADMIN,
@@ -43,14 +45,35 @@ public class DataInitializer implements CommandLineRunner {
         Apartment apartment = createRandApartment("Apartment 1", "ul. Abc 15",
                 "Kraków", "30-349",
                 50.017741,19.953718,owner);
-        createRandApartment("Apartment 2", "ul. Dde 49",
+
+        Apartment apartment2 = createRandApartment("Apartment 2", "ul. Dde 49",
                 "Kraków", "30-349",
                 50.077285,19.872920,owner);
 
         createAgreement("Agreement 1", apartment, owner,
                 LocalDate.of(2023,3, 13),
                 LocalDate.of(2026, 3,1),
-                client, "PL84109024029425764271319137");
+                client, "PL84109024029425764271319137", AgreementStatus.active);
+
+        createAgreement("Agreement 18", apartment, owner,
+                LocalDate.of(2021,3, 13),
+                LocalDate.of(2022, 3,1),
+                client3, "PL84109024029425764271319137", AgreementStatus.cancelled);
+
+        createAgreement("Agreement 18", apartment, owner,
+                LocalDate.of(2019,3, 13),
+                LocalDate.of(2020, 3,1),
+                client2, "PL84109024029425764271319137", AgreementStatus.cancelled);
+
+        createAgreement("Agreement 72", apartment2, owner,
+                LocalDate.of(2023,7, 15),
+                LocalDate.of(2024, 7,15),
+                client3, "PL84109024029425764271319137", AgreementStatus.proposed);
+
+        createAgreement("Agreement 75", apartment2, owner,
+                LocalDate.of(2023,7, 15),
+                LocalDate.of(2024, 7,15),
+                client2, "PL84109024029425764271319137", AgreementStatus.proposed);
         System.out.println("----- FINISHED DATA INITIALIZATION -----");
     }
 
@@ -106,7 +129,7 @@ public class DataInitializer implements CommandLineRunner {
 
     public Agreement createAgreement(String name, Apartment apartment, User owner,
                                      LocalDate signDate, LocalDate expiryDate,
-                                     User tenant, String ownerAccountNo){
+                                     User tenant, String ownerAccountNo, AgreementStatus agreementStatus){
         Agreement agreement = new Agreement();
         agreement.setName(name);
         int randomNum = ThreadLocalRandom.current().nextInt(100000, 400000 + 1);
@@ -119,7 +142,8 @@ public class DataInitializer implements CommandLineRunner {
         agreement.setSigningDate(signDate);
         agreement.setExpirationDate(expiryDate);
         agreement.setOwnerAccountNo(ownerAccountNo);
-        return agreementService.createAgreement(agreement);
+        agreement.setAgreementStatus(agreementStatus);
+        return agreementService.createDemoAgreement(agreement);
     }
 }
 

@@ -30,6 +30,10 @@ public class AgreementService {
         return agreementRepository.save(agreement);
     }
 
+    public Agreement createDemoAgreement(Agreement agreement){
+        return agreementRepository.save(agreement);
+    }
+
     public Agreement changeAgreement(Agreement agreement){
         Optional<Agreement> oldAgreementOpt = agreementRepository.findById(agreement.getId());
         if(oldAgreementOpt.isEmpty()) return null;

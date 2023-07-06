@@ -26,7 +26,7 @@ import ClientAgreement from "./components/client/ClientAgreement";
 import ClientApartment from "./components/client/ClientApartment";
 
 import AdminDashboard from "./components/admin/AdminDashboard";
-import OwnerAgreementDetails from "./components/owner/OwnerAgreementDetails";
+import OwnerAgreementDetails from "./pages/owner/OwnerAgreementDetails";
 
 import FileUploadForm from "./pages/owner/MyForm";
 

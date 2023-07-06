@@ -202,6 +202,7 @@ public class UserController {
         }else return ResponseEntity.notFound().build();
     }
 
+    //    TODO: add agreement by status
     @GetMapping("/user/{username}/apartment/{aid}/agreement")
     public ResponseEntity<List<Agreement>> getAgreementsForApartment(@PathVariable String username,
                                                                      @PathVariable long aid){

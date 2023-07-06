@@ -1,53 +1,70 @@
 import { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, Link } from "react-router-dom";
 import { Carousel } from "react-bootstrap";
 import Card from "react-bootstrap/Card";
 import ListGroup from "react-bootstrap/ListGroup";
 import { ExclamationCircleFill } from "react-bootstrap-icons";
 
 import useAuth from "../../hooks/useAuth";
-import useApartments from "../../hooks/useApartments";
-import useApartmentAgreements from "../../hooks/useApartmentAgreements";
+import useUserApartmentById from "../../hooks/apartment/useUserApartmentById";
+import useUserAgreementsByApartmentId from "../../hooks/agreement/useUserAgreementsByApartmentId";
+import useIsUserApartmentByIdRented from "../../hooks/apartment/useIsUserApartmentByIdRented";
 import SectionHeader from "../../components/common/SectionHeader";
 
 const OwnerApartmentDetails = () => {
   const { id } = useParams();
   const [apartment, setApartment] = useState(null);
   const [agreements, setAgreements] = useState(null);
+  const [activeAgreement, setActiveAgreement] = useState(null);
+  const [proposedAgreements, setProposedAgreements] = useState(null);
+  const [finishedAgreements, setFinishedAgreements] = useState(null);
+  const [isRented, setIsRented] = useState(null);
+  const [isDataFetched, setIsDataFetched] = useState(false);
+
   const { auth } = useAuth();
-  const fetchApartments = useApartments();
-  const fetchApartmentAgreements = useApartmentAgreements();
+  const fetchUserApartmentById = useUserApartmentById();
+  const fetchUserAgreementsByApartmentId = useUserAgreementsByApartmentId();
+  const fetchIsUserApartmentByIdRented = useIsUserApartmentByIdRented();
 
   useEffect(() => {
     const username = auth.username;
-    if (username) {
-      const fetchApartment = async () => {
-        const data = await fetchApartments(username, id);
-        setApartment(data);
-      };
 
-      fetchApartment();
-    }
-  }, []);
-
-  useEffect(() => {
-    const username = auth.username;
-    if (username) {
-      const fetchAgreements = async () => {
-        const data = await fetchApartmentAgreements(username, id);
-        setAgreements(data);
-      };
-
-      fetchAgreements();
-    }
-  }, []);
-
-  useEffect(() => {
-    const username = auth.username;
     if (username) {
       const fetchData = async () => {
-        const data = await fetchApartments(username, id);
-        setApartment(data);
+        const apartment = await fetchUserApartmentById(username, id);
+        const agreements = await fetchUserAgreementsByApartmentId(username, id);
+        // const isRented = await fetchIsUserApartmentByIdRented(username, id);
+        setApartment(apartment);
+        setAgreements(agreements);
+
+        // setIsRented(isRented);
+
+        const activeAgreements = agreements.filter((agreement) => {
+          return agreement.agreementStatus === "active";
+        });
+
+        const proposedAgreements = agreements.filter((agreement) => {
+          return agreement.agreementStatus === "proposed";
+        });
+
+        const finishedAgreements = agreements.filter((agreement) => {
+          return agreement.agreementStatus === "cancelled";
+        });
+
+        setIsRented(activeAgreements.length > 0);
+
+        console.log("log", isRented && activeAgreements.length != 1);
+        if (isRented && activeAgreements.length != 1) {
+          console.log("Invalid nr of active agreements");
+          return;
+        }
+
+        isRented && setActiveAgreement(activeAgreements[0]);
+        setProposedAgreements(proposedAgreements);
+        setFinishedAgreements(finishedAgreements);
+
+        console.log("agreements", agreements);
+        setIsDataFetched(true);
       };
 
       fetchData();
@@ -86,6 +103,55 @@ const OwnerApartmentDetails = () => {
             <ListGroup.Item>
               <strong> Size: </strong> {apartment.size} m²{" "}
             </ListGroup.Item>
+            {isRented ? (
+              <>
+                <ListGroup.Item>
+                  <strong> Status: </strong> Rented
+                </ListGroup.Item>
+                <ListGroup.Item>
+                  <strong> Rent: </strong>{" "}
+                  {(
+                    activeAgreement.administrationFee +
+                    activeAgreement.monthlyPayment
+                  ).toFixed(2)}
+                </ListGroup.Item>
+                <ListGroup.Item>
+                  <strong> Tenant: </strong> {activeAgreement.tenant.firstName}{" "}
+                  {activeAgreement.tenant.lastName} (
+                  {activeAgreement.tenant.username})
+                </ListGroup.Item>
+                <ListGroup.Item>
+                  <strong> Duration: </strong> {activeAgreement.signingDate} :{" "}
+                  {activeAgreement.expirationDate}
+                </ListGroup.Item>
+              </>
+            ) : (
+              <>
+                <ListGroup.Item>
+                  <strong> Status: </strong> Vacant
+                </ListGroup.Item>
+
+                {Array.isArray(proposedAgreements) && (
+                  <>
+                    <ListGroup.Item>
+                      <strong> Proposed Agreements: </strong>
+                    </ListGroup.Item>
+                    {proposedAgreements.map((agreement) => (
+                      <ListGroup.Item
+                        key={agreement.id}
+                        className="flex-row-reverse"
+                      >
+                        <Card.Link as={Link} to={`/agreements/${agreement.id}`}>
+                          {agreement.tenant.firstName}{" "}
+                          {agreement.tenant.lastName} (
+                          {agreement.tenant.username})
+                        </Card.Link>
+                      </ListGroup.Item>
+                    ))}
+                  </>
+                )}
+              </>
+            )}
             {Array.isArray(apartment.equipment) && (
               <>
                 <ListGroup.Item>
@@ -98,6 +164,23 @@ const OwnerApartmentDetails = () => {
                     <div style={{ cursor: "pointer" }}>
                       <ExclamationCircleFill />
                     </div>
+                  </ListGroup.Item>
+                ))}
+              </>
+            )}
+            {Array.isArray(finishedAgreements) && (
+              <>
+                <ListGroup.Item>
+                  <strong> Finished Agreements: </strong>
+                </ListGroup.Item>
+                {finishedAgreements.map((agreement) => (
+                  <ListGroup.Item
+                    key={agreement.id}
+                    className="flex-row-reverse"
+                  >
+                    <Card.Link as={Link} to={`/agreement/${agreement.id}`}>
+                      {agreement.signingDate} : {agreement.expirationDate}
+                    </Card.Link>
                   </ListGroup.Item>
                 ))}
               </>

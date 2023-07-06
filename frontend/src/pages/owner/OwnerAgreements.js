@@ -5,27 +5,50 @@ import useAgreements from "../../hooks/useAgreements";
 import SectionHeader from "../../components/common/SectionHeader";
 import OwnerAgreementsList from "../../components/owner/OwnerAgreementsList";
 
+import useUserAgreementsByStatus from "../../hooks/agreement/useUserAgreementsByStatus";
+
 function OwnerAgreements() {
-  const [agreements, setAgreements] = useState(null);
+  const [activeAgreements, setActiveAgreements] = useState(null);
+  const [proposedAgreements, setProposedAgreements] = useState(null);
+  const [isDataFetched, setIsDataFetched] = useState(false);
+
   const { auth } = useAuth();
-  const fetchAgreements = useAgreements();
+  const fetchUserAgreementsByStatus = useUserAgreementsByStatus();
 
   useEffect(() => {
     const username = auth.username;
+
     if (username) {
       const fetchData = async () => {
-        const data = await fetchAgreements(username);
-        setAgreements(data);
-      };
+        const activeAgreements = await fetchUserAgreementsByStatus(
+          username,
+          "active"
+        );
+        const proposedAgreements = await fetchUserAgreementsByStatus(
+          username,
+          "proposed"
+        );
 
+        setActiveAgreements(activeAgreements);
+        setProposedAgreements(proposedAgreements);
+        setIsDataFetched(true);
+      };
       fetchData();
     }
   }, []);
 
   return (
     <section>
-      <SectionHeader title="Active Agreements" />
-      <OwnerAgreementsList agreements={agreements} />
+      {isDataFetched ? (
+        <>
+          <SectionHeader title="Active Agreements" />
+          <OwnerAgreementsList agreements={activeAgreements} />
+          <SectionHeader title="Proposed Agreements" />
+          <OwnerAgreementsList agreements={proposedAgreements} />
+        </>
+      ) : (
+        <p>Loading</p>
+      )}
     </section>
   );
 }

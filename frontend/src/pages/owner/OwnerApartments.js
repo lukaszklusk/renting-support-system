@@ -1,20 +1,26 @@
 import { useState, useEffect } from "react";
 import useAuth from "../../hooks/useAuth";
-import useApartments from "../../hooks/useApartments";
 import SectionHeader from "../../components/common/SectionHeader";
+import useUserApartmentsByStatus from "../../hooks/apartment/useUserApartmentsByStatus";
 import OwnerApartmentsList from "../../components/owner/OwnerApartmentsList";
 
 const OwnerApartments = () => {
-  const [apartments, setApartments] = useState(null);
+  const [rentedApartments, setRentedApartments] = useState(null);
+  const [vacantApartments, setVanantApartments] = useState(null);
+  const [isDataFetched, setIsDataFetched] = useState(false);
   const { auth } = useAuth();
-  const fetchApartments = useApartments();
+  const fetchApartmentsByStatus = useUserApartmentsByStatus();
 
   useEffect(() => {
     const username = auth.username;
+
     if (username) {
       const fetchData = async () => {
-        const data = await fetchApartments(username);
-        setApartments(data);
+        const rented = await fetchApartmentsByStatus(username, "rented");
+        const vacant = await fetchApartmentsByStatus(username, "vacant");
+        setRentedApartments(rented);
+        setVanantApartments(vacant);
+        setIsDataFetched(true);
       };
 
       fetchData();
@@ -23,8 +29,16 @@ const OwnerApartments = () => {
 
   return (
     <section>
-      <SectionHeader title="Rented Apartments" />
-      <OwnerApartmentsList apartments={apartments} />
+      {isDataFetched ? (
+        <>
+          <SectionHeader title="Rented Apartments" />
+          <OwnerApartmentsList apartments={rentedApartments} />
+          <SectionHeader title="Vacant Apartments" />
+          <OwnerApartmentsList apartments={vacantApartments} />
+        </>
+      ) : (
+        <p>Loading</p>
+      )}
     </section>
   );
 };
