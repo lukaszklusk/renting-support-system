@@ -20,6 +20,7 @@ import OwnerAgreements from "./pages/owner/OwnerAgreements";
 import NewApartment from "./pages/owner/NewApartment";
 import OwnerReports from "./components/owner/OwnerReports";
 import OwnerApartmentDetails from "./pages/owner/OwnerApartmentDetails";
+import AddAgreement from "./pages/owner/AddAgreement";
 
 import ClientDashboard from "./components/client/ClientDashboard";
 import ClientAgreement from "./components/client/ClientAgreement";
@@ -66,6 +67,7 @@ function App() {
             <Route path="apartments/new" element={<NewApartment />} />
             <Route path="agreements" element={<OwnerAgreements />} />
             <Route path="agreements/:id" element={<OwnerAgreementDetails />} />
+            <Route path="agreements/new" element={<AddAgreement />} />
             <Route path="reports" element={<OwnerReports />} />
           </Route>
         )}

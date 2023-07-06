@@ -51,18 +51,24 @@ const OwnerApartmentDetails = () => {
           return agreement.agreementStatus === "cancelled";
         });
 
-        setIsRented(activeAgreements.length > 0);
+        if (activeAgreements.length === 1) {
+          setIsRented(true);
+          setActiveAgreement(activeAgreements[0]);
+        }
 
-        console.log("log", isRented && activeAgreements.length != 1);
+        console.log("bool", activeAgreements.length == 1);
+        console.log("isRented", isRented);
+
         if (isRented && activeAgreements.length != 1) {
           console.log("Invalid nr of active agreements");
           return;
         }
 
-        isRented && setActiveAgreement(activeAgreements[0]);
         setProposedAgreements(proposedAgreements);
         setFinishedAgreements(finishedAgreements);
 
+        console.log("activeAgreements", activeAgreements[0]);
+        console.log("activeAgreement", activeAgreement);
         console.log("agreements", agreements);
         setIsDataFetched(true);
       };
@@ -178,7 +184,7 @@ const OwnerApartmentDetails = () => {
                     key={agreement.id}
                     className="flex-row-reverse"
                   >
-                    <Card.Link as={Link} to={`/agreement/${agreement.id}`}>
+                    <Card.Link as={Link} to={`/agreements/${agreement.id}`}>
                       {agreement.signingDate} : {agreement.expirationDate}
                     </Card.Link>
                   </ListGroup.Item>

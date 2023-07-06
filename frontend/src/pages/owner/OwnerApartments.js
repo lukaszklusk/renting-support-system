@@ -3,6 +3,8 @@ import useAuth from "../../hooks/useAuth";
 import SectionHeader from "../../components/common/SectionHeader";
 import useUserApartmentsByStatus from "../../hooks/apartment/useUserApartmentsByStatus";
 import OwnerApartmentsList from "../../components/owner/OwnerApartmentsList";
+import { Link } from "react-router-dom";
+import { Button } from "react-bootstrap";
 
 const OwnerApartments = () => {
   const [rentedApartments, setRentedApartments] = useState(null);
@@ -35,6 +37,9 @@ const OwnerApartments = () => {
           <OwnerApartmentsList apartments={rentedApartments} />
           <SectionHeader title="Vacant Apartments" />
           <OwnerApartmentsList apartments={vacantApartments} />
+          <Button as={Link} to="new" variant="outline-dark">
+            Add New Apartment
+          </Button>
         </>
       ) : (
         <p>Loading</p>
