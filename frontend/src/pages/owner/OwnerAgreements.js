@@ -35,6 +35,8 @@ function OwnerAgreements() {
           "proposed"
         );
 
+        console.log("acceptedAgreements", acceptedAgreements);
+
         setActiveAgreements(activeAgreements);
         setProposedAgreements(proposedAgreements);
         setAcceptedAgreements(acceptedAgreements);
@@ -50,6 +52,9 @@ function OwnerAgreements() {
         <>
           <SectionHeader title="Active Agreements" />
           <OwnerAgreementsList agreements={activeAgreements} />
+          <SectionHeader title="Accepted Agreements" />
+          <OwnerAgreementsList agreements={acceptedAgreements} />
+          {/* <OwnerAgreementsList agreements={[...activeAgreements, acceptedAgreements]} /> */}
           <SectionHeader title="Proposed Agreements" />
           <OwnerAgreementsList agreements={proposedAgreements} />
 
