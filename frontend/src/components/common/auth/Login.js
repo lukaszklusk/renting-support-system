@@ -40,7 +40,6 @@ const Login = () => {
 
   const handleLogin = async (e) => {
     e.preventDefault();
-    console.log(username, password);
     try {
       const response = await axios.post(
         LOGIN_URL,
@@ -52,7 +51,6 @@ const Login = () => {
       );
       setUsername("");
       setPassword("");
-      console.log(JSON.stringify(response?.data));
       const roles = response?.data?.roles;
       setAuth({ username, roles, isLoggedIn: true });
       navigate(from, { replace: true });

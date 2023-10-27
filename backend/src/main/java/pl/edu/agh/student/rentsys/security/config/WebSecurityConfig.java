@@ -45,9 +45,9 @@ public class WebSecurityConfig {
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .authorizeHttpRequests()
                     .requestMatchers("sign-up", "sign-in", "sign-out", "activate", "refresh").permitAll()
-                    .requestMatchers(HttpMethod.GET, "/demo/client").hasRole(UserRole.CLIENT.name())
-                    .requestMatchers(HttpMethod.GET, "/demo/owner").hasRole(UserRole.OWNER.name())
-                    .requestMatchers(HttpMethod.GET, "/demo/admin").hasRole(UserRole.ADMIN.name())
+//                    .requestMatchers(HttpMethod.GET, "/demo/client").hasRole(UserRole.CLIENT.name())
+//                    .requestMatchers(HttpMethod.GET, "/demo/owner").hasRole(UserRole.OWNER.name())
+//                    .requestMatchers(HttpMethod.GET, "/demo/admin").hasRole(UserRole.ADMIN.name())
                 .anyRequest().authenticated();
         return http.build();
     }

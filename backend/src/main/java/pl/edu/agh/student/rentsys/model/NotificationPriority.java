@@ -1,5 +1,5 @@
 package pl.edu.agh.student.rentsys.model;
 
-public enum MessagePriority {
+public enum NotificationPriority {
     normal, important, critical
 }

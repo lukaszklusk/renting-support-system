@@ -1,61 +1,31 @@
 package pl.edu.agh.student.rentsys.model;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.util.Objects;
 import java.util.Set;
 
 @Entity
-public class Equipment {
-    private Long id;
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@DiscriminatorValue("type1")
+public class Equipment extends NotificationRelatedBaseEntity{
     private String name;
     private String description;
-    private Set<Message> issues;
-    public void setId(Long id) {
-        this.id = id;
-    }
 
-    public Equipment() {
-    }
+    @OneToMany
+    private Set<Notification> issues;
+
 
     public Equipment(String name, String description) {
         this.name = name;
         this.description = description;
-    }
-
-    public Equipment(long id){
-        this.id = id;
-    }
-
-    @Id
-    @GeneratedValue
-    public Long getId() {
-        return id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    @OneToMany
-    public Set<Message> getIssues() {
-        return issues;
-    }
-
-    public void setIssues(Set<Message> issues) {
-        this.issues = issues;
     }
 
     @Override

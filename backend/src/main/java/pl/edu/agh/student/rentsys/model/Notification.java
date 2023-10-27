@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class Message {
+public class Notification {
     @Id
     private Long id;
 
@@ -23,11 +23,18 @@ public class Message {
     @ManyToOne
     @JoinColumn(name="receiver_id")
     private User receiver;
+
+    private NotificationType notificationType;
+    private NotificationPriority priority;
     private LocalDateTime sendTime;
     private Boolean isRead;
-    private String content;
 
     @ManyToOne
-    @JoinColumn(name="response_message_id")
-    private Message responseMessage;
+    @JoinColumn(name="response_notification_id")
+    private Notification responseNotification;
+
+    @ManyToOne
+    @JoinColumn(name="related_object_id")
+    private NotificationRelatedBaseEntity relatedObject;
+
 }

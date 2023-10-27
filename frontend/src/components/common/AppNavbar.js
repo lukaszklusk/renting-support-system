@@ -8,10 +8,10 @@ import useLogout from "../../hooks/useLogout";
 const AppNavbar = () => {
   const location = useLocation();
   const { auth } = useAuth();
-  const isLoggedIn = auth.isLoggedIn;
-  const isClient = isLoggedIn && auth.roles?.includes(ROLES.client);
-  const isOwner = isLoggedIn && auth.roles?.includes(ROLES.owner);
-  const isAdmin = isLoggedIn && auth.roles?.includes(ROLES.admin);
+  const isLoggedIn = auth?.isLoggedIn !== false;
+  const isClient = isLoggedIn && auth?.roles?.includes(ROLES.client);
+  const isOwner = isLoggedIn && auth?.roles?.includes(ROLES.owner);
+  const isAdmin = isLoggedIn && auth?.roles?.includes(ROLES.admin);
   const logout = useLogout();
 
   const [activeLink, setActiveLink] = useState("");
@@ -61,6 +61,15 @@ const AppNavbar = () => {
                   >
                     Agreements
                   </Nav.Link>
+                  <Nav.Link
+                    as={Link}
+                    to="/chat"
+                    className={`custom-navbar-link ${
+                      activeLink === "chat" ? "active" : ""
+                    }`}
+                  >
+                    Chat
+                  </Nav.Link>
                 </>
               )}
 
@@ -92,6 +101,15 @@ const AppNavbar = () => {
                     }`}
                   >
                     Reports
+                  </Nav.Link>
+                  <Nav.Link
+                    as={Link}
+                    to="/chat"
+                    className={`custom-navbar-link ${
+                      activeLink === "chat" ? "active" : ""
+                    }`}
+                  >
+                    Chat
                   </Nav.Link>
                 </>
               )}

@@ -31,12 +31,14 @@ import OwnerAgreementDetails from "./pages/owner/OwnerAgreementDetails";
 
 import FileUploadForm from "./pages/owner/MyForm";
 
+import Chat from "./components/common/chat/Chat";
+
 function App() {
   const { auth } = useAuth();
-  const isLoggedIn = auth.isLoggedIn;
-  const isClient = isLoggedIn && auth.roles?.includes(ROLES.client);
-  const isOwner = isLoggedIn && auth.roles?.includes(ROLES.owner);
-  const isAdmin = isLoggedIn && auth.roles?.includes(ROLES.admin);
+  const isLoggedIn = auth?.isLoggedIn !== false;
+  const isClient = isLoggedIn && auth?.roles?.includes(ROLES.client);
+  const isOwner = isLoggedIn && auth?.roles?.includes(ROLES.owner);
+  const isAdmin = isLoggedIn && auth?.roles?.includes(ROLES.admin);
 
   return (
     <Routes>
@@ -56,6 +58,7 @@ function App() {
             <Route path="apartments/:id" element={<OwnerApartmentDetails />} />
             <Route path="agreements" element={<ClientAgreements />} />
             <Route path="agreements/:id" element={<OwnerAgreementDetails />} />
+            <Route path="chat" element={<Chat />} />
           </Route>
         )}
 
@@ -71,6 +74,7 @@ function App() {
             <Route path="agreements/:id" element={<OwnerAgreementDetails />} />
             <Route path="agreements/new" element={<AddAgreement />} />
             <Route path="reports" element={<OwnerReports />} />
+            <Route path="chat" element={<Chat />} />
           </Route>
         )}
 

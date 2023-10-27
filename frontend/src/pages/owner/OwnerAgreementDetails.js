@@ -16,9 +16,9 @@ const OwnerAgreementDetails = () => {
   const { auth } = useAuth();
 
   const isLoggedIn = auth.isLoggedIn;
-  const isClient = isLoggedIn && auth.roles?.includes(ROLES.client);
-  const isOwner = isLoggedIn && auth.roles?.includes(ROLES.owner);
-  const isAdmin = isLoggedIn && auth.roles?.includes(ROLES.admin);
+  const isClient = isLoggedIn && auth?.roles?.includes(ROLES.client);
+  const isOwner = isLoggedIn && auth?.roles?.includes(ROLES.owner);
+  const isAdmin = isLoggedIn && auth?.roles?.includes(ROLES.admin);
 
   useEffect(() => {
     const username = auth.username;

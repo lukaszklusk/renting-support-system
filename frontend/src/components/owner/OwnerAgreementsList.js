@@ -12,9 +12,9 @@ function OwnerAgreementsList({ agreements, isProposed }) {
   const fetchPatchUserAgreementStatus = usePatchUserAgreementStatus();
 
   const isLoggedIn = auth.isLoggedIn;
-  const isClient = isLoggedIn && auth.roles?.includes(ROLES.client);
-  const isOwner = isLoggedIn && auth.roles?.includes(ROLES.owner);
-  const isAdmin = isLoggedIn && auth.roles?.includes(ROLES.admin);
+  const isClient = isLoggedIn && auth?.roles?.includes(ROLES.client);
+  const isOwner = isLoggedIn && auth?.roles?.includes(ROLES.owner);
+  const isAdmin = isLoggedIn && auth?.roles?.includes(ROLES.admin);
 
   const acceptOffer = async (agreement) => {
     const response = await fetchPatchUserAgreementStatus(

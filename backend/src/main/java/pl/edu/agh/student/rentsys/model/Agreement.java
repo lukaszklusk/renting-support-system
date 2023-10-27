@@ -6,8 +6,8 @@ import pl.edu.agh.student.rentsys.user.User;
 import java.time.LocalDate;
 
 @Entity
-public class Agreement {
-    private Long id;
+@DiscriminatorValue("type2")
+public class Agreement extends NotificationRelatedBaseEntity {
     private String name;
     private double monthlyPayment;
     private double administrationFee;
@@ -19,16 +19,6 @@ public class Agreement {
     private String ownerAccountNo;
     private AgreementStatus agreementStatus;
 
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    @Id
-    @GeneratedValue
-    public Long getId() {
-        return id;
-    }
 
     public String getName() {
         return name;
