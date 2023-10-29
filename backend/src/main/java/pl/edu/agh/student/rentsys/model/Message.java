@@ -14,20 +14,22 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 public class Message {
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @ManyToOne
     @JoinColumn(name="sender_id")
-    private User sender;
+    protected User sender;
 
     @ManyToOne
     @JoinColumn(name="receiver_id")
     private User receiver;
+
+    private String content;
     private LocalDateTime sendTime;
     private Boolean isRead;
-    private String content;
 
     @ManyToOne
-    @JoinColumn(name="response_message_id")
+    @JoinColumn(name="responded_id")
     private Message responseMessage;
 }

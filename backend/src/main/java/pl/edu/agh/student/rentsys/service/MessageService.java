@@ -2,9 +2,6 @@ package pl.edu.agh.student.rentsys.service;
 
 import org.springframework.stereotype.Service;
 import pl.edu.agh.student.rentsys.model.Message;
-import pl.edu.agh.student.rentsys.model.Notification;
-import pl.edu.agh.student.rentsys.model.NotificationPriority;
-import pl.edu.agh.student.rentsys.model.NotificationType;
 import pl.edu.agh.student.rentsys.repository.MessageRepository;
 import pl.edu.agh.student.rentsys.user.User;
 
@@ -16,12 +13,11 @@ import java.util.Optional;
 public class MessageService {
 
     private final MessageRepository messageRepository;
-
     public MessageService(MessageRepository messageRepository) {
         this.messageRepository = messageRepository;
     }
 
-    public Optional<Message> getMessageById(long id){
+    public Optional<Message> getMessageById(Long id){
         return messageRepository.findById(id);
     }
 
@@ -33,57 +29,43 @@ public class MessageService {
         return messageRepository.findAllBySender(user);
     }
 
-    public void deleteMessage(Message notification){
-        messageRepository.delete(notification);
+    public void deleteMessage(Message message){
+        messageRepository.delete(message);
     }
 
-    public List<Message> getReceivedMessagesWithType(User user, NotificationType type){
-        return messageRepository.findAllByReceiverAndMessageType(user,type);
+    public Message markMessageAsRead(Message message){
+        message.setIsRead(true);
+        return messageRepository.save(message);
     }
 
-    public List<Message> getSentMessagesWithType(User user, NotificationType type){
-        return messageRepository.findAllBySenderAndMessageType(user,type);
+    public Message markMessageAsUnread(Message message){
+        message.setIsRead(false);
+        return messageRepository.save(message);
     }
 
-    public Message markAsRead(Notification notification){
-        notification.setIsRead(true);
-        return messageRepository.save(notification);
-    }
-
-    public Message markAsUnread(Notification notification){
-        notification.setIsRead(false);
-        return messageRepository.save(notification);
-    }
-
-    public Message createMessage(User sender, User receiver, String topic, LocalDateTime sendTime,
-                                      NotificationType notificationType, String messageBody, NotificationPriority priority){
+    public Message createMessage(User sender, User receiver, String content, LocalDateTime sendTime) {
         Message newMessage = Message.builder()
                 .sender(sender)
                 .receiver(receiver)
-                .topic(topic)
+                .content(content)
                 .sendTime(sendTime)
-                .messageType(notificationType)
-                .messageBody(messageBody)
-                .priority(priority)
-                .readStatus("unread")
+                .isRead(false)
                 .build();
+
         return messageRepository.save(newMessage);
     }
 
-    public Message createMessageWithResponse(User sender, User receiver, String topic, LocalDateTime sendTime,
-                                                  NotificationType notificationType, String messageBody, NotificationPriority priority,
-                                                  Notification response){
-        Message newNotification = Message.builder()
+    public Message createMessageWithResponse(User sender, User receiver, String content, LocalDateTime sendTime, Message response){
+
+        Message newMessage = Message.builder()
+                .responseMessage(response)
                 .sender(sender)
                 .receiver(receiver)
-                .topic(topic)
+                .content(content)
                 .sendTime(sendTime)
-                .messageType(notificationType)
-                .messageBody(messageBody)
-                .priority(priority)
-                .readStatus("unread")
-                .responseNotification(response)
+                .isRead(false)
                 .build();
-        return messageRepository.save(newNotification);
+
+        return messageRepository.save(newMessage);
     }
 }

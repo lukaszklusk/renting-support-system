@@ -2,9 +2,7 @@ package pl.edu.agh.student.rentsys.model;
 
 import jakarta.persistence.*;
 import lombok.*;
-import pl.edu.agh.student.rentsys.user.User;
-
-import java.time.LocalDateTime;
+import lombok.experimental.SuperBuilder;
 
 @Entity
 @Builder
@@ -14,27 +12,17 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 public class Notification {
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
-    @ManyToOne
-    @JoinColumn(name="sender_id")
-    private User sender;
-
-    @ManyToOne
-    @JoinColumn(name="receiver_id")
-    private User receiver;
 
     private NotificationType notificationType;
     private NotificationPriority priority;
-    private LocalDateTime sendTime;
-    private Boolean isRead;
+    private String topic;
+
+    @OneToOne
+    private Message message;
 
     @ManyToOne
-    @JoinColumn(name="response_notification_id")
+    @JoinColumn(name="responded_id")
     private Notification responseNotification;
-
-    @ManyToOne
-    @JoinColumn(name="related_object_id")
-    private NotificationRelatedBaseEntity relatedObject;
-
 }

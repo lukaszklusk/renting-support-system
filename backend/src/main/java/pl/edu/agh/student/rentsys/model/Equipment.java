@@ -14,8 +14,10 @@ import java.util.Set;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@DiscriminatorValue("type1")
-public class Equipment extends NotificationRelatedBaseEntity{
+public class Equipment {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    protected Long id;
     private String name;
     private String description;
 
@@ -41,4 +43,5 @@ public class Equipment extends NotificationRelatedBaseEntity{
     public int hashCode() {
         return Objects.hash(getId());
     }
+
 }
