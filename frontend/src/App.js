@@ -31,7 +31,7 @@ import OwnerAgreementDetails from "./pages/owner/OwnerAgreementDetails";
 
 import FileUploadForm from "./pages/owner/MyForm";
 
-import Chat from "./components/common/chat/Chat";
+import SendMessage from "./components/common/communication/SendMessage";
 
 function App() {
   const { auth } = useAuth();
@@ -58,7 +58,7 @@ function App() {
             <Route path="apartments/:id" element={<OwnerApartmentDetails />} />
             <Route path="agreements" element={<ClientAgreements />} />
             <Route path="agreements/:id" element={<OwnerAgreementDetails />} />
-            <Route path="chat" element={<Chat />} />
+            <Route path="chat" element={<SendMessage />} />
           </Route>
         )}
 
@@ -74,7 +74,7 @@ function App() {
             <Route path="agreements/:id" element={<OwnerAgreementDetails />} />
             <Route path="agreements/new" element={<AddAgreement />} />
             <Route path="reports" element={<OwnerReports />} />
-            <Route path="chat" element={<Chat />} />
+            <Route path="chat" element={<SendMessage />} />
           </Route>
         )}
 

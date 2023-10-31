@@ -34,9 +34,9 @@ public class UserController {
         this.passwordEncoder = passwordEncoder;
     }
 
-    @GetMapping("/a")
-    public String printA(){
-        return "A";
+    @GetMapping("/test")
+    public String test(){
+        return "ok";
     }
 
     @GetMapping("/user")

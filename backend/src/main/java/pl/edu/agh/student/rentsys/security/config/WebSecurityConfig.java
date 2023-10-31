@@ -33,6 +33,21 @@ public class WebSecurityConfig {
     private final UserService userService;
     private final PasswordEncoder passwordEncoder;
 
+//    @Bean
+//    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+//        http
+//                .cors().and()
+//                .csrf().disable()
+//                .sessionManagement()
+//                .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+//                .and()
+//                .authenticationProvider(daoAuthenticationProvider())
+//                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+//                .authorizeHttpRequests()
+//                .anyRequest().permitAll();
+//
+//        return http.build();
+//    }
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
@@ -45,6 +60,7 @@ public class WebSecurityConfig {
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .authorizeHttpRequests()
                     .requestMatchers("sign-up", "sign-in", "sign-out", "activate", "refresh").permitAll()
+//                .requestMatchers("/test/**").permitAll()
 //                    .requestMatchers(HttpMethod.GET, "/demo/client").hasRole(UserRole.CLIENT.name())
 //                    .requestMatchers(HttpMethod.GET, "/demo/owner").hasRole(UserRole.OWNER.name())
 //                    .requestMatchers(HttpMethod.GET, "/demo/admin").hasRole(UserRole.ADMIN.name())

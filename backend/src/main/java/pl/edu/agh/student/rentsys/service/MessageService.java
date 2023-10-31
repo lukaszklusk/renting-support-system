@@ -1,9 +1,17 @@
 package pl.edu.agh.student.rentsys.service;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import pl.edu.agh.student.rentsys.model.DTOMessage;
 import pl.edu.agh.student.rentsys.model.Message;
 import pl.edu.agh.student.rentsys.repository.MessageRepository;
 import pl.edu.agh.student.rentsys.user.User;
+import pl.edu.agh.student.rentsys.user.UserRepository;
+import pl.edu.agh.student.rentsys.user.UserService;
+
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -13,8 +21,10 @@ import java.util.Optional;
 public class MessageService {
 
     private final MessageRepository messageRepository;
-    public MessageService(MessageRepository messageRepository) {
+    private final UserService userService;
+    public MessageService(MessageRepository messageRepository, UserService userService) {
         this.messageRepository = messageRepository;
+        this.userService = userService;
     }
 
     public Optional<Message> getMessageById(Long id){
@@ -67,5 +77,14 @@ public class MessageService {
                 .build();
 
         return messageRepository.save(newMessage);
+    }
+
+    public Message createMessageFromDTO(DTOMessage dtoMessage) {
+
+        User sender = userService.getUserByUsername(dtoMessage.getSender()).orElse(null);
+        User receiver = userService.getUserByUsername(dtoMessage.getReceiver()).orElse(null);
+        String content = dtoMessage.getContent();
+        LocalDateTime sendTime = LocalDateTime.ofInstant(Instant.ofEpochMilli(dtoMessage.getSendTimestamp()), ZoneId.systemDefault());
+        return createMessage(sender, receiver, content, sendTime);
     }
 }

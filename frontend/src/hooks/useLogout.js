@@ -7,7 +7,7 @@ const useLogout = () => {
   const { auth, setAuth } = useAuth();
 
   const logout = async () => {
-    if (auth.isLoggedIn) {
+    if (auth?.isLoggedIn) {
       try {
         await axios.post("/sign-out");
         setAuth({ isLoggedIn: false });
