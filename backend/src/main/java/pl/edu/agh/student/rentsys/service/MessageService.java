@@ -1,21 +1,20 @@
 package pl.edu.agh.student.rentsys.service;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import pl.edu.agh.student.rentsys.model.DTOMessage;
 import pl.edu.agh.student.rentsys.model.Message;
 import pl.edu.agh.student.rentsys.repository.MessageRepository;
 import pl.edu.agh.student.rentsys.user.User;
-import pl.edu.agh.student.rentsys.user.UserRepository;
 import pl.edu.agh.student.rentsys.user.UserService;
 
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 public class MessageService {
@@ -31,8 +30,41 @@ public class MessageService {
         return messageRepository.findById(id);
     }
 
+    public Optional<DTOMessage> getDTOMessageById(Long id){
+        Optional<Message> message =getMessageById(id);
+        return message.map(DTOMessage::convertFromMessage);
+    }
+
+    public List<Message> getMessages(User user) {
+        return messageRepository.findAllBySenderOrReceiver(user, user);
+    }
+
+    public List<DTOMessage> getMessages(String username) {
+        User user = userService.getUserByUsername(username).orElse(null);
+        List<Message> messages = getMessages(user);
+        return messages.stream()
+                .map(DTOMessage::convertFromMessage)
+                .collect(Collectors.toList());
+    }
+    public List<DTOMessage> getReceivedMessages(String username){
+        User user = userService.getUserByUsername(username).orElse(null);
+        List<Message> messages = getReceivedMessages(user);
+        return messages.stream()
+                .map(DTOMessage::convertFromMessage)
+                .collect(Collectors.toList());
+    }
+
     public List<Message> getReceivedMessages(User user){
         return messageRepository.findAllByReceiver(user);
+    }
+
+
+    public List<DTOMessage> getSentMessages(String username){
+        User user = userService.getUserByUsername(username).orElse(null);
+        List<Message> messages = getSentMessages(user);
+        return messages.stream()
+                .map(DTOMessage::convertFromMessage)
+                .collect(Collectors.toList());
     }
 
     public List<Message> getSentMessages(User user){
@@ -53,8 +85,9 @@ public class MessageService {
         return messageRepository.save(message);
     }
 
-    public Message createMessage(User sender, User receiver, String content, LocalDateTime sendTime) {
+    public Message createMessage(UUID clientId, User sender, User receiver, String content, LocalDateTime sendTime) {
         Message newMessage = Message.builder()
+                .clientId(clientId)
                 .sender(sender)
                 .receiver(receiver)
                 .content(content)
@@ -65,9 +98,10 @@ public class MessageService {
         return messageRepository.save(newMessage);
     }
 
-    public Message createMessageWithResponse(User sender, User receiver, String content, LocalDateTime sendTime, Message response){
+    public Message createMessageWithResponse(UUID clientId, User sender, User receiver, String content, LocalDateTime sendTime, Message response){
 
         Message newMessage = Message.builder()
+                .clientId(clientId)
                 .responseMessage(response)
                 .sender(sender)
                 .receiver(receiver)
@@ -80,11 +114,11 @@ public class MessageService {
     }
 
     public Message createMessageFromDTO(DTOMessage dtoMessage) {
-
+        UUID clientId = dtoMessage.getId();
         User sender = userService.getUserByUsername(dtoMessage.getSender()).orElse(null);
         User receiver = userService.getUserByUsername(dtoMessage.getReceiver()).orElse(null);
         String content = dtoMessage.getContent();
         LocalDateTime sendTime = LocalDateTime.ofInstant(Instant.ofEpochMilli(dtoMessage.getSendTimestamp()), ZoneId.systemDefault());
-        return createMessage(sender, receiver, content, sendTime);
+        return createMessage(clientId, sender, receiver, content, sendTime);
     }
 }

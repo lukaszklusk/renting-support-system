@@ -27,7 +27,6 @@ public class ApartmentController {
     @GetMapping("/apartments/{id}")
     public ResponseEntity<Apartment> getApartmentById(@PathVariable long id){
         Optional<Apartment> apartmentOptional = apartmentService.getApartment(id);
-        if(apartmentOptional.isPresent()) return ResponseEntity.ok(apartmentOptional.get());
-        else return ResponseEntity.notFound().build();
+        return apartmentOptional.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
 }

@@ -5,6 +5,7 @@ import lombok.*;
 import pl.edu.agh.student.rentsys.user.User;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Entity
 @Builder
@@ -16,6 +17,8 @@ public class Message {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    private UUID clientId;
 
     @ManyToOne
     @JoinColumn(name="sender_id")

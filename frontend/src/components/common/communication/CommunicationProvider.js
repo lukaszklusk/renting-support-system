@@ -4,32 +4,54 @@ import Stomp from "stompjs";
 import useAxiosUser from "../../../hooks/useAxiosUser";
 
 import useAuth from "../../../hooks/useAuth";
+import useUserMessages from "../../../hooks/messages/useUserMessages";
+
+import { v4 as uuidv4 } from "uuid";
 
 const CommunicationContext = createContext({});
 
 export const CommunicationProvider = ({ children }) => {
-  const [messages, setMessages] = useState([]);
-  const [stompClient, setStompClient] = useState(null);
-  const axiosUser = useAxiosUser();
-
   const { auth } = useAuth();
 
-  const manageWebSocketConnection = () => {
-    const isLoggedIn = auth?.isLoggedIn == true;
+  const fetchUserMessages = useUserMessages();
+  const axiosUser = useAxiosUser();
+
+  const [messages, setMessages] = useState([]);
+  const [stompClient, setStompClient] = useState(null);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  const configCommunication = () => {
     if (isLoggedIn) {
-      const socket = new SockJS("http://localhost:8080/ws");
-      const stomp = Stomp.over(socket);
-      setStompClient(stomp);
+      configWebSocket();
+      fetchMessages();
+    } else {
+      disconnect();
     }
-    disconnect();
+  };
+
+  const fetchMessages = async () => {
+    try {
+      const username = auth.username;
+      const response = await fetchUserMessages(username);
+      setMessages(response);
+    } catch (err) {
+      console.log("error fetching messages:", err);
+    }
+  };
+
+  const configWebSocket = () => {
+    const socket = new SockJS("http://localhost:8080/ws");
+    const stomp = Stomp.over(socket);
+    setStompClient(stomp);
   };
 
   const connect = () => {
-    stompClient?.connect({}, onConnected, onError);
+    console.log("connect:", isLoggedIn && stompClient?.connect);
+    isLoggedIn && stompClient?.connect({}, onConnected, onError);
   };
 
   const disconnect = () => {
-    stompClient?.disconnect();
+    stompClient?.connected && stompClient?.disconnect();
   };
 
   const onConnected = (frame) => {
@@ -48,29 +70,55 @@ export const CommunicationProvider = ({ children }) => {
   };
 
   const onReceivedMessage = (message) => {
+    console.log("stompClient:", stompClient);
     const receivedMessage = JSON.parse(message.body);
     console.log("received message: ", receivedMessage);
     setMessages((prevMessages) => [...prevMessages, receivedMessage]);
   };
 
-  const sendMessage = useMemo(() => {
-    if (stompClient) {
+  // const sendMessage = useMemo(() => {
+  //   console.log("sending message");
+  //   if (stompClient) {
+  //     const queue = `/rent-sys/chat`;
+  //     return (receiver, content) => {
+  //       const date = new Date();
+  //       const message = {
+  //         receiver: receiver,
+  //         content: content,
+  //         sender: auth.username,
+  //         sendTimestamp: date.getTime(),
+  //       };
+  //       stompClient.send(queue, {}, JSON.stringify(message));
+  //     };
+  //   }
+  //   return () => {
+  //     console.log("Stomp client not yet initialized");
+  //   };
+  // }, [stompClient]);
+
+  const sendMessage = (receiver, content) => {
+    console.log("sending message: ", receiver, content);
+    if (stompClient?.connected) {
+      console.log("stompClient:", stompClient);
       const queue = `/rent-sys/chat`;
-      return (receiver, content) => {
-        const date = new Date();
-        const message = {
-          receiver: receiver,
-          content: content,
-          sender: auth.username,
-          sendTimestamp: date.getTime(),
-        };
-        stompClient.send(queue, {}, JSON.stringify(message));
+      const date = new Date();
+      const message = {
+        id: uuidv4(),
+        receiver: receiver,
+        content: content,
+        sender: auth.username,
+        sendTimestamp: date.getTime(),
       };
+      console.log("message:", message);
+      // setMessages([...messages, message]);
+      setMessages((prevMessages) => [...prevMessages, message]);
+      stompClient.send(queue, {}, JSON.stringify(message));
     }
     return () => {
       console.log("Stomp client not yet initialized");
+      connect();
     };
-  }, [stompClient]);
+  };
 
   const refreshWebSocket = async () => {
     console.log("Refreshing websocket:");
@@ -82,11 +130,16 @@ export const CommunicationProvider = ({ children }) => {
     }
   };
 
-  useEffect(manageWebSocketConnection, [auth]);
+  useEffect(configCommunication, [isLoggedIn]);
   useEffect(connect, [stompClient]);
+  useEffect(() => {
+    setIsLoggedIn(auth?.isLoggedIn == true);
+  }, [auth]);
 
   return (
-    <CommunicationContext.Provider value={{ messages, sendMessage }}>
+    <CommunicationContext.Provider
+      value={{ messages, setMessages, sendMessage }}
+    >
       {children}
     </CommunicationContext.Provider>
   );

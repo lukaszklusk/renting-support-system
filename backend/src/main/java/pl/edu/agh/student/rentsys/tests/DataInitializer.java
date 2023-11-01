@@ -8,14 +8,18 @@ import pl.edu.agh.student.rentsys.model.*;
 import pl.edu.agh.student.rentsys.security.UserRole;
 import pl.edu.agh.student.rentsys.service.AgreementService;
 import pl.edu.agh.student.rentsys.service.ApartmentService;
+import pl.edu.agh.student.rentsys.service.MessageService;
 import pl.edu.agh.student.rentsys.user.User;
 import pl.edu.agh.student.rentsys.user.UserRepository;
 
 import java.io.IOException;
+import java.sql.Timestamp;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Base64;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 
 
@@ -27,6 +31,7 @@ public class DataInitializer implements CommandLineRunner {
     private final ApartmentService apartmentService;
     private final PasswordEncoder passwordEncoder;
     private final AgreementService agreementService;
+    private final MessageService messageService;
 
     @SneakyThrows
     @Override
@@ -74,6 +79,99 @@ public class DataInitializer implements CommandLineRunner {
                 LocalDate.of(2023,7, 15),
                 LocalDate.of(2024, 7,15),
                 client2, "PL84109024029425764271319137", AgreementStatus.proposed);
+
+
+        DTOMessage dtoMessage1 = DTOMessage.builder()
+                .id(UUID.randomUUID())
+                .sender("owner")
+                .receiver("client")
+                .content("Hello")
+                .sendTimestamp(Timestamp.valueOf(LocalDateTime.of(2023, 10, 31, 17, 20, 23, 50)).getTime())
+                .build();
+
+        DTOMessage dtoMessage2 = DTOMessage.builder()
+                .id(UUID.randomUUID())
+                .sender("client")
+                .receiver("owner")
+                .content("Hello")
+                .sendTimestamp(Timestamp.valueOf(LocalDateTime.of(2023, 10, 31, 17, 20, 25, 50)).getTime())
+                .build();
+
+        DTOMessage dtoMessage3 = DTOMessage.builder()
+                .id(UUID.randomUUID())
+                .sender("client")
+                .receiver("owner")
+                .content("yy?")
+                .sendTimestamp(Timestamp.valueOf(LocalDateTime.of(2023, 10, 31, 17, 21, 25, 50)).getTime())
+                .build();
+
+        DTOMessage dtoMessage4 = DTOMessage.builder()
+                .id(UUID.randomUUID())
+                .sender("client")
+                .receiver("owner")
+                .content("yy?")
+                .sendTimestamp(Timestamp.valueOf(LocalDateTime.of(2023, 10, 31, 17, 22, 25, 50)).getTime())
+                .build();
+
+        DTOMessage dtoMessage5 = DTOMessage.builder()
+                .id(UUID.randomUUID())
+                .sender("owner")
+                .receiver("client")
+                .content("ok")
+                .sendTimestamp(Timestamp.valueOf(LocalDateTime.of(2023, 10, 31, 17, 22, 35, 50)).getTime())
+                .build();
+
+        DTOMessage dtoMessage6 = DTOMessage.builder()
+                .id(UUID.randomUUID())
+                .sender("owner")
+                .receiver("client3")
+                .content("?")
+                .sendTimestamp(Timestamp.valueOf(LocalDateTime.of(2023, 10, 31, 17, 22, 35, 50)).getTime())
+                .build();
+
+        DTOMessage dtoMessage7 = DTOMessage.builder()
+                .id(UUID.randomUUID())
+                .sender("client3")
+                .receiver("owner")
+                .content("?")
+                .sendTimestamp(Timestamp.valueOf(LocalDateTime.of(2023, 10, 31, 17, 23, 35, 50)).getTime())
+                .build();
+
+        DTOMessage dtoMessage8 = DTOMessage.builder()
+                .id(UUID.randomUUID())
+                .sender("client3")
+                .receiver("owner")
+                .content("??")
+                .sendTimestamp(Timestamp.valueOf(LocalDateTime.of(2023, 10, 31, 17, 23, 40, 50)).getTime())
+                .build();
+
+        DTOMessage dtoMessage9 = DTOMessage.builder()
+                .id(UUID.randomUUID())
+                .sender("owner")
+                .receiver("client2")
+                .content("?")
+                .sendTimestamp(Timestamp.valueOf(LocalDateTime.of(2023, 10, 31, 17, 23, 35, 50)).getTime())
+                .build();
+
+        DTOMessage dtoMessage10 = DTOMessage.builder()
+                .id(UUID.randomUUID())
+                .sender("owner")
+                .receiver("owner")
+                .content("test")
+                .sendTimestamp(Timestamp.valueOf(LocalDateTime.of(2023, 10, 31, 17, 23, 35, 50)).getTime())
+                .build();
+
+        messageService.createMessageFromDTO(dtoMessage1);
+        messageService.createMessageFromDTO(dtoMessage2);
+        messageService.createMessageFromDTO(dtoMessage3);
+        messageService.createMessageFromDTO(dtoMessage4);
+        messageService.createMessageFromDTO(dtoMessage5);
+        messageService.createMessageFromDTO(dtoMessage6);
+        messageService.createMessageFromDTO(dtoMessage7);
+        messageService.createMessageFromDTO(dtoMessage8);
+        messageService.createMessageFromDTO(dtoMessage9);
+        messageService.createMessageFromDTO(dtoMessage10);
+
         System.out.println("----- FINISHED DATA INITIALIZATION -----");
     }
 
