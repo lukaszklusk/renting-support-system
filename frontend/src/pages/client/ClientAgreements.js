@@ -4,7 +4,7 @@ import useAuth from "../../hooks/useAuth";
 import SectionHeader from "../../components/common/SectionHeader";
 import OwnerAgreementsList from "../../components/owner/OwnerAgreementsList";
 
-import useUserAgreementsByStatus from "../../hooks/agreement/useUserAgreementsByStatus";
+import { useUserAgreementsByStatus } from "../../hooks/useAgreements";
 import { Link } from "react-router-dom";
 import { Button } from "react-bootstrap";
 

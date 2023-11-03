@@ -4,7 +4,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 import pl.edu.agh.student.rentsys.model.Notification;
 import pl.edu.agh.student.rentsys.model.NotificationType;
-import pl.edu.agh.student.rentsys.user.User;
+import pl.edu.agh.student.rentsys.model.User;
 
 import java.util.List;
 

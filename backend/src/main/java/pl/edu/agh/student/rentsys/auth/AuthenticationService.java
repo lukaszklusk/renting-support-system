@@ -20,8 +20,8 @@ import pl.edu.agh.student.rentsys.auth.token.ConfirmationToken;
 import pl.edu.agh.student.rentsys.auth.token.ConfirmationTokenService;
 import pl.edu.agh.student.rentsys.security.UserRole;
 import pl.edu.agh.student.rentsys.security.jwt.JwtService;
-import pl.edu.agh.student.rentsys.user.User;
-import pl.edu.agh.student.rentsys.user.UserService;
+import pl.edu.agh.student.rentsys.model.User;
+import pl.edu.agh.student.rentsys.service.UserService;
 
 import java.io.IOException;
 import java.time.LocalDateTime;

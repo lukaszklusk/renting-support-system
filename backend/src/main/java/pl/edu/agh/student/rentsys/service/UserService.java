@@ -1,4 +1,4 @@
-package pl.edu.agh.student.rentsys.user;
+package pl.edu.agh.student.rentsys.service;
 
 import lombok.AllArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
@@ -10,6 +10,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import pl.edu.agh.student.rentsys.auth.token.ConfirmationToken;
 import pl.edu.agh.student.rentsys.auth.token.ConfirmationTokenService;
+import pl.edu.agh.student.rentsys.model.User;
+import pl.edu.agh.student.rentsys.repository.UserRepository;
 
 import java.time.LocalDateTime;
 import java.util.Collection;

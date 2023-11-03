@@ -2,13 +2,14 @@ import { useState, useEffect } from "react";
 import useAuth from "../../hooks/useAuth";
 import OwnerDashboardApartments from "../../components/owner/OwnerDashboardApartments";
 import SectionHeader from "../../components/common/SectionHeader";
-import useUserApartmentsByStatus from "../../hooks/apartment/useUserApartmentsByStatus";
+import { useUserApartmentsByStatus } from "../../hooks/useApartments";
 
 const OwnerDashboard = () => {
   const [rentedApartments, setRentedApartments] = useState(null);
   const [vacantApartments, setVanantApartments] = useState(null);
   const [isDataFetched, setIsDataFetched] = useState(false);
   const { auth } = useAuth();
+
   const fetchApartmentsByStatus = useUserApartmentsByStatus();
 
   useEffect(() => {

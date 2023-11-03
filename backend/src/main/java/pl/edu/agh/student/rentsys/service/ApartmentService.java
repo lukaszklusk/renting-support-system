@@ -6,7 +6,7 @@ import pl.edu.agh.student.rentsys.repository.ApartmentPropertyRepository;
 import pl.edu.agh.student.rentsys.repository.ApartmentRepository;
 import pl.edu.agh.student.rentsys.repository.EquipmentRepository;
 import pl.edu.agh.student.rentsys.repository.PictureRepository;
-import pl.edu.agh.student.rentsys.user.User;
+import pl.edu.agh.student.rentsys.model.User;
 
 import java.util.List;
 import java.util.Optional;
@@ -14,10 +14,10 @@ import java.util.Optional;
 @Service
 public class ApartmentService {
 
-    private ApartmentRepository apartmentRepository;
-    private ApartmentPropertyRepository apartmentPropertyRepository;
-    private PictureRepository pictureRepository;
-    private EquipmentRepository equipmentRepository;
+    private final ApartmentRepository apartmentRepository;
+    private final ApartmentPropertyRepository apartmentPropertyRepository;
+    private final PictureRepository pictureRepository;
+    private final EquipmentRepository equipmentRepository;
 
     public ApartmentService(ApartmentRepository apartmentRepository,
                             ApartmentPropertyRepository apartmentPropertyRepository,
@@ -30,7 +30,6 @@ public class ApartmentService {
     }
 
     public Apartment createApartment(Apartment apartment){
-        equipmentRepository.saveAll(apartment.getEquipment());
         pictureRepository.saveAll(apartment.getPictures());
         apartmentPropertyRepository.saveAll(apartment.getProperties());
         return apartmentRepository.save(apartment);
@@ -54,6 +53,10 @@ public class ApartmentService {
 
     public Optional<Apartment> getApartment(long id){
         return apartmentRepository.findById(id);
+    }
+
+    public Optional<ApartmentDTO> getApartmentDTO(long id){
+        return getApartment(id).map(ApartmentDTO::convertFromApartment);
     }
 
     public List<Apartment> getAllApartments(){

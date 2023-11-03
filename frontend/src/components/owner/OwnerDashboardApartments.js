@@ -11,8 +11,8 @@ const OwnerDashboardApartments = ({ apartments }) => {
               //   width={800}
               //   height={400}
               className="d-block w-100"
-              alt="Apartment PNG"
-              src={apartment.pictures[0].image}
+              alt={"data:image/png;base64," + apartment?.pictures[0].name}
+              src={"data:image/png;base64," + apartment?.pictures[0].imageData}
             />
             <Link to={`/apartments/${apartment.id}`}>
               <Carousel.Caption>

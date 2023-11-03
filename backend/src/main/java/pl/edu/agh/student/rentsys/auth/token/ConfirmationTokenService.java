@@ -2,7 +2,7 @@ package pl.edu.agh.student.rentsys.auth.token;
 
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
-import pl.edu.agh.student.rentsys.user.User;
+import pl.edu.agh.student.rentsys.model.User;
 
 import java.util.List;
 import java.util.Optional;

@@ -1,47 +1,37 @@
 package pl.edu.agh.student.rentsys.model;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
-import java.util.Objects;
 import java.util.Set;
 
 @Entity
+@Builder
+@Data
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Table(
+        uniqueConstraints = {
+                @UniqueConstraint(
+                        name = "UK_APARTMENT_EQUIPMENT",
+                        columnNames = {"apartment_id", "name"}
+                )
+        }
+)
 public class Equipment {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     protected Long id;
     private String name;
     private String description;
+    private Boolean isBroken;
 
-    @OneToMany
-    private Set<Notification> issues;
+    @OneToMany(fetch = FetchType.LAZY)
+    private Set<Notification> notifications;
 
-
-    public Equipment(String name, String description) {
-        this.name = name;
-        this.description = description;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Equipment equipment = (Equipment) o;
-        if(equipment.getId() == null || this.getId()== null) return false;
-        return getId().equals(equipment.getId());
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(getId());
-    }
-
+    @ManyToOne
+    @JoinColumn(name = "apartment_id")
+    private Apartment apartment;
 }

@@ -21,7 +21,7 @@ import {
 import "bootstrap/dist/css/bootstrap.css";
 import useAxiosUser from "../../hooks/useAxiosUser";
 import useAuth from "../../hooks/useAuth";
-import useUserApartments from "../../hooks/apartment/useUserApartments";
+import { useUserApartments } from "../../hooks/useApartments";
 
 const PRESENT_REGEX = /.+/;
 const NUMBER_REGEX = /^(?!0\d)\d{1,5}(\.\d{1,2})?$/;

@@ -1,11 +1,10 @@
 package pl.edu.agh.student.rentsys.service;
 
 import org.springframework.stereotype.Service;
-import pl.edu.agh.student.rentsys.model.DTOMessage;
+import pl.edu.agh.student.rentsys.model.MessageDTO;
 import pl.edu.agh.student.rentsys.model.Message;
 import pl.edu.agh.student.rentsys.repository.MessageRepository;
-import pl.edu.agh.student.rentsys.user.User;
-import pl.edu.agh.student.rentsys.user.UserService;
+import pl.edu.agh.student.rentsys.model.User;
 
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -30,27 +29,27 @@ public class MessageService {
         return messageRepository.findById(id);
     }
 
-    public Optional<DTOMessage> getDTOMessageById(Long id){
+    public Optional<MessageDTO> getDTOMessageById(Long id){
         Optional<Message> message =getMessageById(id);
-        return message.map(DTOMessage::convertFromMessage);
+        return message.map(MessageDTO::convertFromMessage);
     }
 
     public List<Message> getMessages(User user) {
         return messageRepository.findAllBySenderOrReceiver(user, user);
     }
 
-    public List<DTOMessage> getMessages(String username) {
+    public List<MessageDTO> getMessages(String username) {
         User user = userService.getUserByUsername(username).orElse(null);
         List<Message> messages = getMessages(user);
         return messages.stream()
-                .map(DTOMessage::convertFromMessage)
+                .map(MessageDTO::convertFromMessage)
                 .collect(Collectors.toList());
     }
-    public List<DTOMessage> getReceivedMessages(String username){
+    public List<MessageDTO> getReceivedMessages(String username){
         User user = userService.getUserByUsername(username).orElse(null);
         List<Message> messages = getReceivedMessages(user);
         return messages.stream()
-                .map(DTOMessage::convertFromMessage)
+                .map(MessageDTO::convertFromMessage)
                 .collect(Collectors.toList());
     }
 
@@ -59,11 +58,11 @@ public class MessageService {
     }
 
 
-    public List<DTOMessage> getSentMessages(String username){
+    public List<MessageDTO> getSentMessages(String username){
         User user = userService.getUserByUsername(username).orElse(null);
         List<Message> messages = getSentMessages(user);
         return messages.stream()
-                .map(DTOMessage::convertFromMessage)
+                .map(MessageDTO::convertFromMessage)
                 .collect(Collectors.toList());
     }
 
@@ -113,12 +112,12 @@ public class MessageService {
         return messageRepository.save(newMessage);
     }
 
-    public Message createMessageFromDTO(DTOMessage dtoMessage) {
-        UUID clientId = dtoMessage.getId();
-        User sender = userService.getUserByUsername(dtoMessage.getSender()).orElse(null);
-        User receiver = userService.getUserByUsername(dtoMessage.getReceiver()).orElse(null);
-        String content = dtoMessage.getContent();
-        LocalDateTime sendTime = LocalDateTime.ofInstant(Instant.ofEpochMilli(dtoMessage.getSendTimestamp()), ZoneId.systemDefault());
+    public Message createMessageFromDTO(MessageDTO messageDTO) {
+        UUID clientId = messageDTO.getId();
+        User sender = userService.getUserByUsername(messageDTO.getSender()).orElse(null);
+        User receiver = userService.getUserByUsername(messageDTO.getReceiver()).orElse(null);
+        String content = messageDTO.getContent();
+        LocalDateTime sendTime = LocalDateTime.ofInstant(Instant.ofEpochMilli(messageDTO.getSendTimestamp()), ZoneId.systemDefault());
         return createMessage(clientId, sender, receiver, content, sendTime);
     }
 }

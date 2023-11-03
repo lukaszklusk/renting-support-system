@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import useAuth from "../../hooks/useAuth";
 import OwnerDashboardApartments from "../../components/owner/OwnerDashboardApartments";
 import SectionHeader from "../../components/common/SectionHeader";
-import useUserApartments from "../../hooks/apartment/useUserApartments";
+import { useUserApartments } from "../../hooks/useApartments";
 
 const OwnerDashboard = () => {
   const [apartment, setApartment] = useState(null);

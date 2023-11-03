@@ -2,9 +2,7 @@ package pl.edu.agh.student.rentsys.model;
 
 import jakarta.persistence.*;
 import lombok.*;
-import pl.edu.agh.student.rentsys.user.User;
 
-import java.util.HashSet;
 import java.util.Set;
 
 @Entity
@@ -13,12 +11,18 @@ import java.util.Set;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
+@Table(
+        uniqueConstraints = {
+                @UniqueConstraint(name = "name_user_unique", columnNames = {"name", "owner_id"})
+        }
+)
 public class Apartment {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @ManyToOne
+    @JoinColumn(name = "owner_id")
     private User owner;
     private String name;
     private String address;
@@ -29,7 +33,7 @@ public class Apartment {
     private double size;
     private String description;
 
-    @OneToMany
+    @OneToMany(mappedBy = "apartment", cascade = CascadeType.ALL)
     private Set<Equipment> equipment;
 
     @OneToMany
@@ -38,16 +42,7 @@ public class Apartment {
     @OneToMany
     private Set<Picture> pictures;
 
+    @OneToMany(fetch = FetchType.LAZY)
+    private Set<Notification> notifications;
 
-    public void setPictures(Set<Picture> pictures) {
-        this.pictures = new HashSet<>(pictures);
-    }
-
-    public void setEquipment(Set<Equipment> equipment) {
-        this.equipment = new HashSet<>(equipment);
-    }
-
-    public void setProperties(Set<ApartmentProperty> properties) {
-        this.properties = new HashSet<>(properties);
-    }
 }

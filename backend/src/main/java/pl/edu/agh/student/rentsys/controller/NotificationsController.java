@@ -5,8 +5,8 @@ import org.springframework.web.bind.annotation.*;
 import pl.edu.agh.student.rentsys.model.*;
 import pl.edu.agh.student.rentsys.service.ApartmentService;
 import pl.edu.agh.student.rentsys.service.NotificationService;
-import pl.edu.agh.student.rentsys.user.User;
-import pl.edu.agh.student.rentsys.user.UserService;
+import pl.edu.agh.student.rentsys.model.User;
+import pl.edu.agh.student.rentsys.service.UserService;
 
 import java.util.List;
 import java.util.Optional;

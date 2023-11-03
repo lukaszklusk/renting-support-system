@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import useAuth from "../../hooks/useAuth";
 import SectionHeader from "../../components/common/SectionHeader";
-import useUserApartmentsByStatus from "../../hooks/apartment/useUserApartmentsByStatus";
+import { useUserApartmentsByStatus } from "../../hooks/useApartments";
 import OwnerApartmentsList from "../../components/owner/OwnerApartmentsList";
 import { Link } from "react-router-dom";
 import { Button } from "react-bootstrap";

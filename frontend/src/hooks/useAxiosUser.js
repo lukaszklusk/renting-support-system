@@ -11,9 +11,7 @@ const useAxiosUser = () => {
     const responseIntercept = axiosUser.interceptors.response.use(
       (response) => response,
       async (err) => {
-        console.log("responseIntercept");
         const prevRequest = err?.config;
-        console.log(!prevRequest.sent);
         if (err?.response?.status === 403 && !prevRequest.sent) {
           prevRequest.sent = true;
           await refreshToken();

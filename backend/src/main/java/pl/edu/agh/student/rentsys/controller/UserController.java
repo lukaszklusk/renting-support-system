@@ -1,6 +1,8 @@
 package pl.edu.agh.student.rentsys.controller;
 
 
+import lombok.AllArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
@@ -8,31 +10,27 @@ import pl.edu.agh.student.rentsys.model.*;
 import pl.edu.agh.student.rentsys.security.UserRole;
 import pl.edu.agh.student.rentsys.service.AgreementService;
 import pl.edu.agh.student.rentsys.service.ApartmentService;
-import pl.edu.agh.student.rentsys.user.User;
-import pl.edu.agh.student.rentsys.user.UserService;
+import pl.edu.agh.student.rentsys.model.User;
+import pl.edu.agh.student.rentsys.service.UserService;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @RestController
+@AllArgsConstructor
 public class UserController {
 
-    private UserService userService;
-    private ApartmentService apartmentService;
-    private AgreementService agreementService;
+    @Autowired
+    private final UserService userService;
+    @Autowired
+    private final ApartmentService apartmentService;
+    @Autowired
+    private final AgreementService agreementService;
+    @Autowired
     private final PasswordEncoder passwordEncoder;
 
-
-    public UserController(UserService userService,
-                          ApartmentService apartmentService,
-                          AgreementService agreementService,
-                          PasswordEncoder passwordEncoder) {
-        this.userService = userService;
-        this.apartmentService = apartmentService;
-        this.agreementService = agreementService;
-        this.passwordEncoder = passwordEncoder;
-    }
 
     @GetMapping("/test")
     public String test(){
@@ -47,16 +45,20 @@ public class UserController {
     @GetMapping("/user/{username}")
     public ResponseEntity<User> getUserById(@PathVariable String username){
         Optional<User> userOptional = userService.getUserByUsername(username);
-        if(userOptional.isPresent()) return ResponseEntity.ok(userOptional.get());
-        else return ResponseEntity.notFound().build();
+        return userOptional.map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
-    @GetMapping("/user/{username}/apartment")
-    public ResponseEntity<List<Apartment>> getAllApartmentsForUser(@PathVariable String username){
+    @GetMapping("/user/{username}/apartments")
+    public ResponseEntity<List<ApartmentDTO>> getAllApartmentsForUser(@PathVariable String username){
         Optional<User> userOptional = userService.getUserByUsername(username);
         if(userOptional.isPresent()){
             if(userOptional.get().getUserRole().equals(UserRole.OWNER))
-                return ResponseEntity.ok(apartmentService.getApartmentsForUser(userOptional.get()));
+                return ResponseEntity.ok(
+                        apartmentService.getApartmentsForUser(userOptional.get()).stream()
+                                .map(ApartmentDTO::convertFromApartment)
+                                .collect(Collectors.toList())
+                );
             else if(userOptional.get().getUserRole().equals(UserRole.CLIENT)){
                 List<Apartment> apartments = new ArrayList<>();
                 agreementService.getAgreementsForClientWithStatus(
@@ -65,13 +67,16 @@ public class UserController {
                 agreementService.getAgreementsForClientWithStatus(
                         userOptional.get(),AgreementStatus.accepted).forEach(
                         t -> apartments.add(t.getApartment()));
-                return ResponseEntity.ok(apartments);
+                return ResponseEntity.ok(apartments.stream()
+                        .map(ApartmentDTO::convertFromApartment)
+                        .collect(Collectors.toList())
+                );
             } else return ResponseEntity.badRequest().build();
         }else return ResponseEntity.notFound().build();
     }
 
-    @GetMapping("/user/{username}/apartment/status")
-    public ResponseEntity<List<Apartment>> getApartmentsForUserWithStatus(@PathVariable String username,
+    @GetMapping("/user/{username}/apartments/status")
+    public ResponseEntity<List<ApartmentDTO>> getApartmentsForUserWithStatus(@PathVariable String username,
                                                                           @RequestParam String status){
         Optional<User> userOptional = userService.getUserByUsername(username);
         if(userOptional.isPresent()){
@@ -89,7 +94,10 @@ public class UserController {
                         }
                     }
                 }
-                return ResponseEntity.ok(returnList);
+                return ResponseEntity.ok(returnList.stream()
+                        .map(ApartmentDTO::convertFromApartment)
+                        .collect(Collectors.toList())
+                );
             } else if(status.equals("vacant")){
                 List<Apartment> apartmentList = apartmentService.getApartmentsForUser(userOptional.get());
                 for(Apartment a: apartmentList){
@@ -104,14 +112,17 @@ public class UserController {
                     if(!rented)
                         returnList.add(a);
                 }
-                return ResponseEntity.ok(returnList);
+                return ResponseEntity.ok(returnList.stream()
+                        .map(ApartmentDTO::convertFromApartment)
+                        .collect(Collectors.toList())
+                );
             } else {
                 return ResponseEntity.badRequest().build();
             }
         } else return ResponseEntity.notFound().build();
     }
 
-    @GetMapping("/user/{username}/apartment/{aid}/rented")
+    @GetMapping("/user/{username}/apartments/{aid}/rented")
     public ResponseEntity<Map<String,Boolean>> checkIfApartmentRented(@PathVariable String username,
                                                                      @PathVariable long aid){
         Optional<User> userOptional = userService.getUserByUsername(username);
@@ -129,19 +140,19 @@ public class UserController {
         } else return ResponseEntity.notFound().build();
     }
 
-    @GetMapping("/user/{username}/apartment/{aid}")
-    public ResponseEntity<Apartment> getUserApartment(@PathVariable String username, @PathVariable long aid){
+    @GetMapping("/user/{username}/apartments/{aid}")
+    public ResponseEntity<ApartmentDTO> getUserApartment(@PathVariable String username, @PathVariable long aid){
         Optional<User> userOptional = userService.getUserByUsername(username);
         if (userOptional.isPresent()) {
-            Optional<Apartment> apartmentOptional = apartmentService.getApartment(aid);
-            if(apartmentOptional.isPresent()) return ResponseEntity.ok(apartmentOptional.get());
-            else return ResponseEntity.notFound().build();
+            Optional<ApartmentDTO> apartmentOptional = apartmentService.getApartmentDTO(aid);
+            return apartmentOptional.map(ResponseEntity::ok)
+                    .orElseGet(() -> ResponseEntity.notFound().build());
         }
         else return ResponseEntity.notFound().build();
     }
 
-    @PatchMapping("/user/{username}/agreement/{aid}")
-    public ResponseEntity<Agreement> changeAgreementStatus(@PathVariable String username,
+    @PatchMapping("/user/{username}/agreements/{aid}")
+    public ResponseEntity<AgreementDTO> changeAgreementStatus(@PathVariable String username,
                                                            @PathVariable long aid,
                                                            @RequestParam String status){
         Optional<User> userOptional = userService.getUserByUsername(username);
@@ -151,8 +162,8 @@ public class UserController {
                 try {
                     AgreementStatus agreementStatus =
                             AgreementStatus.valueOf(status);
-                    return ResponseEntity.ok(agreementService.changeAgreementStatus(
-                            agreementOptional.get(), agreementStatus));
+                    return ResponseEntity.ok(AgreementDTO.convertFromAgreement(agreementService.changeAgreementStatus(
+                            agreementOptional.get(), agreementStatus)));
                 }catch (IllegalArgumentException e){
                     return ResponseEntity.badRequest().build();
                 }
@@ -160,16 +171,16 @@ public class UserController {
         } else return ResponseEntity.notFound().build();
     }
 
-    @PatchMapping("/user/{username}/agreement/{aid}/accept")
-    public ResponseEntity<Agreement> setAgreementStatusToActive(@PathVariable String username,
+    @PatchMapping("/user/{username}/agreements/{aid}/accept")
+    public ResponseEntity<AgreementDTO> setAgreementStatusToActive(@PathVariable String username,
                                                                 @PathVariable long aid){
         Optional<User> userOptional = userService.getUserByUsername(username);
         if(userOptional.isPresent()){
             Optional<Agreement> agreementOptional = agreementService.getAgreementById(aid);
             if(agreementOptional.isPresent()){
                 try {
-                    return ResponseEntity.ok(agreementService.changeAgreementStatus(
-                            agreementOptional.get(), AgreementStatus.accepted));
+                    return ResponseEntity.ok(AgreementDTO.convertFromAgreement(agreementService.changeAgreementStatus(
+                            agreementOptional.get(), AgreementStatus.accepted)));
                 }catch (IllegalArgumentException e){
                     return ResponseEntity.badRequest().build();
                 }
@@ -177,16 +188,16 @@ public class UserController {
         } else return ResponseEntity.notFound().build();
     }
 
-    @PatchMapping("/user/{username}/agreement/{aid}/reject")
-    public ResponseEntity<Agreement> setAgreementStatusToRejected(@PathVariable String username,
+    @PatchMapping("/user/{username}/agreements/{aid}/reject")
+    public ResponseEntity<AgreementDTO> setAgreementStatusToRejected(@PathVariable String username,
                                                                 @PathVariable long aid){
         Optional<User> userOptional = userService.getUserByUsername(username);
         if(userOptional.isPresent()){
             Optional<Agreement> agreementOptional = agreementService.getAgreementById(aid);
             if(agreementOptional.isPresent()){
                 try {
-                    return ResponseEntity.ok(agreementService.changeAgreementStatus(
-                            agreementOptional.get(), AgreementStatus.rejected));
+                    return ResponseEntity.ok(AgreementDTO.convertFromAgreement(agreementService.changeAgreementStatus(
+                            agreementOptional.get(), AgreementStatus.rejected)));
                 }catch (IllegalArgumentException e){
                     return ResponseEntity.badRequest().build();
                 }
@@ -194,29 +205,29 @@ public class UserController {
         } else return ResponseEntity.notFound().build();
     }
 
-    @GetMapping("/user/{username}/agreement")
-    public ResponseEntity<List<Agreement>> getAllAgreementsForUser(@PathVariable String username){
+    @GetMapping("/user/{username}/agreements")
+    public ResponseEntity<List<AgreementDTO>> getAllAgreementsForUser(@PathVariable String username){
         Optional<User> userOptional = userService.getUserByUsername(username);
         if(userOptional.isPresent()){
             if(userOptional.get().getUserRole().equals(UserRole.OWNER))
-                return ResponseEntity.ok(agreementService.getAgreementForUser(userOptional.get()));
+                return ResponseEntity.ok(agreementService.getAgreementForUser(userOptional.get()).stream().map(AgreementDTO::convertFromAgreement).collect(Collectors.toList()));
             else if(userOptional.get().getUserRole().equals(UserRole.CLIENT))
-                return ResponseEntity.ok(agreementService.getAgreementsForClient(userOptional.get()));
+                return ResponseEntity.ok(agreementService.getAgreementsForClient(userOptional.get()).stream().map(AgreementDTO::convertFromAgreement).collect(Collectors.toList()));
             else return ResponseEntity.badRequest().build();
         }else return ResponseEntity.notFound().build();
     }
 
-    @GetMapping("/user/{username}/agreement/status/{status}")
-    public ResponseEntity<List<Agreement>> getAllAgreementsForUserWithStatus(@PathVariable String username,
+    @GetMapping("/user/{username}/agreements/status/{status}")
+    public ResponseEntity<List<AgreementDTO>> getAllAgreementsForUserWithStatus(@PathVariable String username,
                                                                              @PathVariable String status){
         Optional<User> userOptional = userService.getUserByUsername(username);
         if(userOptional.isPresent()){
             try {
                 AgreementStatus agreementStatus = AgreementStatus.valueOf(status);
                 if (userOptional.get().getUserRole().equals(UserRole.OWNER))
-                    return ResponseEntity.ok(agreementService.getAgreementsForOwnerWithStatus(userOptional.get(),agreementStatus));
+                    return ResponseEntity.ok(agreementService.getAgreementsForOwnerWithStatus(userOptional.get(),agreementStatus).stream().map(AgreementDTO::convertFromAgreement).collect(Collectors.toList()));
                 else if (userOptional.get().getUserRole().equals(UserRole.CLIENT))
-                    return ResponseEntity.ok(agreementService.getAgreementsForClientWithStatus(userOptional.get(),agreementStatus));
+                    return ResponseEntity.ok(agreementService.getAgreementsForClientWithStatus(userOptional.get(),agreementStatus).stream().map(AgreementDTO::convertFromAgreement).collect(Collectors.toList()));
                 else return ResponseEntity.badRequest().build();
             }catch (IllegalArgumentException e){
                 return ResponseEntity.badRequest().build();
@@ -224,28 +235,29 @@ public class UserController {
         }else return ResponseEntity.notFound().build();
     }
 
-    @GetMapping("/user/{username}/agreement/{agid}")
-    public ResponseEntity<Agreement> getAgreementForUserById(@PathVariable String username,
+    @GetMapping("/user/{username}/agreements/{agid}")
+    public ResponseEntity<AgreementDTO> getAgreementForUserById(@PathVariable String username,
                                                              @PathVariable long agid){
         Optional<User> userOptional = userService.getUserByUsername(username);
         if(userOptional.isPresent()){
             Optional<Agreement> agreementOptional = agreementService.getAgreementById(agid);
-            if(agreementOptional.isPresent()) return ResponseEntity.ok(agreementOptional.get());
-            else return ResponseEntity.notFound().build();
+            return agreementOptional.map(AgreementDTO::convertFromAgreement).map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
         }else return ResponseEntity.notFound().build();
     }
 
     //    TODO: add agreement by status
-    @GetMapping("/user/{username}/apartment/{aid}/agreement")
-    public ResponseEntity<List<Agreement>> getAgreementsForApartment(@PathVariable String username,
+    @GetMapping("/user/{username}/apartments/{aid}/agreements")
+    public ResponseEntity<List<AgreementDTO>> getAgreementsForApartment(@PathVariable String username,
                                                                      @PathVariable long aid){
         Optional<User> userOptional = userService.getUserByUsername(username);
         if(userOptional.isEmpty()) return ResponseEntity.notFound().build();
         else{
             Optional<Apartment> apartmentOptional = apartmentService.getApartment(aid);
-            if(apartmentOptional.isPresent()){
-                return ResponseEntity.ok(agreementService.getAgreementsForApartment(apartmentOptional.get()));
-            }else return ResponseEntity.notFound().build();
+            return apartmentOptional.map(apartment -> ResponseEntity.ok(
+                    agreementService.getAgreementsForApartment(apartment).stream()
+                            .map(AgreementDTO::convertFromAgreement)
+                            .collect(Collectors.toList()))
+                    ).orElseGet(() -> ResponseEntity.notFound().build());
         }
     }
 
@@ -281,8 +293,8 @@ public class UserController {
         }
     }
 
-    @PostMapping("/user/{username}/apartment")
-    public ResponseEntity<Apartment> createApartment(@PathVariable String username,
+    @PostMapping("/user/{username}/apartments")
+    public ResponseEntity<ApartmentDTO> createApartment(@PathVariable String username,
                                                      @RequestBody Map<String, Object> payload){
         if(!payload.containsKey("apartmentName") || !payload.containsKey("address") ||
                 !payload.containsKey("city") || !payload.containsKey("postalCode") ||
@@ -312,7 +324,7 @@ public class UserController {
                 return ResponseEntity.badRequest().build();
             Picture picture = new Picture();
             picture.setName((String) payloadPic.get("name"));
-            picture.setImage((String) payloadPic.get("image"));
+//            picture.setImageData(payloadPic.get("image"));
             pictureSet.add(picture);
         }
         newApartment.setPictures(pictureSet);
@@ -340,13 +352,13 @@ public class UserController {
         newApartment.setProperties(propertySet);
         Apartment apartment = apartmentService.createApartment(newApartment);
         if(apartment != null){
-            return ResponseEntity.ok(apartment);
+            return ResponseEntity.ok(ApartmentDTO.convertFromApartment(apartment));
         }
         else return ResponseEntity.internalServerError().build();
     }
 
-    @PostMapping("/user/{username}/agreement")
-    public ResponseEntity<Agreement> createAgreement(@PathVariable String username,
+    @PostMapping("/user/{username}/agreements")
+    public ResponseEntity<AgreementDTO> createAgreement(@PathVariable String username,
                                                      @RequestBody Map<String, Object> payload){
         if(!payload.containsKey("name") || !payload.containsKey("monthlyPayment") ||
                 !payload.containsKey("administrationFee") || !payload.containsKey("ownerAccountNo") ||
@@ -374,12 +386,12 @@ public class UserController {
         if(tenant.isPresent()) newAgreement.setTenant(tenant.get());
         else return ResponseEntity.notFound().build();
         Agreement agreement = agreementService.createAgreement(newAgreement);
-        if(agreement != null) return ResponseEntity.ok(agreement);
+        if(agreement != null) return ResponseEntity.ok(AgreementDTO.convertFromAgreement(agreement));
         else return ResponseEntity.internalServerError().build();
     }
 
-    @PutMapping("/user/{username}/agreement/{agid}")
-    public ResponseEntity<Agreement> changeAgreement(@PathVariable String username,
+    @PutMapping("/user/{username}/agreements/{agid}")
+    public ResponseEntity<AgreementDTO> changeAgreement(@PathVariable String username,
                                                      @PathVariable long agid,
                                                      @RequestBody Map<String,Object> payload){
         if(!payload.containsKey("name") && !payload.containsKey("monthlyPayment") &&
@@ -418,7 +430,7 @@ public class UserController {
                         if (tenant.isPresent()) agreement.setTenant(tenant.get());
                         else return ResponseEntity.notFound().build();
                     }
-                    return ResponseEntity.ok(agreementService.changeAgreement(agreement));
+                    return ResponseEntity.ok(AgreementDTO.convertFromAgreement(agreementService.changeAgreement(agreement)));
                 } else return ResponseEntity.notFound().build();
             }
         } else return ResponseEntity.notFound().build();

@@ -7,7 +7,7 @@ import pl.edu.agh.student.rentsys.model.NotificationPriority;
 import pl.edu.agh.student.rentsys.model.NotificationType;
 import pl.edu.agh.student.rentsys.repository.MessageRepository;
 import pl.edu.agh.student.rentsys.repository.NotificationRepository;
-import pl.edu.agh.student.rentsys.user.User;
+import pl.edu.agh.student.rentsys.model.User;
 
 import java.time.LocalDateTime;
 import java.util.List;

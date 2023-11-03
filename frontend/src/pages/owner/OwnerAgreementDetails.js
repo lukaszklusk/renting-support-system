@@ -2,7 +2,7 @@ import { useParams, Link } from "react-router-dom";
 import SectionHeader from "../../components/common/SectionHeader";
 import Card from "react-bootstrap/Card";
 import { useState, useEffect } from "react";
-import useUserAgreementById from "../../hooks/agreement/useUserAgreementById";
+import { useUserAgreementById } from "../../hooks/useAgreements";
 import useAuth from "../../hooks/useAuth";
 import ListGroup from "react-bootstrap/ListGroup";
 import { ROLES } from "../../config/roles";

@@ -9,7 +9,8 @@ const useGetRequest = () => {
   const fetchData = async (url) => {
     try {
       const response = await axiosUser.get(url);
-      console.log(response.data);
+      // console.log("url: ", url);
+      // console.log("data: ", response.data);
       return response.data;
     } catch (err) {
       // TODO

@@ -9,17 +9,14 @@ import pl.edu.agh.student.rentsys.security.UserRole;
 import pl.edu.agh.student.rentsys.service.AgreementService;
 import pl.edu.agh.student.rentsys.service.ApartmentService;
 import pl.edu.agh.student.rentsys.service.MessageService;
-import pl.edu.agh.student.rentsys.user.User;
-import pl.edu.agh.student.rentsys.user.UserRepository;
+import pl.edu.agh.student.rentsys.model.User;
+import pl.edu.agh.student.rentsys.repository.UserRepository;
 
 import java.io.IOException;
 import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.Base64;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
 
 
@@ -60,12 +57,12 @@ public class DataInitializer implements CommandLineRunner {
                 LocalDate.of(2026, 3,1),
                 client, "PL84109024029425764271319137", AgreementStatus.active);
 
-        createAgreement("Agreement 18", apartment, owner,
+        createAgreement("Agreement 2", apartment, owner,
                 LocalDate.of(2021,3, 13),
                 LocalDate.of(2022, 3,1),
                 client3, "PL84109024029425764271319137", AgreementStatus.cancelled);
 
-        createAgreement("Agreement 18", apartment, owner,
+        createAgreement("Agreement 3", apartment, owner,
                 LocalDate.of(2019,3, 13),
                 LocalDate.of(2020, 3,1),
                 client2, "PL84109024029425764271319137", AgreementStatus.cancelled);
@@ -81,7 +78,7 @@ public class DataInitializer implements CommandLineRunner {
                 client2, "PL84109024029425764271319137", AgreementStatus.proposed);
 
 
-        DTOMessage dtoMessage1 = DTOMessage.builder()
+        MessageDTO messageDTO1 = MessageDTO.builder()
                 .id(UUID.randomUUID())
                 .sender("owner")
                 .receiver("client")
@@ -89,7 +86,7 @@ public class DataInitializer implements CommandLineRunner {
                 .sendTimestamp(Timestamp.valueOf(LocalDateTime.of(2023, 10, 31, 17, 20, 23, 50)).getTime())
                 .build();
 
-        DTOMessage dtoMessage2 = DTOMessage.builder()
+        MessageDTO messageDTO2 = MessageDTO.builder()
                 .id(UUID.randomUUID())
                 .sender("client")
                 .receiver("owner")
@@ -97,7 +94,7 @@ public class DataInitializer implements CommandLineRunner {
                 .sendTimestamp(Timestamp.valueOf(LocalDateTime.of(2023, 10, 31, 17, 20, 25, 50)).getTime())
                 .build();
 
-        DTOMessage dtoMessage3 = DTOMessage.builder()
+        MessageDTO messageDTO3 = MessageDTO.builder()
                 .id(UUID.randomUUID())
                 .sender("client")
                 .receiver("owner")
@@ -105,7 +102,7 @@ public class DataInitializer implements CommandLineRunner {
                 .sendTimestamp(Timestamp.valueOf(LocalDateTime.of(2023, 10, 31, 17, 21, 25, 50)).getTime())
                 .build();
 
-        DTOMessage dtoMessage4 = DTOMessage.builder()
+        MessageDTO messageDTO4 = MessageDTO.builder()
                 .id(UUID.randomUUID())
                 .sender("client")
                 .receiver("owner")
@@ -113,7 +110,7 @@ public class DataInitializer implements CommandLineRunner {
                 .sendTimestamp(Timestamp.valueOf(LocalDateTime.of(2023, 10, 31, 17, 22, 25, 50)).getTime())
                 .build();
 
-        DTOMessage dtoMessage5 = DTOMessage.builder()
+        MessageDTO messageDTO5 = MessageDTO.builder()
                 .id(UUID.randomUUID())
                 .sender("owner")
                 .receiver("client")
@@ -121,7 +118,7 @@ public class DataInitializer implements CommandLineRunner {
                 .sendTimestamp(Timestamp.valueOf(LocalDateTime.of(2023, 10, 31, 17, 22, 35, 50)).getTime())
                 .build();
 
-        DTOMessage dtoMessage6 = DTOMessage.builder()
+        MessageDTO messageDTO6 = MessageDTO.builder()
                 .id(UUID.randomUUID())
                 .sender("owner")
                 .receiver("client3")
@@ -129,7 +126,7 @@ public class DataInitializer implements CommandLineRunner {
                 .sendTimestamp(Timestamp.valueOf(LocalDateTime.of(2023, 10, 31, 17, 22, 35, 50)).getTime())
                 .build();
 
-        DTOMessage dtoMessage7 = DTOMessage.builder()
+        MessageDTO messageDTO7 = MessageDTO.builder()
                 .id(UUID.randomUUID())
                 .sender("client3")
                 .receiver("owner")
@@ -137,7 +134,7 @@ public class DataInitializer implements CommandLineRunner {
                 .sendTimestamp(Timestamp.valueOf(LocalDateTime.of(2023, 10, 31, 17, 23, 35, 50)).getTime())
                 .build();
 
-        DTOMessage dtoMessage8 = DTOMessage.builder()
+        MessageDTO messageDTO8 = MessageDTO.builder()
                 .id(UUID.randomUUID())
                 .sender("client3")
                 .receiver("owner")
@@ -145,7 +142,7 @@ public class DataInitializer implements CommandLineRunner {
                 .sendTimestamp(Timestamp.valueOf(LocalDateTime.of(2023, 10, 31, 17, 23, 40, 50)).getTime())
                 .build();
 
-        DTOMessage dtoMessage9 = DTOMessage.builder()
+        MessageDTO messageDTO9 = MessageDTO.builder()
                 .id(UUID.randomUUID())
                 .sender("owner")
                 .receiver("client2")
@@ -153,7 +150,7 @@ public class DataInitializer implements CommandLineRunner {
                 .sendTimestamp(Timestamp.valueOf(LocalDateTime.of(2023, 10, 31, 17, 23, 35, 50)).getTime())
                 .build();
 
-        DTOMessage dtoMessage10 = DTOMessage.builder()
+        MessageDTO messageDTO10 = MessageDTO.builder()
                 .id(UUID.randomUUID())
                 .sender("owner")
                 .receiver("owner")
@@ -161,16 +158,16 @@ public class DataInitializer implements CommandLineRunner {
                 .sendTimestamp(Timestamp.valueOf(LocalDateTime.of(2023, 10, 31, 17, 23, 35, 50)).getTime())
                 .build();
 
-        messageService.createMessageFromDTO(dtoMessage1);
-        messageService.createMessageFromDTO(dtoMessage2);
-        messageService.createMessageFromDTO(dtoMessage3);
-        messageService.createMessageFromDTO(dtoMessage4);
-        messageService.createMessageFromDTO(dtoMessage5);
-        messageService.createMessageFromDTO(dtoMessage6);
-        messageService.createMessageFromDTO(dtoMessage7);
-        messageService.createMessageFromDTO(dtoMessage8);
-        messageService.createMessageFromDTO(dtoMessage9);
-        messageService.createMessageFromDTO(dtoMessage10);
+        messageService.createMessageFromDTO(messageDTO1);
+        messageService.createMessageFromDTO(messageDTO2);
+        messageService.createMessageFromDTO(messageDTO3);
+        messageService.createMessageFromDTO(messageDTO4);
+        messageService.createMessageFromDTO(messageDTO5);
+        messageService.createMessageFromDTO(messageDTO6);
+        messageService.createMessageFromDTO(messageDTO7);
+        messageService.createMessageFromDTO(messageDTO8);
+        messageService.createMessageFromDTO(messageDTO9);
+        messageService.createMessageFromDTO(messageDTO10);
 
         System.out.println("----- FINISHED DATA INITIALIZATION -----");
     }
@@ -203,23 +200,49 @@ public class DataInitializer implements CommandLineRunner {
         apartment.setCity(city);
         apartment.setPostalCode(postalCode);
         randomNum = ThreadLocalRandom.current().nextInt(100000, 1000000 + 1);
-        properties.add(new ApartmentProperty("Price", "pln",
-                Integer.toString(randomNum)));
+        properties.add(ApartmentProperty.builder()
+                        .name("Price")
+                        .valueType("pln")
+                        .value(Integer.toString(randomNum))
+                .build());
+
+
         apartment.setProperties(properties);
         Set<Picture> pictures = new HashSet<>();
-        byte[] testImg = this.getClass().getResourceAsStream("/img1.png").readAllBytes();
-        pictures.add(new Picture("Picture 1", "data:image/png;base64," + Base64.getMimeEncoder().encodeToString(testImg)));
-        pictures.add(new Picture("Picture 2", "data:image/png;base64," + Base64.getMimeEncoder().encodeToString(testImg)));
+        byte[] testImg1 = Objects.requireNonNull(this.getClass().getResourceAsStream("/img1.png")).readAllBytes();
+        byte[] testImg2 = Objects.requireNonNull(this.getClass().getResourceAsStream("/img2.png")).readAllBytes();
+        pictures.add(Picture.builder()
+                        .name("Picture 1")
+                        .imageData(testImg1)
+                .build());
+        pictures.add(Picture.builder()
+                .name("Picture 2")
+                .imageData(testImg2)
+                .build());
+
         apartment.setPictures(pictures);
         Set<Equipment> equipment = new HashSet<>();
-        equipment.add(new Equipment("Fridge", "SAMSUNG RB38T774DB1 EF No frost 203cm"));
-        equipment.add(new Equipment("Chair", "Wooden chair"));
+        equipment.add(Equipment.builder()
+                        .name("Fridge")
+                        .description("SAMSUNG RB38T774DB1 EF No frost 203cm")
+                        .notifications(new HashSet<>())
+                        .apartment(apartment)
+                        .isBroken(false)
+                .build());
+        equipment.add(Equipment.builder()
+                .name("Chair")
+                .description("Wooden chair")
+                .notifications(new HashSet<>())
+                .apartment(apartment)
+                .isBroken(false)
+                .build());
         apartment.setEquipment(equipment);
         apartment.setName(name);
         apartment.setAddress(address);
         apartment.setLatitude(latitude);
         apartment.setLongitude(longitude);
         apartment.setOwner(owner);
+        apartment.setNotifications(new HashSet<>());
         randomNum = ThreadLocalRandom.current().nextInt(1000000, 10000000);
         apartment.setDescription("Oto apartament abc" + randomNum);
         return apartmentService.createApartment(apartment);

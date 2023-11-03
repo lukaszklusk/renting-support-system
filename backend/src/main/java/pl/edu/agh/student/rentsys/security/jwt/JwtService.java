@@ -7,7 +7,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import lombok.AllArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
-import pl.edu.agh.student.rentsys.user.UserService;
+import pl.edu.agh.student.rentsys.service.UserService;
 
 import java.util.Date;
 import java.util.HashMap;

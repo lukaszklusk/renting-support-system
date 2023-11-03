@@ -1,4 +1,4 @@
-package pl.edu.agh.student.rentsys.user;
+package pl.edu.agh.student.rentsys.model;
 
 import jakarta.persistence.*;
 import lombok.*;
@@ -9,7 +9,6 @@ import pl.edu.agh.student.rentsys.security.UserRole;
 
 import java.util.Collection;
 import java.util.Collections;
-import java.util.UUID;
 
 @Getter
 @Setter
@@ -22,9 +21,8 @@ import java.util.UUID;
 public class User implements UserDetails {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    @Column(columnDefinition = "BINARY(16)")
-    private UUID id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
     @Column(nullable = false)
     private String email;

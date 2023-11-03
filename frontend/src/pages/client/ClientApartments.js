@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import useAuth from "../../hooks/useAuth";
 import SectionHeader from "../../components/common/SectionHeader";
-import useUserApartments from "../../hooks/apartment/useUserApartments";
+import { useUserApartments } from "../../hooks/useApartments";
 import OwnerApartmentsList from "../../components/owner/OwnerApartmentsList";
 
 const ClientApartments = () => {

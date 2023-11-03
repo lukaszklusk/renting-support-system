@@ -1,13 +1,10 @@
 package pl.edu.agh.student.rentsys.service;
 
 import org.springframework.stereotype.Service;
-import pl.edu.agh.student.rentsys.model.Agreement;
-import pl.edu.agh.student.rentsys.model.AgreementChange;
-import pl.edu.agh.student.rentsys.model.AgreementStatus;
-import pl.edu.agh.student.rentsys.model.Apartment;
+import pl.edu.agh.student.rentsys.model.*;
 import pl.edu.agh.student.rentsys.repository.AgreementChangeRepository;
 import pl.edu.agh.student.rentsys.repository.AgreementRepository;
-import pl.edu.agh.student.rentsys.user.User;
+import pl.edu.agh.student.rentsys.model.User;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -78,6 +75,10 @@ public class AgreementService {
 
     public Optional<Agreement> getAgreementById(long id){
         return agreementRepository.findById(id);
+    }
+
+    public Optional<AgreementDTO> getAgreementDTOById(long id){
+        return getAgreementById(id).map(AgreementDTO::convertFromAgreement);
     }
 
     public List<Agreement> getAgreementForUser(User user){

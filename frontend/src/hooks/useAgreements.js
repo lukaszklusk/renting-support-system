@@ -1,29 +1,60 @@
-import { useNavigate, useLocation } from "react-router-dom";
-import useAxiosUser from "./useAxiosUser";
+import useGetRequest from "./useGetRequest";
+import usePatchRequest from "./usePatchRequest";
 
-const useAgreements = () => {
-  const axiosUser = useAxiosUser();
-  const navigate = useNavigate();
-  const location = useLocation();
-
-  const fetchAgreements = async (username, id = null) => {
-    try {
-      const url = id
-        ? `/user/${username}/agreement/${id}`
-        : `/user/${username}/agreement`;
-      const response = await axiosUser.get(url);
-      console.log(response.data);
-      return response.data;
-    } catch (err) {
-      // TODO
-      console.log(err);
-      navigate("/sign-in", {
-        state: { from: location },
-        replace: true,
-      });
-    }
-  };
-  return fetchAgreements;
+const getBaseUrl = (username) => {
+  return `/user/${username}/agreements`;
 };
 
-export default useAgreements;
+export const useUserAgreements = () => {
+  const fetchData = useGetRequest();
+
+  const fetchUserAgreements = async (username) => {
+    const url = getBaseUrl(username);
+    return fetchData(url);
+  };
+  return fetchUserAgreements;
+};
+
+export const useUserAgreementById = () => {
+  const fetchData = useGetRequest();
+
+  const fetchUserAgreementById = async (username, id) => {
+    const BASE_URL = getBaseUrl(username);
+    const url = `${BASE_URL}/${id}`;
+    return fetchData(url);
+  };
+  return fetchUserAgreementById;
+};
+
+export const useUserAgreementsByStatus = () => {
+  const fetchData = useGetRequest();
+
+  const fetchUserAgreementsByStatus = async (username, status) => {
+    const BASE_URL = getBaseUrl(username);
+    const url = `${BASE_URL}/status/${status}`;
+    return fetchData(url);
+  };
+  return fetchUserAgreementsByStatus;
+};
+
+export const useUserAgreementsByApartmentId = () => {
+  const fetchData = useGetRequest();
+
+  const fetchUserAgreementsByApartmentId = async (username, apartmentId) => {
+    const BASE_URL = getBaseUrl(username);
+    const url = `${BASE_URL}/${apartmentId}/agreements`;
+    return fetchData(url);
+  };
+  return fetchUserAgreementsByApartmentId;
+};
+
+export const usePatchUserAgreementStatus = () => {
+  const patchData = usePatchRequest();
+
+  const patchUserAgreementStatus = async (username, id, status) => {
+    const BASE_URL = getBaseUrl(username);
+    const url = `${BASE_URL}/${id}`;
+    return patchData(url, status);
+  };
+  return patchUserAgreementStatus;
+};

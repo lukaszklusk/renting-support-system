@@ -4,7 +4,7 @@ import ListGroup from "react-bootstrap/ListGroup";
 import { ROLES } from "../../config/roles";
 import useAuth from "../../hooks/useAuth";
 import { Button } from "react-bootstrap";
-import usePatchUserAgreementStatus from "../../hooks/agreement/usePatchUserAgreementStatus";
+import { usePatchUserAgreementStatus } from "../../hooks/useAgreements";
 
 function OwnerAgreementsList({ agreements, isProposed }) {
   const { auth } = useAuth();
@@ -47,7 +47,7 @@ function OwnerAgreementsList({ agreements, isProposed }) {
             <ListGroup variant="flush">
               <ListGroup.Item>
                 {" "}
-                <strong>Apartment:</strong> {agreement.apartment.name}{" "}
+                <strong>Apartment:</strong> {agreement.apartmentName}{" "}
               </ListGroup.Item>
               <ListGroup.Item>
                 {" "}
@@ -99,7 +99,7 @@ function OwnerAgreementsList({ agreements, isProposed }) {
               <Card.Link
                 className="flex-grow-1"
                 as={Link}
-                to={`/apartments/${agreement.apartment.id}`}
+                to={`/apartments/${agreement.apartmentId}`}
               >
                 Apartment
               </Card.Link>

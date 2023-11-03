@@ -6,16 +6,18 @@ import ListGroup from "react-bootstrap/ListGroup";
 import { ExclamationCircleFill } from "react-bootstrap-icons";
 
 import useAuth from "../../hooks/useAuth";
-import useUserApartmentById from "../../hooks/apartment/useUserApartmentById";
-import useUserAgreementsByApartmentId from "../../hooks/agreement/useUserAgreementsByApartmentId";
-import useIsUserApartmentByIdRented from "../../hooks/apartment/useIsUserApartmentByIdRented";
+import {
+  useUserApartmentById,
+  useIsUserApartmentByIdRented,
+} from "../../hooks/useApartments";
+import { useUserAgreementsByApartmentId } from "../../hooks/useAgreements";
 import SectionHeader from "../../components/common/SectionHeader";
 import { ROLES } from "../../config/roles";
 
 const OwnerApartmentDetails = () => {
   const { id } = useParams();
   const [apartment, setApartment] = useState(null);
-  const [agreements, setAgreements] = useState(null);
+  const [agreements, setAgreements] = useState([]);
   const [activeAgreement, setActiveAgreement] = useState(null);
   const [proposedAgreements, setProposedAgreements] = useState(null);
   const [finishedAgreements, setFinishedAgreements] = useState(null);

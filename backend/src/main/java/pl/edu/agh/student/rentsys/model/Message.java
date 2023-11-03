@@ -2,7 +2,6 @@ package pl.edu.agh.student.rentsys.model;
 
 import jakarta.persistence.*;
 import lombok.*;
-import pl.edu.agh.student.rentsys.user.User;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
