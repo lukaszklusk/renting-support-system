@@ -1,31 +1,35 @@
 package pl.edu.agh.student.rentsys.service;
 
+import lombok.AllArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import pl.edu.agh.student.rentsys.exceptions.EntityNotFoundException;
 import pl.edu.agh.student.rentsys.model.*;
 import pl.edu.agh.student.rentsys.repository.AgreementChangeRepository;
 import pl.edu.agh.student.rentsys.repository.AgreementRepository;
 import pl.edu.agh.student.rentsys.model.User;
+import pl.edu.agh.student.rentsys.repository.ApartmentRepository;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 @Service
+@AllArgsConstructor
 public class AgreementService {
 
-    private AgreementRepository agreementRepository;
-    private AgreementChangeRepository agreementChangeRepository;
-
-    public AgreementService(AgreementRepository agreementRepository,
-                            AgreementChangeRepository agreementChangeRepository) {
-        this.agreementRepository = agreementRepository;
-        this.agreementChangeRepository = agreementChangeRepository;
-    }
-
-    public Agreement createAgreement(Agreement agreement){
-        agreement.setAgreementStatus(AgreementStatus.proposed);
-        return agreementRepository.save(agreement);
-    }
+    @Autowired
+    private final AgreementRepository agreementRepository;
+    @Autowired
+    private final AgreementChangeRepository agreementChangeRepository;
+    @Autowired
+    private final NotificationService notificationService;
+    @Autowired
+    private final UserService userService;
+    @Autowired
+    private final ApartmentRepository apartmentRepository;
 
     public Agreement createDemoAgreement(Agreement agreement){
         return agreementRepository.save(agreement);
@@ -106,7 +110,81 @@ public class AgreementService {
     }
 
     public Agreement changeAgreementStatus(Agreement agreement, AgreementStatus agreementStatus){
+        if (agreementStatus.equals(AgreementStatus.active)) {
+            return activateAgreement(agreement);
+        }
+
+//        TODO:
         agreement.setAgreementStatus(agreementStatus);
+        Notification notification = notificationService.createAndSendNotification (
+                agreement,
+                NotificationType.agreement_activated,
+                agreement.getName()
+        );
+        agreement.addNotification(notification);
+        return agreementRepository.save(agreement);
+    }
+
+    public Agreement activateAgreement(Agreement activatedAgreement) {
+        List<Agreement> apartmentAgreements = agreementRepository.findAllByApartment(activatedAgreement.getApartment());
+
+        List<Agreement> modifiedAgreements = apartmentAgreements.stream()
+                .filter(agreement -> !Objects.equals(agreement.getId(), activatedAgreement.getId()))
+                .filter(agreement -> agreement.getAgreementStatus() == AgreementStatus.proposed
+                        || agreement.getAgreementStatus() == AgreementStatus.accepted)
+                .toList();
+
+        for (var modifiedAgreement: modifiedAgreements) {
+            NotificationType notificationType = null;
+            if (modifiedAgreement.getAgreementStatus() == AgreementStatus.proposed) {
+                modifiedAgreement.setAgreementStatus(AgreementStatus.withdrawn);
+                notificationType = NotificationType.agreement_withdrawn;
+            } else {
+                modifiedAgreement.setAgreementStatus(AgreementStatus.rejected_owner);
+                notificationType = NotificationType.agreement_rejected_owner;
+            }
+
+            Notification notification = notificationService.createAndSendNotification (
+                    modifiedAgreement,
+                    notificationType,
+                    activatedAgreement.getName()
+            );
+            modifiedAgreement.addNotification(notification);
+            agreementRepository.save(modifiedAgreement);
+        }
+
+        activatedAgreement.setAgreementStatus(AgreementStatus.active);
+        Notification notification = notificationService.createAndSendNotification (
+                activatedAgreement,
+                NotificationType.agreement_activated,
+                activatedAgreement.getName()
+        );
+        activatedAgreement.addNotification(notification);
+        return agreementRepository.save(activatedAgreement);
+    }
+
+    public Agreement createAgreement(String username, AgreementDTO agreementDTO){
+        User owner = userService.getUserByUsername(username).orElseThrow(() -> new EntityNotFoundException("Owner was not found"));
+        User tenant = userService.getUserByUsername(agreementDTO.getTenant().getUsername()).orElseThrow(
+                () -> new EntityNotFoundException("Tenant was not found")
+        );
+        Apartment apartment = apartmentRepository.getApartmentByOwnerAndName(owner, agreementDTO.getApartmentName()).orElseThrow(() -> new EntityNotFoundException("Apartment was not found"));
+
+        Agreement agreement = Agreement.builder()
+                .owner(owner)
+                .tenant(tenant)
+                .name(agreementDTO.getName())
+                .apartment(apartment)
+                .monthlyPayment(agreementDTO.getMonthlyPayment())
+                .administrationFee(agreementDTO.getAdministrationFee())
+                .ownerAccountNo(agreementDTO.getOwnerAccountNo())
+                .agreementStatus(AgreementStatus.proposed)
+                .signingDate(LocalDate.ofEpochDay(agreementDTO.getSigningDate()))
+                .expirationDate(LocalDate.ofEpochDay(agreementDTO.getExpirationDate()))
+                .build();
+
+        Notification notification = notificationService.createAndSendNotification(agreement, NotificationType.agreement_proposed, agreement.getApartment().getName());
+        agreement.addNotification(notification);
         return agreementRepository.save(agreement);
     }
 }

@@ -5,117 +5,91 @@ import Card from "react-bootstrap/Card";
 import ListGroup from "react-bootstrap/ListGroup";
 import { ExclamationCircleFill } from "react-bootstrap-icons";
 
-import useAuth from "../../hooks/useAuth";
-import {
-  useUserApartmentById,
-  useIsUserApartmentByIdRented,
-} from "../../hooks/useApartments";
-import { useUserAgreementsByApartmentId } from "../../hooks/useAgreements";
+import useData from "../../hooks/useData";
 import SectionHeader from "../../components/common/SectionHeader";
-import { ROLES } from "../../config/roles";
 
 const OwnerApartmentDetails = () => {
   const { id } = useParams();
-  const [apartment, setApartment] = useState(null);
-  const [agreements, setAgreements] = useState([]);
+  const [detailedApartment, setDetailedApartment] = useState(null);
+  const [detailedAgreements, setDetailedAgreements] = useState([]);
   const [activeAgreement, setActiveAgreement] = useState(null);
-  const [proposedAgreements, setProposedAgreements] = useState(null);
-  const [finishedAgreements, setFinishedAgreements] = useState(null);
-  const [isRented, setIsRented] = useState(null);
-  const [isDataFetched, setIsDataFetched] = useState(false);
+  const [proposedAgreements, setProposedAgreements] = useState([]);
+  const [finishedAgreements, setFinishedAgreements] = useState([]);
+  const [canceledAgreements, setCanceledAgreements] = useState([]);
+  const [isRented, setIsRented] = useState(false);
 
-  const { auth } = useAuth();
-  const fetchUserApartmentById = useUserApartmentById();
-  const fetchUserAgreementsByApartmentId = useUserAgreementsByApartmentId();
-  const fetchIsUserApartmentByIdRented = useIsUserApartmentByIdRented();
+  const { isDataFetched, isClient, isOwner, isAdmin, apartments, agreements } =
+    useData();
 
-  const isLoggedIn = auth.isLoggedIn;
-  const isClient = isLoggedIn && auth?.roles?.includes(ROLES.client);
-  const isOwner = isLoggedIn && auth?.roles?.includes(ROLES.owner);
-  const isAdmin = isLoggedIn && auth?.roles?.includes(ROLES.admin);
+  const onApartmentsLoad = () => {
+    setDetailedApartment(apartments.find((item) => item.id === parseInt(id)));
+  };
 
-  useEffect(() => {
-    const username = auth.username;
+  const onAgreementsLoad = () => {
+    setDetailedAgreements(
+      agreements.filter((item) => item.apartmentId === parseInt(id))
+    );
+  };
 
-    if (username) {
-      const fetchData = async () => {
-        const apartment = await fetchUserApartmentById(username, id);
-        const agreements = await fetchUserAgreementsByApartmentId(username, id);
-        // const isRented = await fetchIsUserApartmentByIdRented(username, id);
-        setApartment(apartment);
-        setAgreements(agreements);
+  const onDetailedApartmentLoad = () => {
+    setIsRented(detailedApartment?.tenant != null);
+  };
 
-        // setIsRented(isRented);
+  const onDetailedAgreementsLoad = () => {
+    setActiveAgreement(
+      detailedAgreements?.find((item) => item.agreementStatus == "active")
+    );
+    setProposedAgreements(
+      detailedAgreements?.find((item) => item.agreementStatus == "proposed")
+    );
+    setFinishedAgreements(
+      detailedAgreements?.find((item) => item.agreementStatus == "finished")
+    );
+    setCanceledAgreements(
+      detailedAgreements?.find((item) =>
+        item.agreementStatus.startsWith("canceled")
+      )
+    );
+  };
 
-        const activeAgreements = agreements.filter((agreement) => {
-          return agreement.agreementStatus === "active";
-        });
+  useEffect(onApartmentsLoad, [apartments]);
+  useEffect(onAgreementsLoad, [agreements]);
+  useEffect(onDetailedApartmentLoad, [detailedApartment]);
+  useEffect(onDetailedAgreementsLoad, [detailedAgreements]);
 
-        const proposedAgreements = agreements.filter((agreement) => {
-          return agreement.agreementStatus === "proposed";
-        });
-
-        const finishedAgreements = agreements.filter((agreement) => {
-          return agreement.agreementStatus === "cancelled";
-        });
-
-        if (activeAgreements.length === 1) {
-          setIsRented(true);
-          setActiveAgreement(activeAgreements[0]);
-        }
-
-        console.log("bool", activeAgreements.length == 1);
-        console.log("isRented", isRented);
-
-        if (isRented && activeAgreements.length != 1) {
-          console.log("Invalid nr of active agreements");
-          return;
-        }
-
-        setProposedAgreements(proposedAgreements);
-        setFinishedAgreements(finishedAgreements);
-
-        console.log("activeAgreements", activeAgreements[0]);
-        console.log("activeAgreement", activeAgreement);
-        console.log("agreements", agreements);
-        setIsDataFetched(true);
-      };
-
-      fetchData();
-    }
-  }, []);
-
-  if (apartment) {
-    return (
-      <section>
+  return (
+    <section>
+      (isDataFetched && detailedApartment) ? (
+      <>
         <SectionHeader title="Apartment Details" />
 
         <Card className="mb-3 mx-4">
           <Carousel fade>
-            {Array.isArray(apartment.pictures) &&
-              apartment.pictures.map((picture, index) => (
+            {Array.isArray(detailedApartment.pictures) &&
+              detailedApartment.pictures.map((picture, index) => (
                 <Carousel.Item key={index}>
                   <img
                     className="d-block w-100"
                     alt="Apartment PNG"
-                    src={picture.image}
+                    src={"data:image/png;base64," + picture.imageData}
                   />
                 </Carousel.Item>
               ))}
           </Carousel>
           <Card.Header>
-            <Card.Title>{apartment.name}</Card.Title>
-            <Card.Text> {apartment.description} </Card.Text>
+            <Card.Title>{detailedApartment.name}</Card.Title>
+            <Card.Text> {detailedApartment.description} </Card.Text>
           </Card.Header>
           <ListGroup className="list-group-flush">
             <ListGroup.Item>
-              <strong>Address:</strong> {apartment.address}, {apartment.city}
+              <strong>Address:</strong> {detailedApartment.address},{" "}
+              {detailedApartment.city}
             </ListGroup.Item>
             <ListGroup.Item>
-              <strong> Postal Code: </strong> {apartment.postalCode}
+              <strong> Postal Code: </strong> {detailedApartment.postalCode}
             </ListGroup.Item>
             <ListGroup.Item>
-              <strong> Size: </strong> {apartment.size} m²{" "}
+              <strong> Size: </strong> {detailedApartment.size} m²{" "}
             </ListGroup.Item>
             {isRented ? (
               <>
@@ -166,12 +140,12 @@ const OwnerApartmentDetails = () => {
                 )}
               </>
             )}
-            {Array.isArray(apartment.equipment) && (
+            {Array.isArray(detailedApartment.equipment) && (
               <>
                 <ListGroup.Item>
                   <strong> Equipment: </strong>
                 </ListGroup.Item>
-                {apartment.equipment.map((item) => (
+                {detailedApartment.equipment.map((item) => (
                   <ListGroup.Item key={item.id} className="flex-row-reverse">
                     <div>{item.description}</div>
 
@@ -201,10 +175,10 @@ const OwnerApartmentDetails = () => {
             )}
           </ListGroup>
         </Card>
-      </section>
-    );
-  }
-  return null;
+      </>
+      ) : (<p>Loading</p>)
+    </section>
+  );
 };
 
 export default OwnerApartmentDetails;

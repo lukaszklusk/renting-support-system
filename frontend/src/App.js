@@ -2,7 +2,7 @@ import { Routes, Route } from "react-router-dom";
 
 import { ROLES } from "./config/roles";
 
-import useAuth from "./hooks/useAuth";
+import useData from "./hooks/useData";
 
 import Layout from "./components/common/Layout";
 import Home from "./components/common/Home";
@@ -32,13 +32,10 @@ import OwnerAgreementDetails from "./pages/owner/OwnerAgreementDetails";
 import FileUploadForm from "./pages/owner/MyForm";
 
 import SendMessage from "./components/common/communication/SendMessage";
+import Notifications from "./components/common/communication/Notifications";
 
 function App() {
-  const { auth } = useAuth();
-  const isLoggedIn = auth?.isLoggedIn !== false;
-  const isClient = isLoggedIn && auth?.roles?.includes(ROLES.client);
-  const isOwner = isLoggedIn && auth?.roles?.includes(ROLES.owner);
-  const isAdmin = isLoggedIn && auth?.roles?.includes(ROLES.admin);
+  const { isClient, isOwner, isAdmin } = useData();
 
   return (
     <Routes>
@@ -59,6 +56,7 @@ function App() {
             <Route path="agreements" element={<ClientAgreements />} />
             <Route path="agreements/:id" element={<OwnerAgreementDetails />} />
             <Route path="chat" element={<SendMessage />} />
+            <Route path="notifications" element={<Notifications />} />
           </Route>
         )}
 
@@ -75,6 +73,7 @@ function App() {
             <Route path="agreements/new" element={<AddAgreement />} />
             <Route path="reports" element={<OwnerReports />} />
             <Route path="chat" element={<SendMessage />} />
+            <Route path="notifications" element={<Notifications />} />
           </Route>
         )}
 

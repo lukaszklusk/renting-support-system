@@ -1,14 +1,19 @@
 import { useNavigate, useLocation } from "react-router-dom";
 import useAxiosUser from "./useAxiosUser";
 
-const useGetRequest = () => {
+const usePostRequest = () => {
   const axiosUser = useAxiosUser();
   const navigate = useNavigate();
   const location = useLocation();
 
-  const fetchData = async (url) => {
+  const postData = async (url, payload) => {
     try {
-      const response = await axiosUser.get(url);
+      const response = await axiosUser.post(url, payload, {
+        headers: {
+          "Content-Type": "application/json",
+        },
+        withCredentials: true,
+      });
       return response.data;
     } catch (err) {
       // TODO
@@ -19,7 +24,7 @@ const useGetRequest = () => {
       });
     }
   };
-  return fetchData;
+  return postData;
 };
 
-export default useGetRequest;
+export default usePostRequest;

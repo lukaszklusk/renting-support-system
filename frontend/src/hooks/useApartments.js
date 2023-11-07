@@ -1,4 +1,5 @@
 import useGetRequest from "./useGetRequest";
+import usePostRequest from "./usePostRequest";
 
 const getBaseUrl = (username) => {
   return `/user/${username}/apartments`;
@@ -45,4 +46,29 @@ export const useIsUserApartmentByIdRented = () => {
     return fetchData(url);
   };
   return fetchIsUserApartmentRented;
+};
+
+export const useUserApartment = () => {
+  const postData = usePostRequest();
+
+  const postUserApartment = async (username, payload) => {
+    const url = getBaseUrl(username);
+    console.log("url:", url);
+    console.log("payload:", payload);
+    return postData(url, payload);
+  };
+  return postUserApartment;
+};
+
+export const useUserApartmentEquipment = () => {
+  const postData = usePostRequest();
+
+  const postUserApartmentEquipment = async (username, id, payload) => {
+    const BASE_URL = getBaseUrl(username);
+    const url = `${BASE_URL}/${id}/equipments`;
+    console.log("url:", url);
+    console.log("payload:", payload);
+    return postData(url, payload);
+  };
+  return postUserApartmentEquipment;
 };

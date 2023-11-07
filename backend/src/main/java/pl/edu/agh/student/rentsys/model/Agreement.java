@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDate;
+import java.util.HashSet;
 import java.util.Set;
 
 @Entity
@@ -17,7 +18,7 @@ import java.util.Set;
                 @UniqueConstraint(name = "name_apartment_unique", columnNames = {"name", "apartment_id"})
         }
 )
-public class Agreement {
+public class Agreement implements Notifiable{
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -41,4 +42,12 @@ public class Agreement {
 
     @OneToMany(fetch = FetchType.LAZY)
     private Set<Notification> notifications;
+
+    @Override
+    public void addNotification(Notification notification) {
+        if (notifications == null) {
+            notifications = new HashSet<>();
+        }
+        notifications.add(notification);
+    }
 }

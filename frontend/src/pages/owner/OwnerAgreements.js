@@ -1,50 +1,30 @@
 import { useState, useEffect } from "react";
 
-import useAuth from "../../hooks/useAuth";
+import useData from "../../hooks/useData";
 import SectionHeader from "../../components/common/SectionHeader";
 import OwnerAgreementsList from "../../components/owner/OwnerAgreementsList";
 
-import { useUserAgreementsByStatus } from "../../hooks/useAgreements";
 import { Link } from "react-router-dom";
 import { Button } from "react-bootstrap";
 
 function OwnerAgreements() {
+  const { isDataFetched, agreements } = useData();
+
   const [activeAgreements, setActiveAgreements] = useState(null);
   const [acceptedAgreements, setAcceptedAgreements] = useState(null);
   const [proposedAgreements, setProposedAgreements] = useState(null);
-  const [isDataFetched, setIsDataFetched] = useState(false);
-
-  const { auth } = useAuth();
-  const fetchUserAgreementsByStatus = useUserAgreementsByStatus();
 
   useEffect(() => {
-    const username = auth.username;
-
-    if (username) {
-      const fetchData = async () => {
-        const activeAgreements = await fetchUserAgreementsByStatus(
-          username,
-          "active"
-        );
-        const acceptedAgreements = await fetchUserAgreementsByStatus(
-          username,
-          "accepted"
-        );
-        const proposedAgreements = await fetchUserAgreementsByStatus(
-          username,
-          "proposed"
-        );
-
-        console.log("acceptedAgreements", acceptedAgreements);
-
-        setActiveAgreements(activeAgreements);
-        setProposedAgreements(proposedAgreements);
-        setAcceptedAgreements(acceptedAgreements);
-        setIsDataFetched(true);
-      };
-      fetchData();
-    }
-  }, []);
+    setActiveAgreements(
+      agreements?.filter((agreement) => agreement.agreementStatus == "active")
+    );
+    setAcceptedAgreements(
+      agreements?.filter((agreement) => agreement.agreementStatus == "accepted")
+    );
+    setProposedAgreements(
+      agreements?.filter((agreement) => agreement.agreementStatus == "proposed")
+    );
+  }, [agreements]);
 
   return (
     <section>

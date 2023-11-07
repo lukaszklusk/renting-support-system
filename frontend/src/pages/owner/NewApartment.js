@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useRef } from "react";
-import { useLocation, Link } from "react-router-dom";
 import {
   Row,
   Col,
@@ -14,29 +13,29 @@ import {
   EnvelopeFill,
   List,
   GeoAltFill,
+  BuildingFill,
   ImageFill,
   ArrowsFullscreen,
   Tools,
   ListCheck,
 } from "react-bootstrap-icons";
 import "bootstrap/dist/css/bootstrap.css";
-import useAxiosUser from "../../hooks/useAxiosUser";
-import useAuth from "../../hooks/useAuth";
+import useData from "../../hooks/useData";
+import { useUserApartment } from "../../hooks/useApartments";
 
 const PRESENT_REGEX = /.+/;
-const DESCRIPTION_REGEX = /^(?!(\S+\s+){101})((\S+\s+){9,100}\S+)$/;
+const CITY_REGEX = /^[A-Za-z\s-]+$/;
+const DESCRIPTION_REGEX = /^(?!(\S+\s+){101})((\S+\s+){0,100}\S+)$/;
 const ZIP_CODE_REGEX = /^\d{2}-\d{3}$/;
 const SIZE_REGEX = /^(?!0\d)\d{1,5}(\.\d{1,2})?$/;
 
 const NewApartment = () => {
-  const axiosUser = useAxiosUser();
-  const location = useLocation();
-
   const nameRef = useRef();
 
-  const { auth } = useAuth();
-  const username = auth.username;
-  const APARTMENT_POST_URL = `/user/${username}/apartment`;
+  const postUserApartment = useUserApartment();
+
+  const { username, isClient, isOwner, isAdmin, apartments, agreements } =
+    useData();
 
   const [name, setName] = useState("");
   const [isNameValid, setIsNameValid] = useState(false);
@@ -46,6 +45,9 @@ const NewApartment = () => {
 
   const [address, setAddress] = useState("");
   const [isAddressValid, setIsAddressValid] = useState(false);
+
+  const [city, setCity] = useState("");
+  const [isCityValid, setIsCityValid] = useState(false);
 
   const [zipCode, setZipCode] = useState("");
   const [isZipCodeValid, setIsZipCodeValid] = useState(false);
@@ -76,7 +78,7 @@ const NewApartment = () => {
 
   useEffect(() => {
     setErrMsg("");
-  }, [name, decription, address, zipCode, size]);
+  }, [name, decription, city, address, zipCode, size]);
 
   useEffect(() => {
     const isValid = PRESENT_REGEX.test(name);
@@ -98,6 +100,13 @@ const NewApartment = () => {
     console.log(address);
     setIsAddressValid(isValid);
   }, [address]);
+
+  useEffect(() => {
+    const isValid = CITY_REGEX.test(city);
+    console.log(isValid);
+    console.log(city);
+    setIsCityValid(isValid);
+  }, [city]);
 
   useEffect(() => {
     const isValid = ZIP_CODE_REGEX.test(zipCode);
@@ -225,6 +234,7 @@ const NewApartment = () => {
       return {
         name: value,
         description: validDescriptions[index],
+        isBroken: false,
       };
     });
     return requestEquipments;
@@ -250,7 +260,7 @@ const NewApartment = () => {
     const requestPictures = imageArray.map((value) => {
       return {
         name: "photo",
-        image: value,
+        imageData: value,
       };
     });
     return requestPictures;
@@ -264,18 +274,20 @@ const NewApartment = () => {
       !PRESENT_REGEX.test(name) ||
       !DESCRIPTION_REGEX.test(decription) ||
       !PRESENT_REGEX.test(address) ||
+      !CITY_REGEX.test(city) ||
       !ZIP_CODE_REGEX.test(zipCode) ||
       !SIZE_REGEX.test(size)
     ) {
       setErrMsg("Invalid Entry");
       return;
     }
+
     try {
       const payload = JSON.stringify({
-        apartmentName: name,
+        name: name,
         description: decription,
         address: address,
-        city: "city",
+        city: city,
         postalCode: zipCode,
         size: size,
         equipment: createRequestEquipments(
@@ -287,16 +299,17 @@ const NewApartment = () => {
           propertiesDescription
         ),
         pictures: createRequestPictures([imageArray]),
-        latitude: "0",
-        longitude: "0",
+        latitude: 0.0,
+        longitude: 0.0,
       });
 
-      const response = await axiosUser.post(APARTMENT_POST_URL, payload, {
-        headers: { "Content-Type": "application/json" },
-        withCredentials: true,
-      });
-      console.log(response.data);
-      console.log(JSON.stringify(response));
+      console.log("payload:", payload);
+      // const response = await axiosUser.post(APARTMENT_POST_URL, payload, {
+      //   headers: { "Content-Type": "application/json" },
+      //   withCredentials: true,
+      // });
+
+      const response = await postUserApartment(username, payload);
       setSubmitMsg("Apartment created sucessfully");
       setErrMsg("");
     } catch (err) {
@@ -365,7 +378,7 @@ const NewApartment = () => {
                     <Form.Control.Feedback type="invalid" className="ms-5">
                       Please enter a apartment description with following
                       restrictions:
-                      <br />- between 10 and 100 words
+                      <br />- below 100 words
                     </Form.Control.Feedback>
                   </InputGroup>
                 </Form.Group>
@@ -387,6 +400,27 @@ const NewApartment = () => {
                     />
                     <Form.Control.Feedback type="invalid" className="ms-5">
                       Please enter apartment address
+                    </Form.Control.Feedback>
+                  </InputGroup>
+                </Form.Group>
+
+                <Form.Group controlId="formApartmentCity" className="my-3">
+                  <InputGroup>
+                    <InputGroup.Text className="transparent-input-group-text">
+                      <BuildingFill />
+                    </InputGroup.Text>
+                    <Form.Control
+                      type="text"
+                      placeholder="Enter city name"
+                      value={city}
+                      onChange={(e) => setCity(e.target.value)}
+                      required
+                      autoComplete="off"
+                      isValid={isCityValid}
+                      isInvalid={city && !isCityValid}
+                    />
+                    <Form.Control.Feedback type="invalid" className="ms-5">
+                      Please enter city name
                     </Form.Control.Feedback>
                   </InputGroup>
                 </Form.Group>
@@ -543,7 +577,6 @@ const NewApartment = () => {
                           }}
                           className="mx-2"
                           disabled={!isEquipmentNameValid}
-                          //   className="py-1"
                         >
                           +
                         </Button>
@@ -664,6 +697,7 @@ const NewApartment = () => {
                       isNameValid &&
                       isDescriptionValid &&
                       isAddressValid &&
+                      isCityValid &&
                       isZipCodeValid &&
                       isSizeValid &&
                       isPicturesValid

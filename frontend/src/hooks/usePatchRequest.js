@@ -8,7 +8,7 @@ const usePatchRequest = () => {
 
   const patchData = async (url, args) => {
     try {
-      console.log("patchData", url, args);
+      console.log("patch request:", url, args);
       const response = await axiosUser.patch(url, null, { params: args });
       console.log(response.data);
       return response.data;

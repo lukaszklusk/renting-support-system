@@ -3,6 +3,7 @@ package pl.edu.agh.student.rentsys.model;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.HashSet;
 import java.util.Set;
 
 @Entity
@@ -20,7 +21,7 @@ import java.util.Set;
                 )
         }
 )
-public class Equipment {
+public class Equipment implements Notifiable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     protected Long id;
@@ -34,4 +35,12 @@ public class Equipment {
     @ManyToOne
     @JoinColumn(name = "apartment_id")
     private Apartment apartment;
+
+    @Override
+    public void addNotification(Notification notification) {
+        if (notifications == null) {
+            notifications = new HashSet<>();
+        }
+        notifications.add(notification);
+    }
 }

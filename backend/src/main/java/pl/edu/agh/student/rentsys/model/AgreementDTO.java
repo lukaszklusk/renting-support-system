@@ -4,6 +4,7 @@ import lombok.Builder;
 import lombok.Data;
 
 import java.time.LocalDate;
+import java.time.ZoneId;
 
 @Builder
 @Data
@@ -16,8 +17,8 @@ public class AgreementDTO {
     private String apartmentName;
     private double monthlyPayment;
     private double administrationFee;
-    private LocalDate signingDate;
-    private LocalDate expirationDate;
+    private Long signingDate;
+    private Long expirationDate;
     private String ownerAccountNo;
     private String agreementStatus;
 
@@ -31,9 +32,10 @@ public class AgreementDTO {
                 .apartmentName(agreement.getApartment().getName())
                 .monthlyPayment(agreement.getMonthlyPayment())
                 .administrationFee(agreement.getAdministrationFee())
-                .expirationDate(agreement.getExpirationDate())
+                .expirationDate(agreement.getExpirationDate().toEpochDay())
+                .signingDate(agreement.getSigningDate().toEpochDay())
                 .ownerAccountNo(agreement.getOwnerAccountNo())
-                .agreementStatus(builder().agreementStatus)
+                .agreementStatus(agreement.getAgreementStatus().toString())
                 .build();
     }
 }

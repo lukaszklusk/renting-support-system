@@ -1,8 +1,21 @@
 import useGetRequest from "./useGetRequest";
 import usePatchRequest from "./usePatchRequest";
+import usePostRequest from "./usePostRequest";
 
 const getBaseUrl = (username) => {
   return `/user/${username}/agreements`;
+};
+
+export const useUserAgreement = () => {
+  const postData = usePostRequest();
+
+  const postUserAgreement = async (username, payload) => {
+    const url = getBaseUrl(username);
+    console.log("url:", url);
+    console.log("payload:", payload);
+    return postData(url, payload);
+  };
+  return postUserAgreement;
 };
 
 export const useUserAgreements = () => {

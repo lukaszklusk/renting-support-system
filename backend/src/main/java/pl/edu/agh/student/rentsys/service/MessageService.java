@@ -1,5 +1,9 @@
 package pl.edu.agh.student.rentsys.service;
 
+import jakarta.persistence.EntityExistsException;
+import lombok.AllArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import pl.edu.agh.student.rentsys.model.MessageDTO;
 import pl.edu.agh.student.rentsys.model.Message;
@@ -16,14 +20,15 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
+@AllArgsConstructor
 public class MessageService {
 
+    @Autowired
     private final MessageRepository messageRepository;
+    @Autowired
     private final UserService userService;
-    public MessageService(MessageRepository messageRepository, UserService userService) {
-        this.messageRepository = messageRepository;
-        this.userService = userService;
-    }
+    @Autowired
+    private final SimpMessagingTemplate simpMessagingTemplate;
 
     public Optional<Message> getMessageById(Long id){
         return messageRepository.findById(id);
@@ -39,7 +44,7 @@ public class MessageService {
     }
 
     public List<MessageDTO> getMessages(String username) {
-        User user = userService.getUserByUsername(username).orElse(null);
+        User user = userService.getUserByUsername(username).orElseThrow(EntityExistsException::new);
         List<Message> messages = getMessages(user);
         return messages.stream()
                 .map(MessageDTO::convertFromMessage)
@@ -112,7 +117,7 @@ public class MessageService {
         return messageRepository.save(newMessage);
     }
 
-    public Message createMessageFromDTO(MessageDTO messageDTO) {
+    public Message createMessage(MessageDTO messageDTO) {
         UUID clientId = messageDTO.getId();
         User sender = userService.getUserByUsername(messageDTO.getSender()).orElse(null);
         User receiver = userService.getUserByUsername(messageDTO.getReceiver()).orElse(null);
@@ -120,4 +125,9 @@ public class MessageService {
         LocalDateTime sendTime = LocalDateTime.ofInstant(Instant.ofEpochMilli(messageDTO.getSendTimestamp()), ZoneId.systemDefault());
         return createMessage(clientId, sender, receiver, content, sendTime);
     }
+
+    public void sendMessageToUser(MessageDTO messageDTO) {
+        simpMessagingTemplate.convertAndSendToUser(messageDTO.getReceiver(),"/dm" , messageDTO);
+    }
+
 }

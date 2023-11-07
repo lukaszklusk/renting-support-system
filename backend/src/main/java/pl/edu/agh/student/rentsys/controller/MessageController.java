@@ -3,13 +3,11 @@ package pl.edu.agh.student.rentsys.controller;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.handler.annotation.*;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.socket.config.annotation.EnableWebSocketMessageBroker;
 import pl.edu.agh.student.rentsys.model.MessageDTO;
-import pl.edu.agh.student.rentsys.model.Message;
 import pl.edu.agh.student.rentsys.service.MessageService;
 
 import java.util.List;
@@ -18,22 +16,13 @@ import java.util.Optional;
 @Controller
 @EnableWebSocketMessageBroker
 public class MessageController {
-
-    @Autowired
-    private SimpMessagingTemplate simpMessagingTemplate;
-
     @Autowired
     private MessageService messageService;
-    @MessageMapping("/message")
-    @SendTo("/chatroom/public")
-    public Message sendMessage(@Payload Message message) {
-        return message;
-    }
 
     @MessageMapping("/chat")
     public void sendPrivateMessage(@Payload MessageDTO messageDTO) {
-        messageService.createMessageFromDTO(messageDTO);
-        simpMessagingTemplate.convertAndSendToUser(messageDTO.getReceiver(),"/queue/private" , messageDTO);
+        messageService.createMessage(messageDTO);
+        messageService.sendMessageToUser(messageDTO);
     }
 
     @GetMapping("/user/{username}/messages")

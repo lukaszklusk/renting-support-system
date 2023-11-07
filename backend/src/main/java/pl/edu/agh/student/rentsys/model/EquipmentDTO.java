@@ -6,11 +6,11 @@ import lombok.Data;
 @Data
 @Builder
 public class EquipmentDTO {
-    protected Long id;
+    private Long id;
+    private Long apartmentId;
     private String name;
     private String description;
     private Boolean isBroken;
-    private Long apartmentId;
 
     public static EquipmentDTO convertFromEquipment(Equipment equipment) {
         return EquipmentDTO.builder()

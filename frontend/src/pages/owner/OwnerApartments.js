@@ -1,33 +1,26 @@
 import { useState, useEffect } from "react";
-import useAuth from "../../hooks/useAuth";
-import SectionHeader from "../../components/common/SectionHeader";
-import { useUserApartmentsByStatus } from "../../hooks/useApartments";
-import OwnerApartmentsList from "../../components/owner/OwnerApartmentsList";
+
+import useData from "../../hooks/useData";
+
 import { Link } from "react-router-dom";
 import { Button } from "react-bootstrap";
+import SectionHeader from "../../components/common/SectionHeader";
+import OwnerApartmentsList from "../../components/owner/OwnerApartmentsList";
 
 const OwnerApartments = () => {
-  const [rentedApartments, setRentedApartments] = useState(null);
-  const [vacantApartments, setVanantApartments] = useState(null);
-  const [isDataFetched, setIsDataFetched] = useState(false);
-  const { auth } = useAuth();
-  const fetchApartmentsByStatus = useUserApartmentsByStatus();
+  const { isDataFetched, apartments } = useData();
+
+  const [rentedApartments, setRentedApartments] = useState([]);
+  const [vacantApartments, setVacantApartments] = useState([]);
 
   useEffect(() => {
-    const username = auth.username;
-
-    if (username) {
-      const fetchData = async () => {
-        const rented = await fetchApartmentsByStatus(username, "rented");
-        const vacant = await fetchApartmentsByStatus(username, "vacant");
-        setRentedApartments(rented);
-        setVanantApartments(vacant);
-        setIsDataFetched(true);
-      };
-
-      fetchData();
-    }
-  }, []);
+    setRentedApartments(
+      apartments?.filter((apartment) => apartment.tenant != null)
+    );
+    setVacantApartments(
+      apartments?.filter((apartment) => apartment.tenant == null)
+    );
+  }, [apartments]);
 
   return (
     <section>

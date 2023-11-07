@@ -1,44 +1,71 @@
 package pl.edu.agh.student.rentsys.controller;
 
+import lombok.AllArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.socket.config.annotation.EnableWebSocketMessageBroker;
+import pl.edu.agh.student.rentsys.exceptions.EntityNotFoundException;
 import pl.edu.agh.student.rentsys.model.*;
-import pl.edu.agh.student.rentsys.service.ApartmentService;
 import pl.edu.agh.student.rentsys.service.NotificationService;
 import pl.edu.agh.student.rentsys.model.User;
 import pl.edu.agh.student.rentsys.service.UserService;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
-public class NotificationsController {
-
-    private final NotificationService service;
+@Controller
+@EnableWebSocketMessageBroker
+@AllArgsConstructor
+public class NotificationController {
+    @Autowired
+    private final NotificationService notificationService;
+    @Autowired
     private final UserService userService;
-    private final ApartmentService apartmentService;
-
-    public NotificationsController(NotificationService service, UserService userService, ApartmentService apartmentService) {
-        this.service = service;
-        this.userService = userService;
-        this.apartmentService = apartmentService;
-    }
 
     @GetMapping("/notifications/{id}")
     public ResponseEntity<Notification> getMessage(@PathVariable long id){
-        Optional<Notification> notificationOptional = service.getNotificationById(id);
+        Optional<Notification> notificationOptional = notificationService.getNotificationById(id);
         return notificationOptional.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
+    }
+
+    @PatchMapping("/user/{username}/notifications/{id}/read")
+    public ResponseEntity<NotificationDTO> changeNotificationReadStatus(@PathVariable String username,
+                                                                        @PathVariable UUID id,
+                                                                        @RequestParam Boolean read){
+        try {
+            Notification notification = notificationService.changeNotificationReadStatus(username, id, read);
+            NotificationDTO notificationDTO = NotificationDTO.convertFromSenderNotification(notification);
+            return ResponseEntity.ok(notificationDTO);
+        } catch (EntityNotFoundException e) {
+            return ResponseEntity.notFound().build();
+        } catch (IllegalStateException e) {
+            return ResponseEntity.badRequest().build();
+        }
+    }
+
+    @GetMapping("/user/{username}/notifications")
+    public ResponseEntity<List<NotificationDTO>> getAllMessages(@PathVariable String username){
+        try {
+            List<NotificationDTO> notificationDTOList = notificationService.getNotifications(username);
+            return ResponseEntity.ok(notificationDTOList);
+        } catch (EntityNotFoundException e) {
+            return ResponseEntity.notFound().build();
+        }
     }
 
     @GetMapping("/user/{username}/notifications/received")
     public ResponseEntity<List<Notification>> getReceivedMessages(@PathVariable String username){
         Optional<User> userOptional = userService.getUserByUsername(username);
-        return userOptional.map(user -> ResponseEntity.ok(service.getReceivedNotifications(user))).orElseGet(() -> ResponseEntity.notFound().build());
+        return userOptional.map(user -> ResponseEntity.ok(notificationService.getReceivedNotifications(user))).orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @GetMapping("/user/{username}/notifications/sent")
     public ResponseEntity<List<Notification>> getSentMessages(@PathVariable String username){
         Optional<User> userOptional = userService.getUserByUsername(username);
-        return userOptional.map(user -> ResponseEntity.ok(service.getSentNotifications(user))).orElseGet(() -> ResponseEntity.notFound().build());
+        return userOptional.map(user -> ResponseEntity.ok(notificationService.getSentNotifications(user))).orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @GetMapping("/user/{username}/notifications/received/{type}")
@@ -48,7 +75,7 @@ public class NotificationsController {
         if(userOptional.isPresent()){
             try{
                 NotificationType notificationType = NotificationType.valueOf(type);
-                return ResponseEntity.ok(service.getReceivedNotificationsWithType(
+                return ResponseEntity.ok(notificationService.getReceivedNotificationsWithType(
                         userOptional.get(), notificationType));
             }catch (IllegalArgumentException e){
                 return ResponseEntity.badRequest().build();
@@ -63,7 +90,7 @@ public class NotificationsController {
         if(userOptional.isPresent()){
             try{
                 NotificationType notificationType = NotificationType.valueOf(type);
-                return ResponseEntity.ok(service.getSentNotificationsWithType(
+                return ResponseEntity.ok(notificationService.getSentNotificationsWithType(
                         userOptional.get(), notificationType));
             }catch (IllegalArgumentException e){
                 return ResponseEntity.badRequest().build();

@@ -2,91 +2,95 @@ import { useParams, Link } from "react-router-dom";
 import SectionHeader from "../../components/common/SectionHeader";
 import Card from "react-bootstrap/Card";
 import { useState, useEffect } from "react";
-import { useUserAgreementById } from "../../hooks/useAgreements";
-import useAuth from "../../hooks/useAuth";
 import ListGroup from "react-bootstrap/ListGroup";
-import { ROLES } from "../../config/roles";
+
+import useData from "../../hooks/useData";
 
 const OwnerAgreementDetails = () => {
   const { id } = useParams();
-  const [agreement, setAgreement] = useState(null);
-  const [isDataFetched, setIsDataFetched] = useState(false);
 
-  const fetchUserAgreementById = useUserAgreementById();
-  const { auth } = useAuth();
+  const { isDataFetched, isClient, isOwner, isAdmin, apartments, agreements } =
+    useData();
 
-  const isLoggedIn = auth.isLoggedIn;
-  const isClient = isLoggedIn && auth?.roles?.includes(ROLES.client);
-  const isOwner = isLoggedIn && auth?.roles?.includes(ROLES.owner);
-  const isAdmin = isLoggedIn && auth?.roles?.includes(ROLES.admin);
+  const [detailedAgreement, setDetailedAgreement] = useState(null);
+  const [detailedApartment, setDetailedApartment] = useState(null);
 
-  useEffect(() => {
-    const username = auth.username;
+  const onDetailedAgreementLoad = () => {
+    setDetailedApartment(
+      apartments.find((item) => item.id === detailedAgreement.apartmentId)
+    );
+  };
 
-    if (username) {
-      const fetchData = async () => {
-        const agreement = await fetchUserAgreementById(username, id);
-        setAgreement(agreement);
-        setIsDataFetched(true);
-      };
-      fetchData();
-    }
-  }, []);
+  const onAgreementsLoad = () => {
+    setDetailedAgreement(agreements.find((item) => item.id === parseInt(id)));
+  };
+
+  useEffect(onAgreementsLoad, [agreements]);
+  useEffect(onDetailedAgreementLoad, [detailedAgreement]);
 
   return (
     <section>
-      {isDataFetched ? (
+      {isDataFetched && detailedAgreement?.id ? (
         <>
           <SectionHeader title="Agreement Details" />
           <Card className="mb-3 mx-4">
             <Card.Header>
-              <Card.Link as={Link} to={`/apartments/${agreement.apartment.id}`}>
-                {agreement.name}
+              <Card.Link
+                as={Link}
+                to={`/apartments/${detailedAgreement.apartmentId}`}
+              >
+                {detailedAgreement.name}
               </Card.Link>
             </Card.Header>
             <ListGroup variant="flush">
               <ListGroup.Item>
                 {" "}
-                <strong>Status:</strong> {agreement.agreementStatus}{" "}
+                <strong>Status:</strong> {detailedAgreement.agreementStatus}{" "}
               </ListGroup.Item>
               <ListGroup.Item>
                 {" "}
-                <strong>Apartment:</strong> {agreement.apartment.name}{" "}
+                <strong>Apartment:</strong> {detailedApartment?.name}{" "}
               </ListGroup.Item>
               <ListGroup.Item>
                 <strong> Rent: </strong>{" "}
                 {(
-                  agreement.administrationFee + agreement.monthlyPayment
+                  detailedAgreement.administrationFee +
+                  detailedAgreement.monthlyPayment
                 ).toFixed(2)}
               </ListGroup.Item>
               {isOwner ? (
                 <>
                   <ListGroup.Item>
                     {" "}
-                    <strong>Tenant:</strong> {agreement.tenant.firstName}{" "}
-                    {agreement.tenant.lastName} ({agreement.tenant.username})
+                    <strong>Tenant:</strong>{" "}
+                    {detailedAgreement.tenant.firstName}{" "}
+                    {detailedAgreement.tenant.lastName} (
+                    {detailedAgreement.tenant.username})
                   </ListGroup.Item>
                   <ListGroup.Item>
                     {" "}
-                    <strong>Contact:</strong> {agreement.tenant.phoneNumber}
+                    <strong>Contact:</strong>{" "}
+                    {detailedAgreement.tenant.phoneNumber}
                   </ListGroup.Item>{" "}
                 </>
               ) : (
                 <>
                   <ListGroup.Item>
                     {" "}
-                    <strong>Tenant:</strong> {agreement.owner.firstName}{" "}
-                    {agreement.owner.lastName} ({agreement.owner.username})
+                    <strong>Owner:</strong> {detailedAgreement.owner.firstName}{" "}
+                    {detailedAgreement.owner.lastName} (
+                    {detailedAgreement.owner.username})
                   </ListGroup.Item>
                   <ListGroup.Item>
                     {" "}
-                    <strong>Contact:</strong> {agreement.owner.phoneNumber}
+                    <strong>Contact:</strong>{" "}
+                    {detailedAgreement.owner.phoneNumber}
                   </ListGroup.Item>{" "}
                 </>
               )}
               <ListGroup.Item>
-                <strong> Duration: </strong> {agreement.signingDate} :{" "}
-                {agreement.expirationDate}
+                <strong> Duration: </strong> {detailedAgreement.signingDate} :{" "}
+                {detailedAgreement.expirationDate}
               </ListGroup.Item>
             </ListGroup>
           </Card>

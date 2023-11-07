@@ -3,7 +3,7 @@ package pl.edu.agh.student.rentsys.model;
 import lombok.Builder;
 import lombok.Data;
 
-import java.time.ZoneOffset;
+import java.time.ZoneId;
 import java.util.UUID;
 
 @Data
@@ -12,7 +12,7 @@ public class MessageDTO {
     private UUID id;
     private String receiver;
     private String content;
-    protected String sender;
+    private String sender;
     private Long sendTimestamp;
 
     public static MessageDTO convertFromMessage(Message message) {
@@ -21,7 +21,7 @@ public class MessageDTO {
                 .receiver(message.getReceiver().getUsername())
                 .sender(message.getSender().getUsername())
                 .content(message.getContent())
-                .sendTimestamp(message.getSendTime().toEpochSecond(ZoneOffset.ofHours(0)))
+                .sendTimestamp(message.getSendTime().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli())
                 .build();
     }
 }

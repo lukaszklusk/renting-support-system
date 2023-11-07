@@ -20,7 +20,7 @@ import {
   TypingIndicator,
 } from "@chatscope/chat-ui-kit-react";
 
-import useCommunication from "../../../hooks/useCommunication";
+import useData from "../../../hooks/useData";
 import img from "../../../img.png";
 
 import useAuth from "../../../hooks/useAuth";
@@ -34,7 +34,7 @@ const Chat = () => {
   const [sortedConversations, setSortedConversations] = useState([]);
   const [sortedActiveMessages, setSortedActiveMessages] = useState([]);
 
-  const { messages, sendMessage } = useCommunication();
+  const { messages, sendMessage } = useData();
   const { auth } = useAuth();
 
   const MyConversation = {

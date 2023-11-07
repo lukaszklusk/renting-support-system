@@ -3,6 +3,7 @@ package pl.edu.agh.student.rentsys.model;
 import lombok.Builder;
 import lombok.Data;
 
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -11,6 +12,7 @@ import java.util.stream.Collectors;
 public class ApartmentDTO {
     private Long id;
     private UserDTO owner;
+    private UserDTO tenant;
     private String name;
     private String address;
     private String city;
@@ -29,6 +31,7 @@ public class ApartmentDTO {
         return ApartmentDTO.builder()
                 .id(apartment.getId())
                 .owner(UserDTO.convertFromUser(apartment.getOwner()))
+                .tenant(Optional.ofNullable(apartment.getTenant()).map(UserDTO::convertFromUser).orElse(null))
                 .name(apartment.getName())
                 .address(apartment.getAddress())
                 .city(apartment.getCity())

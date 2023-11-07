@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import useCommunication from "../../../hooks/useCommunication";
+import useData from "../../../hooks/useData";
 import {
   ConversationList,
   Conversation,
@@ -20,7 +20,7 @@ import Chat from "./Chat";
 // patrikIco,
 
 const SendMessage = () => {
-  const { sendMessage } = useCommunication();
+  const { sendMessage } = useData();
   const [receiver, setReceiver] = useState("");
   const [message, setMessage] = useState("");
 

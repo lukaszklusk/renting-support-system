@@ -3,6 +3,7 @@ package pl.edu.agh.student.rentsys.model;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.HashSet;
 import java.util.Set;
 
 @Entity
@@ -16,7 +17,7 @@ import java.util.Set;
                 @UniqueConstraint(name = "name_user_unique", columnNames = {"name", "owner_id"})
         }
 )
-public class Apartment {
+public class Apartment implements Notifiable{
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -24,6 +25,8 @@ public class Apartment {
     @ManyToOne
     @JoinColumn(name = "owner_id")
     private User owner;
+    @OneToOne
+    private User tenant;
     private String name;
     private String address;
     private String city;
@@ -44,5 +47,13 @@ public class Apartment {
 
     @OneToMany(fetch = FetchType.LAZY)
     private Set<Notification> notifications;
+
+    @Override
+    public void addNotification(Notification notification) {
+        if (notifications == null) {
+            notifications = new HashSet<>();
+        }
+        notifications.add(notification);
+    }
 
 }

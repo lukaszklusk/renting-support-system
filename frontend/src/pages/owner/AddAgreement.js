@@ -19,8 +19,11 @@ import {
   PassFill,
 } from "react-bootstrap-icons";
 import "bootstrap/dist/css/bootstrap.css";
+
+import useData from "../../hooks/useData";
+import { useUserAgreement } from "../../hooks/useAgreements";
+
 import useAxiosUser from "../../hooks/useAxiosUser";
-import useAuth from "../../hooks/useAuth";
 import { useUserApartments } from "../../hooks/useApartments";
 
 const PRESENT_REGEX = /.+/;
@@ -29,15 +32,12 @@ const USERNAME_REGEX = /^[A-z][A-z0-9-_]{3,23}$/;
 const DATE_REGEX = /^\d{4}-\d{2}-\d{2}$/;
 
 const AddAgreement = () => {
-  const axiosUser = useAxiosUser();
   const fetchUserApartments = useUserApartments();
+  const postUserAgreement = useUserAgreement();
+  const { username, isClient, isOwner, isAdmin, apartments, agreements } =
+    useData();
 
   const nameRef = useRef();
-
-  const { auth } = useAuth();
-  const username = auth.username;
-  const AGREEMENT_POST_URL = `/user/${username}/agreement`;
-
   const [ownerApartments, setOwnerApartments] = useState([]);
 
   const [agreementName, setAgreementName] = useState("");
@@ -70,8 +70,6 @@ const AddAgreement = () => {
   }, []);
 
   useEffect(() => {
-    const username = auth.username;
-
     if (username) {
       const fetchData = async () => {
         const apartments = await fetchUserApartments(username);
@@ -94,55 +92,41 @@ const AddAgreement = () => {
 
   useEffect(() => {
     const isValid = PRESENT_REGEX.test(agreementName);
-    console.log(isValid);
-    console.log(agreementName);
     setIsAgreementNameValid(isValid);
   }, [agreementName]);
 
   useEffect(() => {
     const isValid = PRESENT_REGEX.test(apartmentName);
-    console.log(isValid);
-    console.log(apartmentName);
     setIsApartmentNameValid(isValid);
   }, [apartmentName]);
 
   useEffect(() => {
     const isValid = USERNAME_REGEX.test(clientUsername);
-    console.log(isValid);
-    console.log(clientUsername);
     setIsClientUsernameValid(isValid);
   }, [clientUsername]);
 
   useEffect(() => {
     const isValid = PRESENT_REGEX.test(monthlyPayment);
-    console.log(isValid);
-    console.log(monthlyPayment);
     setIsMontlyPaymentValid(isValid);
   }, [monthlyPayment]);
 
   useEffect(() => {
     const isValid = NUMBER_REGEX.test(administrationFee);
-    console.log(isValid);
-    console.log(administrationFee);
     setIsAdministrationFeeValid(isValid);
   }, [administrationFee]);
 
   useEffect(() => {
     const isValid = DATE_REGEX.test(signingDate);
-    console.log(isValid);
-    console.log(signingDate);
     setIsSigningDateValid(isValid);
   }, [signingDate]);
 
   useEffect(() => {
     const isValid = DATE_REGEX.test(expirationDate);
-    console.log(isValid);
-    console.log(signingDate);
     setIsExpirationDateValid(isValid);
   }, [expirationDate]);
 
   const getApartmentIdByName = (apartements, name) => {
-    const apartmentsByName = apartements.filter((apartment) => {
+    const apartmentsByName = apartements.find((apartment) => {
       return apartment.name === name;
     });
     if (apartmentsByName.length === 0) {
@@ -152,11 +136,12 @@ const AddAgreement = () => {
       console.log("error: ", name, "multiple names");
       return null;
     }
-    return apartmentsByName[0].id.toString();
+    return apartmentsByName[0].id;
   };
 
   const handleCreateAgreement = async (e) => {
     e.preventDefault();
+    console.log("+");
 
     if (
       !PRESENT_REGEX.test(agreementName) ||
@@ -171,26 +156,31 @@ const AddAgreement = () => {
       return;
     }
 
-    console.log("To Send");
-
     try {
       const payload = JSON.stringify({
         name: agreementName,
-        apartmentId: getApartmentIdByName(ownerApartments, apartmentName),
+        apartmentName,
+        // apartmentId: getApartmentIdByName(ownerApartments, apartmentName),
         administrationFee,
         monthlyPayment,
-        signingDate,
-        expirationDate,
+        signingDate: Math.floor(
+          new Date(signingDate).getTime() / (1000 * 60 * 60 * 24)
+        ),
+        expirationDate: Math.floor(
+          new Date(expirationDate).getTime() / (1000 * 60 * 60 * 24)
+        ),
         ownerAccountNo: "ownerAccountNo",
-        tenant: clientUsername,
+        tenant: { username: clientUsername },
       });
-
-      const response = await axiosUser.post(AGREEMENT_POST_URL, payload, {
-        headers: { "Content-Type": "application/json" },
-        withCredentials: true,
-      });
-      console.log(response.data);
-      console.log(JSON.stringify(response));
+      // const response = await axiosUser.post(AGREEMENT_POST_URL, payload, {
+      //   headers: { "Content-Type": "application/json" },
+      //   withCredentials: true,
+      // });
+      // console.log(response.data);
+      // console.log(JSON.stringify(response));
+      console.log("payload:", payload);
+      const data = await postUserAgreement(username, payload);
+      console.log("data:", data);
       setSubmitMsg("Apartment created sucessfully");
       setErrMsg("");
     } catch (err) {

@@ -46,11 +46,11 @@ public class DataInitializer implements CommandLineRunner {
                 "Admin", "Admiński", "+48666420123");
         Apartment apartment = createRandApartment("Apartment 1", "ul. Abc 15",
                 "Kraków", "30-349",
-                50.017741,19.953718,owner);
+                50.017741,19.953718,owner, client);
 
         Apartment apartment2 = createRandApartment("Apartment 2", "ul. Dde 49",
                 "Kraków", "30-349",
-                50.077285,19.872920,owner);
+                50.077285,19.872920,owner, null);
 
         createAgreement("Agreement 1", apartment, owner,
                 LocalDate.of(2023,3, 13),
@@ -60,12 +60,12 @@ public class DataInitializer implements CommandLineRunner {
         createAgreement("Agreement 2", apartment, owner,
                 LocalDate.of(2021,3, 13),
                 LocalDate.of(2022, 3,1),
-                client3, "PL84109024029425764271319137", AgreementStatus.cancelled);
+                client3, "PL84109024029425764271319137", AgreementStatus.finished);
 
         createAgreement("Agreement 3", apartment, owner,
                 LocalDate.of(2019,3, 13),
                 LocalDate.of(2020, 3,1),
-                client2, "PL84109024029425764271319137", AgreementStatus.cancelled);
+                client2, "PL84109024029425764271319137", AgreementStatus.finished);
 
         createAgreement("Agreement 72", apartment2, owner,
                 LocalDate.of(2023,7, 15),
@@ -158,16 +158,16 @@ public class DataInitializer implements CommandLineRunner {
                 .sendTimestamp(Timestamp.valueOf(LocalDateTime.of(2023, 10, 31, 17, 23, 35, 50)).getTime())
                 .build();
 
-        messageService.createMessageFromDTO(messageDTO1);
-        messageService.createMessageFromDTO(messageDTO2);
-        messageService.createMessageFromDTO(messageDTO3);
-        messageService.createMessageFromDTO(messageDTO4);
-        messageService.createMessageFromDTO(messageDTO5);
-        messageService.createMessageFromDTO(messageDTO6);
-        messageService.createMessageFromDTO(messageDTO7);
-        messageService.createMessageFromDTO(messageDTO8);
-        messageService.createMessageFromDTO(messageDTO9);
-        messageService.createMessageFromDTO(messageDTO10);
+        messageService.createMessage(messageDTO1);
+        messageService.createMessage(messageDTO2);
+        messageService.createMessage(messageDTO3);
+        messageService.createMessage(messageDTO4);
+        messageService.createMessage(messageDTO5);
+        messageService.createMessage(messageDTO6);
+        messageService.createMessage(messageDTO7);
+        messageService.createMessage(messageDTO8);
+        messageService.createMessage(messageDTO9);
+        messageService.createMessage(messageDTO10);
 
         System.out.println("----- FINISHED DATA INITIALIZATION -----");
     }
@@ -192,7 +192,7 @@ public class DataInitializer implements CommandLineRunner {
     private Apartment createRandApartment(String name, String address,
                                      String city, String postalCode,
                                      double latitude, double longitude,
-                                     User owner) throws IOException {
+                                     User owner, User client) throws IOException {
         Apartment apartment = new Apartment();
         Set<ApartmentProperty> properties = new HashSet<>();
         int randomNum = ThreadLocalRandom.current().nextInt(300, 600 + 1);
@@ -242,6 +242,7 @@ public class DataInitializer implements CommandLineRunner {
         apartment.setLatitude(latitude);
         apartment.setLongitude(longitude);
         apartment.setOwner(owner);
+        apartment.setTenant(client);
         apartment.setNotifications(new HashSet<>());
         randomNum = ThreadLocalRandom.current().nextInt(1000000, 10000000);
         apartment.setDescription("Oto apartament abc" + randomNum);

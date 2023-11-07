@@ -70,6 +70,15 @@ const AppNavbar = () => {
                   >
                     Chat
                   </Nav.Link>
+                  <Nav.Link
+                    as={Link}
+                    to="/notifications"
+                    className={`custom-navbar-link ${
+                      activeLink === "notifications" ? "active" : ""
+                    }`}
+                  >
+                    Notifications
+                  </Nav.Link>
                 </>
               )}
 
@@ -110,6 +119,15 @@ const AppNavbar = () => {
                     }`}
                   >
                     Chat
+                  </Nav.Link>
+                  <Nav.Link
+                    as={Link}
+                    to="/notifications"
+                    className={`custom-navbar-link ${
+                      activeLink === "notifications" ? "active" : ""
+                    }`}
+                  >
+                    Notifications
                   </Nav.Link>
                 </>
               )}
