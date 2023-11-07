@@ -44,6 +44,7 @@ export const DataProvider = ({ children }) => {
   const [isOwner, setIsOwner] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
 
+  console.log("isDataFetched:", isDataFetched);
   const configCommunication = () => {
     if (isLoggedIn) {
       configWebSocket();

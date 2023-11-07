@@ -8,7 +8,7 @@ import SectionHeader from "../../components/common/SectionHeader";
 import OwnerApartmentsList from "../../components/owner/OwnerApartmentsList";
 
 const OwnerApartments = () => {
-  const { isDataFetched, apartments } = useData();
+  const { isOwner, isDataFetched, apartments } = useData();
 
   const [rentedApartments, setRentedApartments] = useState([]);
   const [vacantApartments, setVacantApartments] = useState([]);
@@ -24,7 +24,7 @@ const OwnerApartments = () => {
 
   return (
     <section>
-      {isDataFetched ? (
+      {isDataFetched && isOwner ? (
         <>
           <SectionHeader title="Rented Apartments" />
           <OwnerApartmentsList apartments={rentedApartments} />
@@ -35,8 +35,17 @@ const OwnerApartments = () => {
           </Button>
         </>
       ) : (
-        <p>Loading</p>
+        <span></span>
       )}
+      {isDataFetched && !isOwner ? (
+        <>
+          <SectionHeader title="Rented Apartment" />
+          <OwnerApartmentsList apartments={rentedApartments} />
+        </>
+      ) : (
+        <span></span>
+      )}
+      {!isDataFetched ? <p>Loading</p> : <span></span>}
     </section>
   );
 };

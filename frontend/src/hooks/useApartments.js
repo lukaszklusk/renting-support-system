@@ -1,5 +1,6 @@
 import useGetRequest from "./useGetRequest";
 import usePostRequest from "./usePostRequest";
+import usePatchRequest from "./usePatchRequest";
 
 const getBaseUrl = (username) => {
   return `/user/${username}/apartments`;
@@ -71,4 +72,15 @@ export const useUserApartmentEquipment = () => {
     return postData(url, payload);
   };
   return postUserApartmentEquipment;
+};
+
+export const usePatchApartmentEquipmentStatus = () => {
+  const patchData = usePatchRequest();
+
+  const patchUserEquipmentStatus = async (username, aid, eid, status) => {
+    const BASE_URL = getBaseUrl(username);
+    const url = `${BASE_URL}/${aid}/equipments/${eid}`;
+    return patchData(url, status);
+  };
+  return patchUserEquipmentStatus;
 };

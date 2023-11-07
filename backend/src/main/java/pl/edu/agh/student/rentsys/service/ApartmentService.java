@@ -40,7 +40,7 @@ public class ApartmentService {
         pictureRepository.saveAll(apartment.getPictures());
         apartmentPropertyRepository.saveAll(apartment.getProperties());
 
-        Notification notification = notificationService.createAndSendNotification(apartment, NotificationType.apartment_created);
+        Notification notification = notificationService.createAndSendNotification(apartment.getOwner(), null, NotificationType.apartment_created, NotificationPriority.critical, apartment.getName());
         apartment.addNotification(notification);
 
         Apartment createdApartment = apartmentRepository.save(apartment);

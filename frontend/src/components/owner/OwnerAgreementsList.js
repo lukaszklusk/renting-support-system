@@ -3,25 +3,32 @@ import Card from "react-bootstrap/Card";
 import ListGroup from "react-bootstrap/ListGroup";
 import { ROLES } from "../../config/roles";
 import useAuth from "../../hooks/useAuth";
+import useData from "../../hooks/useData";
 import { Button } from "react-bootstrap";
 import { usePatchUserAgreementStatus } from "../../hooks/useAgreements";
 
 function OwnerAgreementsList({ agreements, isProposed }) {
-  const { auth } = useAuth();
-  const username = auth.username;
+  const { username, isClient, isOwner, isAdmin } = useData();
   const fetchPatchUserAgreementStatus = usePatchUserAgreementStatus();
 
-  const isLoggedIn = auth.isLoggedIn;
-  const isClient = isLoggedIn && auth?.roles?.includes(ROLES.client);
-  const isOwner = isLoggedIn && auth?.roles?.includes(ROLES.owner);
-  const isAdmin = isLoggedIn && auth?.roles?.includes(ROLES.admin);
+  const epochDaysToStringDate = (epochDays) => {
+    const millisecondsPerDay = 24 * 60 * 60 * 1000;
+    const date = new Date(
+      epochDays * millisecondsPerDay +
+        new Date().getTimezoneOffset() * 60 * 1000
+    );
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    return `${day}-${month}-${year}`;
+  };
 
   const acceptOffer = async (agreement) => {
     const response = await fetchPatchUserAgreementStatus(
       username,
       agreement.id,
       {
-        status: "accepted",
+        status: isOwner ? "active" : "accepted",
       }
     );
     console.log(response);
@@ -32,7 +39,7 @@ function OwnerAgreementsList({ agreements, isProposed }) {
       username,
       agreement.id,
       {
-        status: "rejected",
+        status: isOwner ? "rejected_owner" : "rejected_client",
       }
     );
     console.log(response);
@@ -58,8 +65,9 @@ function OwnerAgreementsList({ agreements, isProposed }) {
               </ListGroup.Item>
               <ListGroup.Item>
                 {" "}
-                <strong>Duration:</strong> {agreement.signingDate} :{" "}
-                {agreement.expirationDate}
+                <strong>Duration:</strong>{" "}
+                {epochDaysToStringDate(agreement.signingDate)} :{" "}
+                {epochDaysToStringDate(agreement.expirationDate)}
               </ListGroup.Item>
 
               {isOwner ? (
@@ -105,7 +113,7 @@ function OwnerAgreementsList({ agreements, isProposed }) {
               </Card.Link>
             </Card.Footer>
 
-            {isProposed && isClient && (
+            {isProposed && (
               <Card.Footer>
                 <Button
                   className="flex-grow-1"

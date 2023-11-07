@@ -58,7 +58,7 @@ public class EquipmentController {
         }
     }
 
-    @PutMapping("/{eid}")
+    @PatchMapping("/{eid}")
     public ResponseEntity<EquipmentDTO> changeEquipmentStatus(@PathVariable String username,
                                                         @PathVariable long aid,
                                                         @PathVariable long eid,

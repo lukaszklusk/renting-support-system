@@ -69,17 +69,18 @@ public class NotificationService {
         notificationRepository.delete(notification);
     }
 
-    public Notification changeNotificationReadStatus(String username, UUID clientId, Boolean status) {
+    public NotificationDTO changeNotificationReadStatus(String username, UUID clientId, Boolean status) {
         User user = userService.getUserByUsername(username).orElseThrow(EntityNotFoundException::new);
         Notification notification = getNotificationByClientId(clientId).orElseThrow(EntityNotFoundException::new);
         if (user == notification.getSender()) {
             notification.setSenderIsRead(status);
+            return NotificationDTO.convertFromSenderNotification(notificationRepository.save(notification));
         } else if (user == notification.getReceiver()) {
             notification.setReceiverIsRead(status);
+            return NotificationDTO.convertFromReceiverNotification(notificationRepository.save(notification));
         } else {
             throw new IllegalStateException();
         }
-        return notificationRepository.save(notification);
     }
 
     public Notification markNotificationAsRead(Notification notification){
@@ -125,44 +126,9 @@ public class NotificationService {
         }
     }
 
-    private Notification createAndSendNotification (User sender, User receiver, NotificationType notificationType, NotificationPriority priority, String name) {
+    public Notification createAndSendNotification (User sender, User receiver, NotificationType notificationType, NotificationPriority priority, String name) {
         Notification notification = createNotification(sender, receiver, notificationType, priority, name);
         sendNotificationToUsers(notification);
         return notification;
-    }
-
-    public Notification createAndSendNotification (Agreement agreement, NotificationType notificationType, String name) {
-        return createAndSendNotification(
-                agreement.getOwner(),
-                agreement.getTenant(),
-                notificationType,
-                NotificationPriority.critical,
-                name
-        );
-    }
-
-    public Notification createAndSendNotification (Equipment equipment, NotificationType notificationType, String name) {
-        User owner = equipment.getApartment().getOwner();
-        User client = equipment.getApartment().getTenant();
-
-        return createAndSendNotification(
-                owner,
-                client,
-                notificationType,
-                NotificationPriority.important,
-                name
-        );
-    }
-
-    public Notification createAndSendNotification (Apartment apartment, NotificationType notificationType) {
-        User owner = apartment.getOwner();
-
-        return createAndSendNotification(
-                owner,
-                null,
-                notificationType,
-                NotificationPriority.critical,
-                apartment.getName()
-        );
     }
 }

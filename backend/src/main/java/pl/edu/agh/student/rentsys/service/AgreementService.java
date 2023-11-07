@@ -114,11 +114,21 @@ public class AgreementService {
             return activateAgreement(agreement);
         }
 
-//        TODO:
+        User sender = null;
+        User receiver = null;
+        if ((agreementStatus.equals(AgreementStatus.proposed) || agreementStatus.equals(AgreementStatus.rejected_owner) || agreementStatus.equals(AgreementStatus.withdrawn)) || agreementStatus.equals(AgreementStatus.cancelled_owner)) {
+            sender = agreement.getOwner();
+            receiver = agreement.getTenant();
+        } else {
+            sender = agreement.getTenant();
+            receiver = agreement.getOwner();
+        }
         agreement.setAgreementStatus(agreementStatus);
         Notification notification = notificationService.createAndSendNotification (
-                agreement,
-                NotificationType.agreement_activated,
+                sender,
+                receiver,
+                NotificationType.mapStatusToNotificationType(agreementStatus),
+                NotificationPriority.critical,
                 agreement.getName()
         );
         agreement.addNotification(notification);
@@ -144,22 +154,34 @@ public class AgreementService {
                 notificationType = NotificationType.agreement_rejected_owner;
             }
 
+            User sender = modifiedAgreement.getOwner();
+            User receiver = modifiedAgreement.getTenant();
+
             Notification notification = notificationService.createAndSendNotification (
-                    modifiedAgreement,
+                    sender, receiver,
                     notificationType,
+                    NotificationPriority.critical,
                     activatedAgreement.getName()
             );
             modifiedAgreement.addNotification(notification);
             agreementRepository.save(modifiedAgreement);
         }
 
+        User sender = activatedAgreement.getOwner();
+        User receiver = activatedAgreement.getTenant();
         activatedAgreement.setAgreementStatus(AgreementStatus.active);
         Notification notification = notificationService.createAndSendNotification (
-                activatedAgreement,
+                sender, receiver,
                 NotificationType.agreement_activated,
+                NotificationPriority.critical,
                 activatedAgreement.getName()
         );
         activatedAgreement.addNotification(notification);
+
+        Apartment apartment = activatedAgreement.getApartment();
+        apartment.setTenant(receiver);
+        apartmentRepository.save(apartment);
+
         return agreementRepository.save(activatedAgreement);
     }
 
@@ -183,7 +205,7 @@ public class AgreementService {
                 .expirationDate(LocalDate.ofEpochDay(agreementDTO.getExpirationDate()))
                 .build();
 
-        Notification notification = notificationService.createAndSendNotification(agreement, NotificationType.agreement_proposed, agreement.getApartment().getName());
+        Notification notification = notificationService.createAndSendNotification(owner, tenant, NotificationType.agreement_proposed, NotificationPriority.critical, agreement.getApartment().getName());
         agreement.addNotification(notification);
         return agreementRepository.save(agreement);
     }

@@ -50,10 +50,10 @@ function App() {
         {/* client secured routes */}
         {isClient && (
           <Route element={<RequireAuth roles={[ROLES.client]} />}>
-            <Route path="dashboard" element={<ClientDashboard />} />
-            <Route path="apartments" element={<ClientApartments />} />
+            <Route path="dashboard" element={<OwnerDashboard />} />
+            <Route path="apartments" element={<OwnerApartments />} />
             <Route path="apartments/:id" element={<OwnerApartmentDetails />} />
-            <Route path="agreements" element={<ClientAgreements />} />
+            <Route path="agreements" element={<OwnerAgreements />} />
             <Route path="agreements/:id" element={<OwnerAgreementDetails />} />
             <Route path="chat" element={<SendMessage />} />
             <Route path="notifications" element={<Notifications />} />

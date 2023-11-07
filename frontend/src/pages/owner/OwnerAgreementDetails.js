@@ -17,7 +17,7 @@ const OwnerAgreementDetails = () => {
 
   const onDetailedAgreementLoad = () => {
     setDetailedApartment(
-      apartments.find((item) => item.id === detailedAgreement.apartmentId)
+      apartments.find((item) => item.id === detailedAgreement?.apartmentId)
     );
   };
 
@@ -37,7 +37,7 @@ const OwnerAgreementDetails = () => {
             <Card.Header>
               <Card.Link
                 as={Link}
-                to={`/apartments/${detailedAgreement.apartmentId}`}
+                to={`/apartments/${detailedAgreement?.apartmentId}`}
               >
                 {detailedAgreement.name}
               </Card.Link>

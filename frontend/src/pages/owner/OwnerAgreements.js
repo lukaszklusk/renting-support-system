@@ -8,7 +8,7 @@ import { Link } from "react-router-dom";
 import { Button } from "react-bootstrap";
 
 function OwnerAgreements() {
-  const { isDataFetched, agreements } = useData();
+  const { isOwner, isDataFetched, agreements } = useData();
 
   const [activeAgreements, setActiveAgreements] = useState(null);
   const [acceptedAgreements, setAcceptedAgreements] = useState(null);
@@ -28,12 +28,15 @@ function OwnerAgreements() {
 
   return (
     <section>
-      {isDataFetched ? (
+      {isDataFetched && isOwner ? (
         <>
           <SectionHeader title="Active Agreements" />
           <OwnerAgreementsList agreements={activeAgreements} />
           <SectionHeader title="Accepted Agreements" />
-          <OwnerAgreementsList agreements={acceptedAgreements} />
+          <OwnerAgreementsList
+            agreements={acceptedAgreements}
+            isProposed={true}
+          />
           {/* <OwnerAgreementsList agreements={[...activeAgreements, acceptedAgreements]} /> */}
           <SectionHeader title="Proposed Agreements" />
           <OwnerAgreementsList agreements={proposedAgreements} />
@@ -44,8 +47,24 @@ function OwnerAgreements() {
           {/* <SectionHeader title="Propose New Agreement" as={Link} to="/new" /> */}
         </>
       ) : (
-        <p>Loading</p>
+        <span></span>
       )}
+      {isDataFetched && !isOwner ? (
+        <>
+          <SectionHeader title="Active Agreement" />
+          <OwnerAgreementsList agreements={activeAgreements} />
+          <SectionHeader title="Accepted Agreements" />
+          <OwnerAgreementsList agreements={acceptedAgreements} />
+          <SectionHeader title="Proposed Agreements" />
+          <OwnerAgreementsList
+            agreements={proposedAgreements}
+            isProposed={true}
+          />
+        </>
+      ) : (
+        <span></span>
+      )}
+      {!isDataFetched ? <p>Loading</p> : <span></span>}
     </section>
   );
 }
