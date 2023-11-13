@@ -20,11 +20,9 @@ import {
 } from "react-bootstrap-icons";
 import "bootstrap/dist/css/bootstrap.css";
 
-import useData from "../../hooks/useData";
-import { useUserAgreement } from "../../hooks/useAgreements";
-
-import useAxiosUser from "../../hooks/useAxiosUser";
-import { useUserApartments } from "../../hooks/useApartments";
+import useData from "../../../hooks/useData";
+import { useUserAgreement } from "../../../hooks/useAgreements";
+import { useUserApartments } from "../../../hooks/useApartments";
 
 const PRESENT_REGEX = /.+/;
 const NUMBER_REGEX = /^(?!0\d)\d{1,5}(\.\d{1,2})?$/;
@@ -34,8 +32,7 @@ const DATE_REGEX = /^\d{4}-\d{2}-\d{2}$/;
 const AddAgreement = () => {
   const fetchUserApartments = useUserApartments();
   const postUserAgreement = useUserAgreement();
-  const { username, isClient, isOwner, isAdmin, apartments, agreements } =
-    useData();
+  const { username, setSuccessMsg, setErrMsg } = useData();
 
   const nameRef = useRef();
   const [ownerApartments, setOwnerApartments] = useState([]);
@@ -61,9 +58,6 @@ const AddAgreement = () => {
 
   const [expirationDate, setExpirationDate] = useState("");
   const [isExpirationDateValid, setIsExpirationDateValid] = useState(false);
-
-  const [submitMsg, setSubmitMsg] = useState("");
-  const [errMsg, setErrMsg] = useState("");
 
   useEffect(() => {
     nameRef.current.focus();
@@ -160,7 +154,6 @@ const AddAgreement = () => {
       const payload = JSON.stringify({
         name: agreementName,
         apartmentName,
-        // apartmentId: getApartmentIdByName(ownerApartments, apartmentName),
         administrationFee,
         monthlyPayment,
         signingDate: Math.floor(
@@ -172,19 +165,14 @@ const AddAgreement = () => {
         ownerAccountNo: "ownerAccountNo",
         tenant: { username: clientUsername },
       });
-      // const response = await axiosUser.post(AGREEMENT_POST_URL, payload, {
-      //   headers: { "Content-Type": "application/json" },
-      //   withCredentials: true,
-      // });
-      // console.log(response.data);
-      // console.log(JSON.stringify(response));
+
       console.log("payload:", payload);
       const data = await postUserAgreement(username, payload);
       console.log("data:", data);
-      setSubmitMsg("Apartment created sucessfully");
+      setSuccessMsg("Apartment created sucessfully");
       setErrMsg("");
     } catch (err) {
-      setSubmitMsg("");
+      setSuccessMsg("");
       if (!err?.response) {
         setErrMsg("Server did not respond");
       } else {
@@ -203,8 +191,6 @@ const AddAgreement = () => {
               <Card.Title className="text-center mb-5">
                 Propose New Agreement
               </Card.Title>
-              {errMsg && <Alert variant="danger">{errMsg}</Alert>}
-              {submitMsg && <Alert variant="success">{submitMsg}</Alert>}
               <Form onSubmit={handleCreateAgreement}>
                 <Form.Group controlId="formAgreementName" className="my-3">
                   <InputGroup>

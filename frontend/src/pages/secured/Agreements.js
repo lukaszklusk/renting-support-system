@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 
 import useData from "../../hooks/useData";
 import SectionHeader from "../../components/common/SectionHeader";
-import OwnerAgreementsList from "../../components/owner/OwnerAgreementsList";
+import OwnerAgreementsList from "../../components/owner/AgreementsList";
 
 import { Link } from "react-router-dom";
 import { Button } from "react-bootstrap";
@@ -37,14 +37,12 @@ function OwnerAgreements() {
             agreements={acceptedAgreements}
             isProposed={true}
           />
-          {/* <OwnerAgreementsList agreements={[...activeAgreements, acceptedAgreements]} /> */}
           <SectionHeader title="Proposed Agreements" />
           <OwnerAgreementsList agreements={proposedAgreements} />
 
           <Button as={Link} to="new" variant="outline-dark">
             Propose New Agreement
           </Button>
-          {/* <SectionHeader title="Propose New Agreement" as={Link} to="/new" /> */}
         </>
       ) : (
         <span></span>

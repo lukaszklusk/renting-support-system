@@ -11,12 +11,12 @@ const useGetRequest = () => {
       const response = await axiosUser.get(url);
       return response.data;
     } catch (err) {
-      // TODO
-      console.log(err);
+      console.log("error fetching data", err);
       navigate("/sign-in", {
         state: { from: location },
         replace: true,
       });
+      throw err;
     }
   };
   return fetchData;

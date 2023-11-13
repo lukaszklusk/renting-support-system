@@ -5,31 +5,25 @@ import { ROLES } from "./config/roles";
 import useData from "./hooks/useData";
 
 import Layout from "./components/common/Layout";
-import Home from "./components/common/Home";
-import About from "./components/common/About";
-import Contact from "./components/common/Contact";
-import NotFound from "./components/common/NotFound";
+import Home from "./pages/public/Home";
+import About from "./pages/public/About";
+import Contact from "./pages/public/Contact";
+import NotFound from "./pages/public/NotFound";
 
 import Register from "./components/common/auth/Register";
 import Login from "./components/common/auth/Login";
 import RequireAuth from "./components/common/auth/RequireAuth";
 
-import OwnerDashboard from "./pages/owner/OwnerDashboard";
-import OwnerApartments from "./pages/owner/OwnerApartments";
-import OwnerAgreements from "./pages/owner/OwnerAgreements";
-import NewApartment from "./pages/owner/NewApartment";
+import OwnerDashboard from "./pages/secured/Dashboard";
+import OwnerApartments from "./pages/secured/Apartments";
+import OwnerAgreements from "./pages/secured/Agreements";
+import NewApartment from "./pages/secured/owner/NewApartment";
 import OwnerReports from "./components/owner/OwnerReports";
-import OwnerApartmentDetails from "./pages/owner/OwnerApartmentDetails";
-import AddAgreement from "./pages/owner/AddAgreement";
-
-import ClientDashboard from "./pages/client/ClientDashboard";
-import ClientAgreements from "./pages/client/ClientAgreements";
-import ClientApartments from "./pages/client/ClientApartments";
+import OwnerApartmentDetails from "./pages/secured/ApartmentDetails";
+import AddAgreement from "./pages/secured/owner/NewAgreement";
 
 import AdminDashboard from "./components/admin/AdminDashboard";
-import OwnerAgreementDetails from "./pages/owner/OwnerAgreementDetails";
-
-import FileUploadForm from "./pages/owner/MyForm";
+import OwnerAgreementDetails from "./pages/secured/AgreementDetails";
 
 import SendMessage from "./components/common/communication/SendMessage";
 import Notifications from "./components/common/communication/Notifications";
@@ -64,7 +58,6 @@ function App() {
         {isOwner && (
           <Route element={<RequireAuth roles={[ROLES.owner]} />}>
             <Route path="dashboard" element={<OwnerDashboard />} />
-            <Route exact path="test" element={<FileUploadForm />} />
             <Route exact path="apartments" element={<OwnerApartments />} />
             <Route path="apartments/:id" element={<OwnerApartmentDetails />} />
             <Route path="apartments/new" element={<NewApartment />} />

@@ -5,7 +5,7 @@ import useData from "../../hooks/useData";
 import { Link } from "react-router-dom";
 import { Button } from "react-bootstrap";
 import SectionHeader from "../../components/common/SectionHeader";
-import OwnerApartmentsList from "../../components/owner/OwnerApartmentsList";
+import OwnerApartmentsList from "../../components/owner/ApartmentsList";
 
 const OwnerApartments = () => {
   const { isOwner, isDataFetched, apartments } = useData();

@@ -1,10 +1,8 @@
 import React, { useState, useEffect } from "react";
 
 import useAuth from "../../../hooks/useAuth";
-import useAxiosUser from "../../../hooks/useAxiosUser";
 import useData from "../../../hooks/useData";
 import { usePatchMessageReadStatus } from "../../../hooks/useCommunication";
-import { useUserApartmentEquipment } from "../../../hooks/useApartments";
 
 import {
   getNotificationTitle,
@@ -48,18 +46,6 @@ const Notifications = () => {
     );
   }, [notifications]);
 
-  // const handleClick = async () => {
-  //   const payload = JSON.stringify({
-  //     apartmentId: 1,
-  //     name: "test name",
-  //     description: "test description",
-  //     isBroken: false,
-  //   });
-  //   console.log("payload: ", payload);
-  //   const response = await postUserApartmentEquipment("owner", 1, payload);
-  //   console.log(response);
-  // };
-
   const expandNotification = (notificationId) => {
     const updatedNotifications = notifications?.map((notification) => {
       if (notification.id == notificationId) {
@@ -101,8 +87,9 @@ const Notifications = () => {
       <h2>Notification List</h2>
       <List sx={{ width: "100%", bgcolor: "background.paper" }}>
         {sortedNotifications?.map((notification, index) => (
-          <>
-            <ListItem alignItems="flex-start" disablePadding>
+          // <>
+          <div key={index}>
+            <ListItem key={index} alignItems="flex-start" disablePadding>
               <ListItemButton onClick={() => handleExpand(notification)}>
                 <ListItemText
                   primary={
@@ -129,24 +116,21 @@ const Notifications = () => {
                     </div>
                   }
                   secondary={
-                    <div>
-                      <React.Fragment>
-                        <Typography
-                          variant="body2"
-                          color="text.primary"
-                          fontWeight={notification?.isRead ? "normal" : "bold"}
-                        >
-                          {displayContent(notification)}
-                        </Typography>
-                      </React.Fragment>
-                    </div>
+                    <Typography
+                      variant="body2"
+                      color="text.primary"
+                      fontWeight={notification?.isRead ? "normal" : "bold"}
+                    >
+                      {displayContent(notification)}
+                    </Typography>
                   }
                 />
               </ListItemButton>
             </ListItem>
-
-            <Divider component="li" />
-          </>
+            {index < sortedNotifications.length - 1 && (
+              <Divider component="li" />
+            )}
+          </div>
         ))}
       </List>
     </div>

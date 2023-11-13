@@ -44,24 +44,36 @@ export const DataProvider = ({ children }) => {
   const [isOwner, setIsOwner] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
 
-  console.log("isDataFetched:", isDataFetched);
+  const [successMsg, setSuccessMsg] = useState("");
+  const [errMsg, setErrMsg] = useState("");
+
+  const [firstMsgRender, setFirstMsgRender] = useState(false);
+
   const configCommunication = () => {
     if (isLoggedIn) {
       configWebSocket();
-      // TODO
-      fetchData();
+      console.log("configCommunication fetching");
+      !isDataFetched && fetchData();
     } else {
       disconnect();
     }
   };
 
-  const fetchData = () => {
-    if (isLoggedIn && !isDataFetched) {
-      fetchMessages();
-      fetchNotifications();
-      fetchApartments();
-      fetchAgreements();
+  const fetchData = async () => {
+    try {
+      console.log("fetcing data", !isDataFetched, username);
+      await Promise.all([
+        fetchMessages(),
+        fetchApartments(),
+        fetchAgreements(),
+        fetchNotifications(),
+      ]);
+      console.log("setting is data fetch to true after fetching");
       setIsDataFetched(true);
+    } catch (err) {
+      console.log("err fetching data:", err);
+      console.log("setting is data fetch to false after failed fetching");
+      setIsDataFetched(false);
     }
   };
 
@@ -71,6 +83,7 @@ export const DataProvider = ({ children }) => {
       setAgreements(data);
     } catch (err) {
       console.log("error fetching apartments:", err);
+      return err;
     }
   };
 
@@ -80,6 +93,7 @@ export const DataProvider = ({ children }) => {
       setApartments(data);
     } catch (err) {
       console.log("error fetching apartments:", err);
+      return err;
     }
   };
 
@@ -89,6 +103,7 @@ export const DataProvider = ({ children }) => {
       setMessages(data);
     } catch (err) {
       console.log("error fetching messages:", err);
+      return err;
     }
   };
 
@@ -98,6 +113,7 @@ export const DataProvider = ({ children }) => {
       setNotifications(data);
     } catch (err) {
       console.log("error fetching notifications:", err);
+      return err;
     }
   };
 
@@ -135,6 +151,7 @@ export const DataProvider = ({ children }) => {
 
   const onReceivedNotification = (notification) => {
     const receivedNotification = JSON.parse(notification.body);
+    console.log("setting is data fetch to false after receiving notif");
     setIsDataFetched(false);
     showNotification(receivedNotification);
     setNotifications((prevNotifications) => [
@@ -180,6 +197,7 @@ export const DataProvider = ({ children }) => {
       setUsername(auth?.username);
     } else {
       setUsername(null);
+      console.log("setting is data fetch to false after auth change to null");
       setIsDataFetched(false);
     }
   };
@@ -194,7 +212,27 @@ export const DataProvider = ({ children }) => {
   useEffect(connect, [stompClient]);
   useEffect(onAuthChange, [auth]);
   useEffect(onIsLoggedInChange, [isLoggedIn]);
-  useEffect(fetchData, [isDataFetched]);
+  useEffect(() => {
+    username && !isDataFetched && fetchData();
+  }, [isDataFetched]);
+
+  useEffect(() => {
+    console.log("on change isDataFetched:", isDataFetched);
+  }, [isDataFetched]);
+
+  useEffect(() => {
+    setFirstMsgRender(true);
+  }, [successMsg, errMsg]);
+
+  useEffect(() => {
+    console.log("render:", firstMsgRender);
+    if (firstMsgRender) {
+      setFirstMsgRender(false);
+    } else {
+      setSuccessMsg("");
+      setErrMsg("");
+    }
+  });
 
   const showNotification = (notification) => {
     const content = getNotificationTitle(notification);
@@ -220,7 +258,6 @@ export const DataProvider = ({ children }) => {
 
         messages,
         setMessages,
-        sendMessage,
         notifications,
         setNotifications,
         apartments,
@@ -229,6 +266,13 @@ export const DataProvider = ({ children }) => {
         setAgreements,
         isDataFetched,
         setIsDataFetched,
+
+        sendMessage,
+
+        successMsg,
+        errMsg,
+        setSuccessMsg,
+        setErrMsg,
       }}
     >
       {children}

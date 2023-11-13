@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 
 import useData from "../../hooks/useData";
 
-import OwnerDashboardApartments from "../../components/owner/OwnerDashboardApartments";
+import OwnerDashboardApartments from "../../components/owner/DashboardApartments";
 import SectionHeader from "../../components/common/SectionHeader";
 
 const OwnerDashboard = () => {

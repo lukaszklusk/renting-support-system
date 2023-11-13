@@ -1,19 +1,27 @@
+import React, { useEffect } from "react";
+
 import { Outlet } from "react-router-dom";
-import { Container } from "react-bootstrap";
+import { Alert, Container } from "react-bootstrap";
 
 import AppNavbar from "./AppNavbar";
 import Footer from "./Footer";
 
 import "../../styles/custom-styles.css";
 
-import { ToastContainer, toast } from "react-toastify";
+import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
+import useData from "../../hooks/useData";
+
 const Layout = () => {
+  const { errMsg, successMsg } = useData();
+
   return (
     <main className="App">
       <AppNavbar />
       <Container className="main-component">
+        {errMsg && <Alert variant="danger">{errMsg}</Alert>}
+        {successMsg && <Alert variant="success">{successMsg}</Alert>}
         <ToastContainer />
         <Outlet />
       </Container>

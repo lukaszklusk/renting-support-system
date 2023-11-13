@@ -7,13 +7,16 @@ const useLogout = () => {
   const { auth, setAuth } = useAuth();
 
   const logout = async () => {
+    console.log("trying logging out");
     if (auth?.isLoggedIn) {
       try {
+        console.log("starting logging out");
         await axios.post("/sign-out");
         setAuth({ isLoggedIn: false });
         navigate("/sign-in");
-      } catch (error) {
-        console.error("Signing out failed:", error);
+      } catch (err) {
+        console.error("Signing out failed:", err);
+        throw err;
       }
     }
   };

@@ -1,10 +1,11 @@
-import { useParams, Link } from "react-router-dom";
-import SectionHeader from "../../components/common/SectionHeader";
-import Card from "react-bootstrap/Card";
 import { useState, useEffect } from "react";
+import { useParams, Link } from "react-router-dom";
+
+import Card from "react-bootstrap/Card";
 import ListGroup from "react-bootstrap/ListGroup";
 
 import useData from "../../hooks/useData";
+import SectionHeader from "../../components/common/SectionHeader";
 
 const OwnerAgreementDetails = () => {
   const { id } = useParams();

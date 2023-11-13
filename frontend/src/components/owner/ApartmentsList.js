@@ -29,7 +29,7 @@ const OwnerApartmentsList = ({ apartments }) => {
                 Details
               </Card.Link>
               {/* TODO */}
-              <Card.Link className="flex-grow-1" href="#">
+              <Card.Link className="flex-grow-1" as={Link} to="#">
                 Agreement
               </Card.Link>
             </Card.Footer>

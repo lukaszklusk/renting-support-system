@@ -23,8 +23,6 @@ import {
 import useData from "../../../hooks/useData";
 import img from "../../../img.png";
 
-import useAuth from "../../../hooks/useAuth";
-
 const Chat = () => {
   const [messageInputValue, setMessageInputValue] = useState("");
 
@@ -34,8 +32,7 @@ const Chat = () => {
   const [sortedConversations, setSortedConversations] = useState([]);
   const [sortedActiveMessages, setSortedActiveMessages] = useState([]);
 
-  const { messages, sendMessage } = useData();
-  const { auth } = useAuth();
+  const { username, messages, sendMessage } = useData();
 
   const MyConversation = {
     create: function (name, messages, lastMessage) {
@@ -49,7 +46,6 @@ const Chat = () => {
 
   const createConversations = (messages) => {
     console.log("createConversations:", messages);
-    const username = auth?.username;
     const conversations = {};
     if (!username) {
       return conversations;
@@ -122,7 +118,6 @@ const Chat = () => {
           <Search placeholder="Search..." />
           <ConversationList>
             {sortedConversations.map((conversation, idx) => (
-              // <span key={idx}>
               <Conversation
                 key={idx}
                 name={conversation.name}
@@ -132,7 +127,6 @@ const Chat = () => {
               >
                 <Avatar src={img} name={conversation.name} />
               </Conversation>
-              // </span>
             ))}
           </ConversationList>
         </Sidebar>
@@ -146,35 +140,22 @@ const Chat = () => {
             </ConversationHeader>
             <MessageList>
               {sortedActiveMessages.map((msg, idx) => (
-                <>
-                  {msg.sender === auth?.username ? (
-                    <Message
-                      model={{
-                        message: msg.content,
-                        sentTime: "15 mins ago",
-                        sender: msg.content,
-                        direction: "outgoing",
-                        position: "single",
-                      }}
-                      // avatarSpacer
-                    >
-                      {" "}
+                <React.Fragment key={idx}>
+                  <Message
+                    model={{
+                      message: msg.content,
+                      sentTime: "15 mins ago",
+                      sender: msg.content,
+                      direction:
+                        msg.sender === username ? "outgoing" : "incoming",
+                      position: "single",
+                    }}
+                  >
+                    {msg.sender === username && (
                       <Avatar src={img} name={msg.sender} />
-                    </Message>
-                  ) : (
-                    <Message
-                      model={{
-                        message: msg.content,
-                        sentTime: "15 mins ago",
-                        sender: msg.content,
-                        direction: "incoming",
-                        position: "single",
-                      }}
-                    >
-                      <Avatar src={img} name={msg.sender} />
-                    </Message>
-                  )}
-                </>
+                    )}
+                  </Message>
+                </React.Fragment>
               ))}
             </MessageList>
             <MessageInput
