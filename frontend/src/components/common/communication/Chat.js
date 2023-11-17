@@ -25,6 +25,7 @@ import img from "../../../img.png";
 
 const Chat = () => {
   const [messageInputValue, setMessageInputValue] = useState("");
+  const [searchVal, setSearchVal] = useState("");
 
   const [activeConversation, setActiveConversation] = useState(null);
   const [conversations, setConversations] = useState([]);
@@ -79,6 +80,12 @@ const Chat = () => {
     }
   };
 
+  const filterConversations = (conversations, searchVal) => {
+    return conversations?.filter((conversation) =>
+      conversation.name.startsWith(searchVal)
+    );
+  };
+
   useEffect(() => {
     setConversations(createConversations(messages));
   }, [messages]);
@@ -106,6 +113,12 @@ const Chat = () => {
     );
   }, [activeConversation, messages]);
 
+  useEffect(() => {
+    console.log("searchVal", searchVal, conversations);
+    searchVal &&
+      setConversations(filterConversations(conversations, searchVal));
+  }, [searchVal]);
+
   return (
     <div
       style={{
@@ -115,7 +128,12 @@ const Chat = () => {
     >
       <MainContainer responsive>
         <Sidebar position="left" scrollable={false}>
-          <Search placeholder="Search..." />
+          <Search
+            placeholder="Search..."
+            value={searchVal}
+            onChange={setSearchVal}
+            onClearClick={() => setSearchVal("")}
+          />
           <ConversationList>
             {sortedConversations.map((conversation, idx) => (
               <Conversation

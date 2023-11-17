@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { useLocation, Link } from "react-router-dom";
+import { useNavigate, useLocation, Link } from "react-router-dom";
 import {
   Row,
   Col,
@@ -22,7 +22,6 @@ import "bootstrap/dist/css/bootstrap.css";
 
 import useData from "../../../hooks/useData";
 import { useUserAgreement } from "../../../hooks/useAgreements";
-import { useUserApartments } from "../../../hooks/useApartments";
 
 const PRESENT_REGEX = /.+/;
 const NUMBER_REGEX = /^(?!0\d)\d{1,5}(\.\d{1,2})?$/;
@@ -30,12 +29,12 @@ const USERNAME_REGEX = /^[A-z][A-z0-9-_]{3,23}$/;
 const DATE_REGEX = /^\d{4}-\d{2}-\d{2}$/;
 
 const AddAgreement = () => {
-  const fetchUserApartments = useUserApartments();
   const postUserAgreement = useUserAgreement();
-  const { username, setSuccessMsg, setErrMsg } = useData();
+  const navigate = useNavigate();
+  const { username, setAgreements, onSuccessMsg, onErrMsg, apartements } =
+    useData();
 
   const nameRef = useRef();
-  const [ownerApartments, setOwnerApartments] = useState([]);
 
   const [agreementName, setAgreementName] = useState("");
   const [isAgreementNameValid, setIsAgreementNameValid] = useState(false);
@@ -64,18 +63,7 @@ const AddAgreement = () => {
   }, []);
 
   useEffect(() => {
-    if (username) {
-      const fetchData = async () => {
-        const apartments = await fetchUserApartments(username);
-        console.log("apartments", apartments);
-        setOwnerApartments(apartments);
-      };
-      fetchData();
-    }
-  }, []);
-
-  useEffect(() => {
-    setErrMsg("");
+    onErrMsg("");
   }, [
     agreementName,
     apartmentName,
@@ -146,7 +134,7 @@ const AddAgreement = () => {
       !DATE_REGEX.test(expirationDate) ||
       !USERNAME_REGEX.test(clientUsername)
     ) {
-      setErrMsg("Invalid Entry");
+      onErrMsg("Invalid Entry");
       return;
     }
 
@@ -166,18 +154,19 @@ const AddAgreement = () => {
         tenant: { username: clientUsername },
       });
 
-      console.log("payload:", payload);
-      const data = await postUserAgreement(username, payload);
-      console.log("data:", data);
-      setSuccessMsg("Apartment created sucessfully");
-      setErrMsg("");
+      const newAgreement = await postUserAgreement(username, payload);
+      setAgreements((prevAgreements) => [...prevAgreements, newAgreement]);
+      navigate("/dashboard", {
+        replace: true,
+      });
+      onErrMsg("");
+      onSuccessMsg("Agreement created sucessfully");
     } catch (err) {
-      setSuccessMsg("");
+      onSuccessMsg("");
       if (!err?.response) {
-        setErrMsg("Server did not respond");
+        onErrMsg("Server did not respond");
       } else {
-        setErrMsg("Error");
-        console.log(err.response);
+        onErrMsg(err?.response?.data?.message);
       }
     }
   };
@@ -230,7 +219,9 @@ const AddAgreement = () => {
                       isInvalid={apartmentName && !isApartmentNameValid}
                     />
                     <Form.Control.Feedback type="invalid" className="ms-5">
-                      Please enter apartment name
+                      Please enter an username with following restrictions:
+                      <br />
+                      - different than existing apartment names <br />
                     </Form.Control.Feedback>
                   </InputGroup>
                 </Form.Group>

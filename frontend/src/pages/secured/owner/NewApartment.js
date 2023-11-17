@@ -20,7 +20,7 @@ import { useUserApartment } from "../../../hooks/useApartments";
 
 const PRESENT_REGEX = /.+/;
 const CITY_REGEX = /^[A-Za-z\s-]+$/;
-const DESCRIPTION_REGEX = /^(?!(\S+\s+){101})((\S+\s+){0,100}\S+)$/;
+const DESCRIPTION_REGEX = /^(\s*\w+\s*){1,100}$/;
 const ZIP_CODE_REGEX = /^\d{2}-\d{3}$/;
 const SIZE_REGEX = /^(?!0\d)\d{1,5}(\.\d{1,2})?$/;
 
@@ -30,7 +30,8 @@ const NewApartment = () => {
   const navigate = useNavigate();
   const postUserApartment = useUserApartment();
 
-  const { username, setSuccessMsg, setErrMsg } = useData();
+  const { username, apartments, onSuccessMsg, onErrMsg, setApartments } =
+    useData();
 
   const [name, setName] = useState("");
   const [isNameValid, setIsNameValid] = useState(false);
@@ -66,16 +67,15 @@ const NewApartment = () => {
 
   useEffect(() => {
     nameRef.current.focus();
-    setErrMsg("");
-    setSuccessMsg("");
   }, []);
 
   useEffect(() => {
-    setErrMsg("");
+    onErrMsg("");
   }, [name, decription, city, address, zipCode, size]);
 
   useEffect(() => {
-    const isValid = PRESENT_REGEX.test(name);
+    const isValid =
+      PRESENT_REGEX.test(name) && !apartments?.find((a) => a.name === name);
     setIsNameValid(isValid);
   }, [name]);
 
@@ -256,7 +256,7 @@ const NewApartment = () => {
       !ZIP_CODE_REGEX.test(zipCode) ||
       !SIZE_REGEX.test(size)
     ) {
-      setErrMsg("Invalid Entry");
+      onErrMsg("Invalid Entry");
       return;
     }
 
@@ -281,26 +281,19 @@ const NewApartment = () => {
         longitude: 0.0,
       });
 
-      console.log("payload:", payload);
-      // const response = await axiosUser.post(APARTMENT_POST_URL, payload, {
-      //   headers: { "Content-Type": "application/json" },
-      //   withCredentials: true,
-      // });
-
-      const response = await postUserApartment(username, payload);
-      console.log("response:", response);
-      setSuccessMsg("Apartment created sucessfully");
-      setErrMsg("");
+      const newApartment = await postUserApartment(username, payload);
+      setApartments((prevApartments) => [...prevApartments, newApartment]);
       navigate("/dashboard", {
         replace: true,
       });
+      onErrMsg("");
+      onSuccessMsg("Apartment created sucessfully");
     } catch (err) {
-      setSuccessMsg("");
+      onSuccessMsg("");
       if (!err?.response) {
-        setErrMsg("Server did not respond");
+        onErrMsg("Server did not respond");
       } else {
-        setErrMsg("Error during sending creating new apartment");
-        console.log(err.response);
+        onErrMsg(err?.response?.data?.message);
       }
     }
   };
@@ -333,7 +326,10 @@ const NewApartment = () => {
                       isInvalid={name && !isNameValid}
                     />
                     <Form.Control.Feedback type="invalid" className="ms-5">
-                      Please enter apartment name
+                      Please enter an apartment name with following
+                      restrictions:
+                      <br />
+                      - different than existing apartment names <br />
                     </Form.Control.Feedback>
                   </InputGroup>
                 </Form.Group>
@@ -656,7 +652,6 @@ const NewApartment = () => {
                           }}
                           className="mx-2"
                           disabled={!isPropertyNameValid}
-                          //   className="py-1"
                         >
                           +
                         </Button>

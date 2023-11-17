@@ -1,4 +1,4 @@
-package pl.edu.agh.student.rentsys.auth.exception;
+package pl.edu.agh.student.rentsys.exceptions;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -39,6 +39,30 @@ public class AppExceptionHandler {
     @ExceptionHandler(value = {Exception.class})
     public ResponseEntity<AppException> handleInternalServerErrorException(Exception e) {
         HttpStatus status = HttpStatus.INTERNAL_SERVER_ERROR;
+        AppException appException = AppException.builder()
+                .message(e.getMessage())
+                .httpStatus(status)
+                .timestamp(ZonedDateTime.now())
+                .build();
+
+        return new ResponseEntity<>(appException, status);
+    }
+
+    @ExceptionHandler(value = {EntityNotFoundException.class})
+    public ResponseEntity<AppException> handleEntityNotFoundException(EntityNotFoundException e) {
+        HttpStatus status = HttpStatus.NOT_FOUND;
+        AppException appException = AppException.builder()
+                .message(e.getMessage())
+                .httpStatus(status)
+                .timestamp(ZonedDateTime.now())
+                .build();
+
+        return new ResponseEntity<>(appException, status);
+    }
+
+    @ExceptionHandler(value = {IllegalStateException.class})
+    public ResponseEntity<AppException> handleIllegalStateException(IllegalStateException e) {
+        HttpStatus status = HttpStatus.BAD_REQUEST;
         AppException appException = AppException.builder()
                 .message(e.getMessage())
                 .httpStatus(status)

@@ -11,6 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 import pl.edu.agh.student.rentsys.auth.token.ConfirmationToken;
 import pl.edu.agh.student.rentsys.auth.token.ConfirmationTokenService;
 import pl.edu.agh.student.rentsys.model.User;
+import pl.edu.agh.student.rentsys.model.UserDTO;
 import pl.edu.agh.student.rentsys.repository.UserRepository;
 
 import java.time.LocalDateTime;
@@ -102,6 +103,10 @@ public class UserService implements UserDetailsService {
 
     public Optional<User> getUserByUsername(String username){
         return userRepository.findByUsername(username);
+    }
+
+    public UserDTO getByUsername(String username){
+        return getUserByUsername(username).map(UserDTO::convertFromUser).orElseThrow(() -> new UsernameNotFoundException(String.format("Username %s was not found", username)));
     }
 
     public List<User> getAllUsers(){

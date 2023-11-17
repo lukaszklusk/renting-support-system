@@ -16,12 +16,12 @@ const usePostRequest = () => {
       });
       return response.data;
     } catch (err) {
-      // TODO
-      console.log(err);
-      navigate("/sign-in", {
-        state: { from: location },
-        replace: true,
-      });
+      console.log("error posting data", err);
+      // navigate("/sign-in", {
+      //   state: { from: location },
+      //   replace: true,
+      // });
+      throw err;
     }
   };
   return postData;

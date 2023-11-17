@@ -11,7 +11,6 @@ import pl.edu.agh.student.rentsys.model.User;
 import pl.edu.agh.student.rentsys.repository.ApartmentRepository;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;

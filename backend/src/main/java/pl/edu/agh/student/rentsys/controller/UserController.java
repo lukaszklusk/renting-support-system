@@ -3,22 +3,16 @@ package pl.edu.agh.student.rentsys.controller;
 
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
-import pl.edu.agh.student.rentsys.model.*;
+import pl.edu.agh.student.rentsys.model.UserDTO;
 import pl.edu.agh.student.rentsys.security.UserRole;
-import pl.edu.agh.student.rentsys.service.AgreementService;
-import pl.edu.agh.student.rentsys.service.ApartmentService;
 import pl.edu.agh.student.rentsys.model.User;
-import pl.edu.agh.student.rentsys.service.EquipmentService;
 import pl.edu.agh.student.rentsys.service.UserService;
 
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @RestController
 @AllArgsConstructor
@@ -41,10 +35,9 @@ public class UserController {
     }
 
     @GetMapping("/user/{username}")
-    public ResponseEntity<User> getUserById(@PathVariable String username){
-        Optional<User> userOptional = userService.getUserByUsername(username);
-        return userOptional.map(ResponseEntity::ok)
-                .orElseGet(() -> ResponseEntity.notFound().build());
+    public ResponseEntity<UserDTO> getUserByUsername(@PathVariable String username){
+       UserDTO userDTO = userService.getByUsername(username);
+        return ResponseEntity.status(HttpStatus.OK).body(userDTO);
     }
 
     @PostMapping("/user")
@@ -77,44 +70,4 @@ public class UserController {
         }
     }
 
-//    @PatchMapping("/user/{username}/apartments/{aid}/equipments")
-//    public ResponseEntity<Set<EquipmentDTO>> getApartmentEquipment(@PathVariable String username,
-//                                                                   @PathVariable long aid,
-//                                                                   @RequestParam String status){
-//        Optional<User> userOptional = userService.getUserByUsername(username);
-//        if(userOptional.isPresent()){
-//            Optional<Agreement> agreementOptional = agreementService.getAgreementById(aid);
-//            if(agreementOptional.isPresent()){
-//                try {
-//                    equipmentService.createEquipment()
-//                    AgreementStatus agreementStatus =
-//                            AgreementStatus.valueOf(status);
-//                    return ResponseEntity.ok(AgreementDTO.convertFromAgreement(agreementService.changeAgreementStatus(
-//                            agreementOptional.get(), agreementStatus)));
-//                }catch (IllegalArgumentException e){
-//                    return ResponseEntity.badRequest().build();
-//                }
-//            } else return ResponseEntity.notFound().build();
-//        } else return ResponseEntity.notFound().build();
-//    }
-
-//    @PatchMapping("/user/{username}/agreements/{aid}")
-//    public ResponseEntity<AgreementDTO> changeAgreementStatus(@PathVariable String username,
-//                                                              @PathVariable long aid,
-//                                                              @RequestParam String status){
-//        Optional<User> userOptional = userService.getUserByUsername(username);
-//        if(userOptional.isPresent()){
-//            Optional<Agreement> agreementOptional = agreementService.getAgreementById(aid);
-//            if(agreementOptional.isPresent()){
-//                try {
-//                    AgreementStatus agreementStatus =
-//                            AgreementStatus.valueOf(status);
-//                    return ResponseEntity.ok(AgreementDTO.convertFromAgreement(agreementService.changeAgreementStatus(
-//                            agreementOptional.get(), agreementStatus)));
-//                }catch (IllegalArgumentException e){
-//                    return ResponseEntity.badRequest().build();
-//                }
-//            } else return ResponseEntity.notFound().build();
-//        } else return ResponseEntity.notFound().build();
-//    }
 }

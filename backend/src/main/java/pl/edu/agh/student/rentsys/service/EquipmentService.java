@@ -2,15 +2,12 @@ package pl.edu.agh.student.rentsys.service;
 
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.crossstore.ChangeSetPersister;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import pl.edu.agh.student.rentsys.exceptions.EntityNotFoundException;
 import pl.edu.agh.student.rentsys.model.*;
 import pl.edu.agh.student.rentsys.repository.ApartmentRepository;
 import pl.edu.agh.student.rentsys.repository.EquipmentRepository;
 
-import java.time.LocalDateTime;
 import java.util.*;
 
 @Service

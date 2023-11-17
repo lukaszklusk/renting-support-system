@@ -1,4 +1,4 @@
-package pl.edu.agh.student.rentsys.auth.exception;
+package pl.edu.agh.student.rentsys.exceptions;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

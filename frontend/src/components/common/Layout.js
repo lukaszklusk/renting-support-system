@@ -16,6 +16,10 @@ import useData from "../../hooks/useData";
 const Layout = () => {
   const { errMsg, successMsg } = useData();
 
+  useEffect(() => {
+    console.log("rendering!");
+  }, []);
+
   return (
     <main className="App">
       <AppNavbar />

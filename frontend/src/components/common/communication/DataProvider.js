@@ -1,4 +1,6 @@
 import React, { createContext, useState, useEffect, useMemo } from "react";
+import { useLocation } from "react-router-dom";
+
 import Stomp from "stompjs";
 import SockJS from "sockjs-client";
 import { v4 as uuidv4 } from "uuid";
@@ -23,6 +25,7 @@ const DataContext = createContext({});
 export const DataProvider = ({ children }) => {
   const { auth } = useAuth();
   const axiosUser = useAxiosUser();
+  const location = useLocation();
 
   const fetchUserMessages = useUserMessages();
   const fetchUserApartments = useUserApartments();
@@ -151,8 +154,10 @@ export const DataProvider = ({ children }) => {
 
   const onReceivedNotification = (notification) => {
     const receivedNotification = JSON.parse(notification.body);
-    console.log("setting is data fetch to false after receiving notif");
-    setIsDataFetched(false);
+    if (notification.receiver === username) {
+      console.log("setting is data fetch to false after receiving notif");
+      notification.receiver === username && setIsDataFetched(false);
+    }
     showNotification(receivedNotification);
     setNotifications((prevNotifications) => [
       ...prevNotifications,
@@ -208,6 +213,30 @@ export const DataProvider = ({ children }) => {
     setIsAdmin(isLoggedIn && auth?.roles?.includes(ROLES.admin));
   };
 
+  const onSuccessMsg = (msg) => {
+    sessionStorage.setItem("successMsg", msg);
+    setSuccessMsg(msg);
+  };
+
+  const onErrMsg = (msg) => {
+    sessionStorage.setItem("errMsg", msg);
+    setErrMsg(msg);
+  };
+
+  const onPathChange = () => {
+    const successMsg = sessionStorage.getItem("successMsg");
+    const errMsg = sessionStorage.getItem("errMsg");
+
+    if (successMsg !== "") {
+      sessionStorage.removeItem("successMsg");
+      setSuccessMsg(successMsg);
+    }
+    if (errMsg !== "") {
+      sessionStorage.removeItem("errMsg");
+      setErrMsg(errMsg);
+    }
+  };
+
   useEffect(configCommunication, [isLoggedIn]);
   useEffect(connect, [stompClient]);
   useEffect(onAuthChange, [auth]);
@@ -224,15 +253,7 @@ export const DataProvider = ({ children }) => {
     setFirstMsgRender(true);
   }, [successMsg, errMsg]);
 
-  useEffect(() => {
-    console.log("render:", firstMsgRender);
-    if (firstMsgRender) {
-      setFirstMsgRender(false);
-    } else {
-      setSuccessMsg("");
-      setErrMsg("");
-    }
-  });
+  useEffect(onPathChange, [location.pathname]);
 
   const showNotification = (notification) => {
     const content = getNotificationTitle(notification);
@@ -273,6 +294,9 @@ export const DataProvider = ({ children }) => {
         errMsg,
         setSuccessMsg,
         setErrMsg,
+
+        onSuccessMsg,
+        onErrMsg,
       }}
     >
       {children}

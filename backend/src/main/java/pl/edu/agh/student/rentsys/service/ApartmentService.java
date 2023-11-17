@@ -2,6 +2,7 @@ package pl.edu.agh.student.rentsys.service;
 
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import pl.edu.agh.student.rentsys.exceptions.EntityNotFoundException;
 import pl.edu.agh.student.rentsys.model.*;
@@ -37,6 +38,9 @@ public class ApartmentService {
     private final NotificationService notificationService;
 
     public Apartment createApartment(Apartment apartment){
+        apartmentRepository.getApartmentByOwnerAndName(apartment.getOwner(), apartment.getName()).ifPresent(a -> {
+            throw new IllegalStateException("Apartment names cannot repeat for the same owner");
+        } );
         pictureRepository.saveAll(apartment.getPictures());
         apartmentPropertyRepository.saveAll(apartment.getProperties());
 
@@ -71,12 +75,17 @@ public class ApartmentService {
         return apartmentRepository.findById(id);
     }
 
-    public Optional<ApartmentDTO> getApartmentDTO(long id){
-        return getApartmentById(id).map(ApartmentDTO::convertFromApartment);
+    public ApartmentDTO getApartmentDTO(long id){
+        return getApartmentById(id)
+                .map(ApartmentDTO::convertFromApartment)
+                .orElseThrow(() -> new EntityNotFoundException(String.format("Apartment with id = %d was not found", id)));
     }
 
-    public List<Apartment> getAllApartments(){
-        return apartmentRepository.findAll();
+    public List<ApartmentDTO> getAllApartments(){
+        return apartmentRepository.findAll()
+                .stream()
+                .map(ApartmentDTO::convertFromApartment)
+                .collect(Collectors.toList());
     }
 
     public List<Apartment> getApartmentsForUser(User user){
