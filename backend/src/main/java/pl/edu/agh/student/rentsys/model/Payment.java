@@ -1,10 +1,16 @@
 package pl.edu.agh.student.rentsys.model;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
 
 @Entity
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class Payment {
     private Long id;
     private double amount;
@@ -12,6 +18,7 @@ public class Payment {
     private Agreement agreement;
     private LocalDate dueDate;
     private PaymentMethod paymentMethod;
+
 
     public void setId(Long id) {
         this.id = id;

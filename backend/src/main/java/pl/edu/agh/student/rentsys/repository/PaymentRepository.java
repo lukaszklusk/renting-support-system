@@ -9,4 +9,5 @@ import java.util.List;
 public interface PaymentRepository extends JpaRepository<Payment, Long> {
 
     List<Payment> getPaymentsByAgreement(Agreement agreement);
+
 }

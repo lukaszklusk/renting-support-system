@@ -11,6 +11,7 @@ import pl.edu.agh.student.rentsys.service.ApartmentService;
 import pl.edu.agh.student.rentsys.service.MessageService;
 import pl.edu.agh.student.rentsys.model.User;
 import pl.edu.agh.student.rentsys.repository.UserRepository;
+import pl.edu.agh.student.rentsys.service.PaymentService;
 
 import java.io.IOException;
 import java.sql.Timestamp;
@@ -29,6 +30,7 @@ public class DataInitializer implements CommandLineRunner {
     private final PasswordEncoder passwordEncoder;
     private final AgreementService agreementService;
     private final MessageService messageService;
+    private final PaymentService paymentService;
 
     @SneakyThrows
     @Override
@@ -52,7 +54,7 @@ public class DataInitializer implements CommandLineRunner {
                 "Kraków", "30-349",
                 50.077285,19.872920,owner, null);
 
-        createAgreement("Agreement 1", apartment, owner,
+        Agreement agr = createAgreement("Agreement 1", apartment, owner,
                 LocalDate.of(2023,3, 13),
                 LocalDate.of(2026, 3,1),
                 client, "PL84109024029425764271319137", AgreementStatus.active);
@@ -67,7 +69,7 @@ public class DataInitializer implements CommandLineRunner {
                 LocalDate.of(2020, 3,1),
                 client2, "PL84109024029425764271319137", AgreementStatus.finished);
 
-        createAgreement("Agreement 72", apartment2, owner,
+        Agreement agr2 = createAgreement("Agreement 72", apartment2, owner,
                 LocalDate.of(2023,7, 15),
                 LocalDate.of(2024, 7,15),
                 client3, "PL84109024029425764271319137", AgreementStatus.proposed);
@@ -168,6 +170,43 @@ public class DataInitializer implements CommandLineRunner {
         messageService.createMessage(messageDTO8);
         messageService.createMessage(messageDTO9);
         messageService.createMessage(messageDTO10);
+
+        Payment payment1 = Payment.builder()
+                .paymentMethod(PaymentMethod.card)
+                .dueDate(LocalDate.of(2024, 10,15))
+                .status(PaymentStatus.paid)
+                .agreement(agr)
+                .amount(1500.0)
+                .build();
+
+        Payment payment2 = Payment.builder()
+                .paymentMethod(PaymentMethod.card)
+                .dueDate(LocalDate.of(2024, 11,15))
+                .status(PaymentStatus.paid)
+                .agreement(agr)
+                .amount(1300.0)
+                .build();
+
+        Payment payment3 = Payment.builder()
+                .paymentMethod(PaymentMethod.card)
+                .dueDate(LocalDate.of(2024, 12,15))
+                .status(PaymentStatus.due)
+                .agreement(agr)
+                .amount(1700.0)
+                .build();
+
+        Payment payment4 = Payment.builder()
+                .paymentMethod(PaymentMethod.card)
+                .dueDate(LocalDate.of(2024, 12,15))
+                .status(PaymentStatus.overdue)
+                .agreement(agr2)
+                .amount(1900.0)
+                .build();
+
+        paymentService.createPayment(payment1);
+        paymentService.createPayment(payment2);
+        paymentService.createPayment(payment3);
+        paymentService.createPayment(payment4);
 
         System.out.println("----- FINISHED DATA INITIALIZATION -----");
     }
