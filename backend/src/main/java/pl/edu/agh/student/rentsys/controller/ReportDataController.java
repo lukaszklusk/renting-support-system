@@ -3,6 +3,7 @@ package pl.edu.agh.student.rentsys.controller;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.AllArgsConstructor;
 import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.JasperFillManager;
@@ -14,15 +15,18 @@ import net.sf.jasperreports.export.SimpleExporterInput;
 import net.sf.jasperreports.export.SimpleOutputStreamExporterOutput;
 import net.sf.jasperreports.export.SimplePdfExporterConfiguration;
 import net.sf.jasperreports.export.SimplePdfReportConfiguration;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.orm.jpa.EntityManagerFactoryInfo;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import pl.edu.agh.student.rentsys.model.User;
 import pl.edu.agh.student.rentsys.service.UserService;
 
 import javax.sql.DataSource;
+import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
@@ -48,14 +52,15 @@ public class ReportDataController {
     }
 
 
-    @GetMapping("/user/{username}/report")
-    public ResponseEntity createReport(@PathVariable String username) {
+    @GetMapping(value = "/user/{username}/report", produces = MediaType.APPLICATION_PDF_VALUE)
+    public @ResponseBody ResponseEntity<byte[]> createReport(@PathVariable String username, HttpServletResponse response) {
         Optional<User> userOptional =  userService.getUserByUsername(username);
         if(!userOptional.isPresent()){
             return ResponseEntity.notFound().build();
         }
         int userID = userOptional.get().getId().intValue();
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+        DateTimeFormatter dtf2 = DateTimeFormatter.ofPattern("dd_MM_yyyy");
         String current_date = dtf.format(LocalDateTime.now());
         try {
             HashMap<String,Object> params = new HashMap<>();
@@ -68,8 +73,12 @@ public class ReportDataController {
                     report,params,getDatasource().getConnection());
 
             JRPdfExporter exporter = new JRPdfExporter();
+            ByteArrayOutputStream pdfOutputStream = new ByteArrayOutputStream();
             exporter.setExporterInput(new SimpleExporterInput(print));
-            exporter.setExporterOutput(new SimpleOutputStreamExporterOutput("report_" + username + ".pdf"));
+            exporter.setExporterOutput(new SimpleOutputStreamExporterOutput(pdfOutputStream));
+
+            response.setHeader("Content-Disposition",
+                    "attachment; filename=report_" + userID + "_" + dtf2.format(LocalDateTime.now()) + ".pdf");
 
             SimplePdfReportConfiguration reportConfiguration = new SimplePdfReportConfiguration();
             reportConfiguration.setSizePageToContent(true);
@@ -84,9 +93,13 @@ public class ReportDataController {
             exporter.setConfiguration(exporterConfiguration);
 
             exporter.exportReport();
+
+            byte[] res = pdfOutputStream.toByteArray();
+            return ResponseEntity.ok(res);
         } catch (JRException | SQLException e) {
             e.printStackTrace();
         }
-        return ResponseEntity.ok("ok");
+
+        return ResponseEntity.internalServerError().build();
     }
 }
