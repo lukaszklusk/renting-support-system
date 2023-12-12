@@ -14,6 +14,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 @Service
 @AllArgsConstructor
@@ -84,7 +85,7 @@ public class AgreementService {
         return getAgreementById(id).map(AgreementDTO::convertFromAgreement);
     }
 
-    public List<Agreement> getAgreementForUser(User user){
+    public List<Agreement> getAgreementsForOwner(User user){
         return agreementRepository.getAgreementsByOwner(user);
     }
 
@@ -108,80 +109,84 @@ public class AgreementService {
         return agreementRepository.findAllByTenant(client);
     }
 
-    public Agreement changeAgreementStatus(Agreement agreement, AgreementStatus agreementStatus){
-        if (agreementStatus.equals(AgreementStatus.active)) {
-            return activateAgreement(agreement);
+    public Agreement changeAgreementStatus(String username, long aid, boolean status, boolean isOwner) {
+
+        User owner, client;
+        Agreement agreement;
+
+        if (isOwner) {
+            owner = userService.getUserByUsername(username).orElseThrow(() -> new EntityNotFoundException(String.format("User with username %s was not found", username)));
+            agreement =  getAgreementById(aid).orElseThrow(() -> new EntityNotFoundException(String.format("Agreement with id %d was not found", aid)));
+            client = agreement.getTenant();
+        } else {
+            client = userService.getUserByUsername(username).orElseThrow(() -> new EntityNotFoundException(String.format("User with username %s was not found", username)));
+            agreement =  getAgreementById(aid).orElseThrow(() -> new EntityNotFoundException(String.format("Agreement with id %d was not found", aid)));
+            owner = agreement.getOwner();
         }
 
-        User sender = null;
-        User receiver = null;
-        if ((agreementStatus.equals(AgreementStatus.proposed) || agreementStatus.equals(AgreementStatus.rejected_owner) || agreementStatus.equals(AgreementStatus.withdrawn)) || agreementStatus.equals(AgreementStatus.cancelled_owner)) {
-            sender = agreement.getOwner();
-            receiver = agreement.getTenant();
-        } else {
-            sender = agreement.getTenant();
-            receiver = agreement.getOwner();
+        if (!owner.equals(agreement.getOwner()) || !client.equals(agreement.getTenant())) {
+            throw new IllegalStateException();
         }
-        agreement.setAgreementStatus(agreementStatus);
-        Notification notification = notificationService.createAndSendNotification (
-                sender,
-                receiver,
-                NotificationType.mapStatusToNotificationType(agreementStatus),
+
+        return status ? acceptAgreement(agreement, isOwner, false) : rejectAgreement(agreement, isOwner);
+
+    }
+
+    private Agreement rejectAgreement(Agreement agreement, boolean isOwner) {
+        AgreementStatus newAgreementStatus = agreement.getAgreementStatus().reject(isOwner)
+                .orElseThrow(IllegalStateException::new);
+        return changeAgreementStatus(agreement, newAgreementStatus, isOwner);
+    }
+
+    private Agreement acceptAgreement(Agreement agreement, boolean isOwner, boolean callByActivate) {
+        AgreementStatus newAgreementStatus = agreement.getAgreementStatus().accept(isOwner)
+                .orElseThrow(IllegalStateException::new);
+        if (newAgreementStatus.equals(AgreementStatus.active) && !callByActivate) {
+            return activateAgreement(agreement);
+        }
+        return changeAgreementStatus(agreement, newAgreementStatus, isOwner);
+    }
+
+    private Agreement changeAgreementStatus(Agreement agreement, AgreementStatus newAgreementStatus, boolean isOwner) {
+        agreement.setAgreementStatus(newAgreementStatus);
+        NotificationType notificationType = newAgreementStatus.mapToNotificationType();
+
+
+        User sender = isOwner ? agreement.getOwner() : agreement.getTenant();
+        User receiver = isOwner ? agreement.getTenant() : agreement.getOwner();
+
+        Notification notification = notificationService.createAndSendNotification(
+                sender, receiver,
+                notificationType,
                 NotificationPriority.critical,
-                agreement.getName()
+                agreement.getName(),
+                agreement.getApartment().getName()
         );
         agreement.addNotification(notification);
         return agreementRepository.save(agreement);
     }
+    public Agreement activateAgreement(Agreement agreementToActivate) {
 
-    public Agreement activateAgreement(Agreement activatedAgreement) {
-        List<Agreement> apartmentAgreements = agreementRepository.findAllByApartment(activatedAgreement.getApartment());
+        List<Agreement> clientAgreements = getAgreementsForClient(agreementToActivate.getTenant());
+        List<Agreement> apartmentAgreements = agreementRepository.findAllByApartment(agreementToActivate.getApartment());
 
-        List<Agreement> modifiedAgreements = apartmentAgreements.stream()
-                .filter(agreement -> !Objects.equals(agreement.getId(), activatedAgreement.getId()))
-                .filter(agreement -> agreement.getAgreementStatus() == AgreementStatus.proposed
-                        || agreement.getAgreementStatus() == AgreementStatus.accepted)
+        List<Agreement> rejectedAgreements = Stream.concat(clientAgreements.stream(), apartmentAgreements.stream())
+                .filter(agreement -> !Objects.equals(agreement.getId(), agreementToActivate.getId()))
+                .filter(agreement -> agreement.getAgreementStatus().isAlive())
+                .distinct()
                 .toList();
 
-        for (var modifiedAgreement: modifiedAgreements) {
-            NotificationType notificationType = null;
-            if (modifiedAgreement.getAgreementStatus() == AgreementStatus.proposed) {
-                modifiedAgreement.setAgreementStatus(AgreementStatus.withdrawn);
-                notificationType = NotificationType.agreement_withdrawn;
-            } else {
-                modifiedAgreement.setAgreementStatus(AgreementStatus.rejected_owner);
-                notificationType = NotificationType.agreement_rejected_owner;
-            }
-
-            User sender = modifiedAgreement.getOwner();
-            User receiver = modifiedAgreement.getTenant();
-
-            Notification notification = notificationService.createAndSendNotification (
-                    sender, receiver,
-                    notificationType,
-                    NotificationPriority.critical,
-                    activatedAgreement.getName()
-            );
-            modifiedAgreement.addNotification(notification);
-            agreementRepository.save(modifiedAgreement);
+        for (var rejectedAgreement: rejectedAgreements) {
+            boolean isOwner = rejectedAgreement.getOwner().equals(agreementToActivate.getOwner());
+            rejectAgreement(rejectedAgreement, isOwner);
         }
 
-        User sender = activatedAgreement.getOwner();
-        User receiver = activatedAgreement.getTenant();
-        activatedAgreement.setAgreementStatus(AgreementStatus.active);
-        Notification notification = notificationService.createAndSendNotification (
-                sender, receiver,
-                NotificationType.agreement_activated,
-                NotificationPriority.critical,
-                activatedAgreement.getName()
-        );
-        activatedAgreement.addNotification(notification);
-
-        Apartment apartment = activatedAgreement.getApartment();
-        apartment.setTenant(receiver);
+        Agreement activeAgreement = acceptAgreement(agreementToActivate, true, true);
+        Apartment apartment = activeAgreement.getApartment();
+        apartment.setTenant(activeAgreement.getTenant());
         apartmentRepository.save(apartment);
 
-        return agreementRepository.save(activatedAgreement);
+        return agreementRepository.save(activeAgreement);
     }
 
     public Agreement createAgreement(String username, AgreementDTO agreementDTO){
@@ -204,7 +209,7 @@ public class AgreementService {
                 .expirationDate(LocalDate.ofEpochDay(agreementDTO.getExpirationDate()))
                 .build();
 
-        Notification notification = notificationService.createAndSendNotification(owner, tenant, NotificationType.agreement_proposed, NotificationPriority.critical, agreement.getApartment().getName());
+        Notification notification = notificationService.createAndSendNotification(owner, tenant, NotificationType.agreement_proposed, NotificationPriority.critical, agreement.getName(), agreement.getApartment().getName());
         agreement.addNotification(notification);
         return agreementRepository.save(agreement);
     }

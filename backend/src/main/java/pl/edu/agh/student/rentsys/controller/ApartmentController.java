@@ -69,4 +69,11 @@ public class ApartmentController {
         ApartmentDTO newApartmentDTO = ApartmentDTO.convertFromApartment(apartment);
         return ResponseEntity.status(HttpStatus.CREATED).body(newApartmentDTO);
     }
+
+    @DeleteMapping("/user/{username}/apartments/{id}")
+    public ResponseEntity<ApartmentDTO> deleteApartment(@PathVariable String username,
+                                                        @PathVariable long id) {
+        apartmentService.deleteApartment(username, id);
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+    }
 }

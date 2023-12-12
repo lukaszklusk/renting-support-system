@@ -2,8 +2,12 @@ import { useState, useEffect } from "react";
 
 import useData from "../../hooks/useData";
 
-import OwnerDashboardApartments from "../../components/owner/DashboardApartments";
+import DashboardApartments from "../../components/owner/DashboardApartments";
 import SectionHeader from "../../components/common/SectionHeader";
+
+import DashboardSkeleton from "../../components/common/skeletons/DashboardSkeleton";
+
+import { Box } from "@mui/material";
 
 const OwnerDashboard = () => {
   const { isOwner, isDataFetched, apartments } = useData();
@@ -20,27 +24,23 @@ const OwnerDashboard = () => {
   }, [apartments]);
 
   return (
-    <section>
-      {isDataFetched && isOwner ? (
+    <Box sx={{ flexGrow: 1 }}>
+      {isDataFetched && isOwner && (
         <>
           <SectionHeader title="Rented Apartments" />
-          <OwnerDashboardApartments apartments={rentedApartments} />
+          <DashboardApartments apartments={rentedApartments} />
           <SectionHeader title="Vacant Apartments" />
-          <OwnerDashboardApartments apartments={vacantApartments} />
+          <DashboardApartments apartments={vacantApartments} />
         </>
-      ) : (
-        <span></span>
       )}
-      {isDataFetched && !isOwner ? (
+      {isDataFetched && !isOwner && (
         <>
           <SectionHeader title="Rented Apartment" />
-          <OwnerDashboardApartments apartments={rentedApartments} />
+          <DashboardApartments apartments={rentedApartments} />
         </>
-      ) : (
-        <span></span>
       )}
-      {!isDataFetched ? <p>Loading</p> : <span></span>}
-    </section>
+      {!isDataFetched && <DashboardSkeleton />}
+    </Box>
   );
 };
 

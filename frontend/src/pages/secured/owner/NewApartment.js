@@ -135,7 +135,6 @@ const NewApartment = () => {
 
   const handleFilesUpload = async (event) => {
     const file = event.target.files[0];
-    console.log("+");
     setIsFilesUpload(true);
     if (!file) {
       setIsPicturesValid(false);

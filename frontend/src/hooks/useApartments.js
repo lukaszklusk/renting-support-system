@@ -1,6 +1,7 @@
 import useGetRequest from "./useGetRequest";
 import usePostRequest from "./usePostRequest";
 import usePatchRequest from "./usePatchRequest";
+import useDeleteRequest from "./useDeleteRequest";
 
 const getBaseUrl = (username) => {
   return `/user/${username}/apartments`;
@@ -54,33 +55,51 @@ export const useUserApartment = () => {
 
   const postUserApartment = async (username, payload) => {
     const url = getBaseUrl(username);
-    console.log("url:", url);
-    console.log("payload:", payload);
     return postData(url, payload);
   };
   return postUserApartment;
 };
 
-export const useUserApartmentEquipment = () => {
+export const usePostEquipment = () => {
   const postData = usePostRequest();
 
-  const postUserApartmentEquipment = async (username, id, payload) => {
+  const postEquipment = async (username, id, payload) => {
     const BASE_URL = getBaseUrl(username);
     const url = `${BASE_URL}/${id}/equipments`;
-    console.log("url:", url);
-    console.log("payload:", payload);
     return postData(url, payload);
   };
-  return postUserApartmentEquipment;
+  return postEquipment;
 };
 
-export const usePatchApartmentEquipmentStatus = () => {
+export const usePatchEquipmentStatus = () => {
   const patchData = usePatchRequest();
 
-  const patchUserEquipmentStatus = async (username, aid, eid, status) => {
+  const patchEquipmentStatus = async (username, aid, eid, status) => {
     const BASE_URL = getBaseUrl(username);
     const url = `${BASE_URL}/${aid}/equipments/${eid}`;
     return patchData(url, status);
   };
-  return patchUserEquipmentStatus;
+  return patchEquipmentStatus;
+};
+
+export const useDeleteEquipment = () => {
+  const deleteData = useDeleteRequest();
+
+  const deleteEquipment = async (username, aid, eid) => {
+    const BASE_URL = getBaseUrl(username);
+    const url = `${BASE_URL}/${aid}/equipments/${eid}`;
+    return deleteData(url);
+  };
+  return deleteEquipment;
+};
+
+export const useDeleteApartment = () => {
+  const deleteData = useDeleteRequest();
+
+  const deleteApartment = async (username, aid) => {
+    const BASE_URL = getBaseUrl(username);
+    const url = `${BASE_URL}/${aid}`;
+    return deleteData(url);
+  };
+  return deleteApartment;
 };

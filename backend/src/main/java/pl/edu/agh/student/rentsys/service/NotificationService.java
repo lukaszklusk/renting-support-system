@@ -102,7 +102,7 @@ public class NotificationService {
     }
 
     public Notification createNotification(User sender, User receiver, NotificationType notificationType,
-                                           NotificationPriority priority, String notifiableName){
+                                           NotificationPriority priority, String notifiableName, String notifiableRelatedName){
         return notificationRepository.save(Notification.builder()
                 .clientId(UUID.randomUUID())
                 .sender(sender)
@@ -113,9 +113,10 @@ public class NotificationService {
                 .notificationType(notificationType)
                 .priority(priority)
                 .notifiableName(notifiableName)
+                .notifiableRelatedName(notifiableRelatedName)
                 .build());
     }
-    public void sendNotificationToUsers(Notification notification) {
+    public void sendNotificationsToUsers(Notification notification) {
         if (notification.getSender() != null) {
             NotificationDTO notificationDTO = NotificationDTO.convertFromSenderNotification(notification);
             simpMessagingTemplate.convertAndSendToUser(notificationDTO.getSender(),"/notifications" , notificationDTO);
@@ -126,9 +127,9 @@ public class NotificationService {
         }
     }
 
-    public Notification createAndSendNotification (User sender, User receiver, NotificationType notificationType, NotificationPriority priority, String name) {
-        Notification notification = createNotification(sender, receiver, notificationType, priority, name);
-        sendNotificationToUsers(notification);
+    public Notification createAndSendNotification(User sender, User receiver, NotificationType notificationType, NotificationPriority priority, String notifiableName, String notifiableRelatedName) {
+        Notification notification = createNotification(sender, receiver, notificationType, priority, notifiableName, notifiableRelatedName);
+        sendNotificationsToUsers(notification);
         return notification;
     }
 }

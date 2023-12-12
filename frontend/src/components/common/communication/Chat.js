@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import styles from "@chatscope/chat-ui-kit-styles/dist/default/styles.min.css";
 import {
   MainContainer,
@@ -8,24 +8,22 @@ import {
   Conversation,
   ConversationHeader,
   ConversationList,
-  InfoButton,
-  VoiceCallButton,
   ChatContainer,
-  VideoCallButton,
   MessageList,
   MessageSeparator,
   Message,
-  ExpansionPanel,
   MessageInput,
-  TypingIndicator,
 } from "@chatscope/chat-ui-kit-react";
 
 import useData from "../../../hooks/useData";
+import { useUser } from "../../../hooks/useCommunication";
 import img from "../../../img.png";
+import { debounce } from "lodash";
 
 const Chat = () => {
   const [messageInputValue, setMessageInputValue] = useState("");
   const [searchVal, setSearchVal] = useState("");
+  const searchValRef = useRef();
 
   const [activeConversation, setActiveConversation] = useState(null);
   const [conversations, setConversations] = useState([]);
@@ -34,6 +32,7 @@ const Chat = () => {
   const [sortedActiveMessages, setSortedActiveMessages] = useState([]);
 
   const { username, messages, sendMessage } = useData();
+  const fetchUserByUsername = useUser();
 
   const MyConversation = {
     create: function (name, messages, lastMessage) {
@@ -46,7 +45,6 @@ const Chat = () => {
   };
 
   const createConversations = (messages) => {
-    console.log("createConversations:", messages);
     const conversations = {};
     if (!username) {
       return conversations;
@@ -69,6 +67,7 @@ const Chat = () => {
         }
       }
     });
+
     return conversations;
   };
 
@@ -81,17 +80,49 @@ const Chat = () => {
   };
 
   const filterConversations = (conversations, searchVal) => {
-    return conversations?.filter((conversation) =>
-      conversation.name.startsWith(searchVal)
+    return Object.fromEntries(
+      Object.entries(conversations).filter(([key]) => key.startsWith(searchVal))
     );
   };
 
+  const debouncedNewConversationSearch = useRef(
+    debounce(async (username) => {
+      try {
+        const user = await fetchUserByUsername(username);
+        if (!conversations[username]) {
+          const newConversation = MyConversation.create(username, [], null);
+          const updatedConversations = { ...conversations };
+          updatedConversations[username] = newConversation;
+          setConversations(updatedConversations);
+        }
+      } catch (err) {
+        console.log("debounce err:", err);
+      }
+    }, 1000)
+  ).current;
+
   useEffect(() => {
-    setConversations(createConversations(messages));
+    return () => {
+      debouncedNewConversationSearch.cancel();
+    };
+  }, [debouncedNewConversationSearch]);
+
+  useEffect(() => {
+    updateConversations(messages, conversations, searchVal, true);
   }, [messages]);
 
   useEffect(() => {
+    let toCreate = true;
+    if (searchValRef.current?.length < searchVal?.length) {
+      toCreate = false;
+    }
+    updateConversations(messages, conversations, searchVal, toCreate);
+    searchValRef.current = searchVal;
+  }, [searchVal]);
+
+  useEffect(() => {
     activeConversation &&
+      conversations[activeConversation.name] &&
       setActiveConversation(conversations[activeConversation.name]);
   }, [conversations]);
 
@@ -113,11 +144,34 @@ const Chat = () => {
     );
   }, [activeConversation, messages]);
 
-  useEffect(() => {
-    console.log("searchVal", searchVal, conversations);
-    searchVal &&
-      setConversations(filterConversations(conversations, searchVal));
-  }, [searchVal]);
+  const updateConversations = async (
+    messages,
+    conversations,
+    searchVal,
+    toCreate
+  ) => {
+    if (
+      searchVal &&
+      messages?.filter((msg) => {
+        return msg.receiver === searchVal || msg.sender === searchVal;
+      }).length == 0
+    ) {
+      debouncedNewConversationSearch(searchVal);
+    }
+    const updatedConversations = toCreate
+      ? createConversations(messages)
+      : conversations;
+    const filteredConversations = filterConversations(
+      updatedConversations,
+      searchVal
+    );
+    setConversations(filteredConversations);
+  };
+
+  const onActivateConversation = (conversation) => {
+    setSearchVal("");
+    setActiveConversation(conversation);
+  };
 
   return (
     <div
@@ -139,9 +193,9 @@ const Chat = () => {
               <Conversation
                 key={idx}
                 name={conversation.name}
-                lastSenderName={conversation.lastMessage.sender}
-                info={conversation.lastMessage.content}
-                onClick={(_) => setActiveConversation(conversation)}
+                lastSenderName={conversation?.lastMessage.sender}
+                info={conversation?.lastMessage.content}
+                onClick={(_) => onActivateConversation(conversation)}
               >
                 <Avatar src={img} name={conversation.name} />
               </Conversation>
@@ -149,33 +203,36 @@ const Chat = () => {
           </ConversationList>
         </Sidebar>
 
-        {activeConversation && sortedActiveMessages ? (
+        {activeConversation && (
           <ChatContainer>
             <ConversationHeader>
               <ConversationHeader.Back />
               <Avatar src={img} name={activeConversation.name} />
               <ConversationHeader.Content userName={activeConversation.name} />
             </ConversationHeader>
-            <MessageList>
-              {sortedActiveMessages.map((msg, idx) => (
-                <React.Fragment key={idx}>
-                  <Message
-                    model={{
-                      message: msg.content,
-                      sentTime: "15 mins ago",
-                      sender: msg.content,
-                      direction:
-                        msg.sender === username ? "outgoing" : "incoming",
-                      position: "single",
-                    }}
-                  >
-                    {msg.sender === username && (
-                      <Avatar src={img} name={msg.sender} />
-                    )}
-                  </Message>
-                </React.Fragment>
-              ))}
-            </MessageList>
+
+            {sortedActiveMessages?.length > 0 && (
+              <MessageList>
+                {sortedActiveMessages.map((msg, idx) => (
+                  <React.Fragment key={idx}>
+                    <Message
+                      model={{
+                        message: msg.content,
+                        sentTime: "15 mins ago",
+                        sender: msg.content,
+                        direction:
+                          msg.sender === username ? "outgoing" : "incoming",
+                        position: "single",
+                      }}
+                    >
+                      {msg.sender === username && (
+                        <Avatar src={img} name={msg.sender} />
+                      )}
+                    </Message>
+                  </React.Fragment>
+                ))}
+              </MessageList>
+            )}
             <MessageInput
               placeholder="Type message here"
               value={messageInputValue}
@@ -183,7 +240,7 @@ const Chat = () => {
               onSend={onSend}
             />
           </ChatContainer>
-        ) : null}
+        )}
       </MainContainer>
     </div>
   );

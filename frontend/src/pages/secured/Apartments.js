@@ -1,17 +1,31 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect, Suspense } from "react";
 
 import useData from "../../hooks/useData";
 
 import { Link } from "react-router-dom";
-import { Button } from "react-bootstrap";
 import SectionHeader from "../../components/common/SectionHeader";
-import OwnerApartmentsList from "../../components/owner/ApartmentsList";
+
+import Apartment from "../../components/common/Apartment";
+
+import { Box, SpeedDial, SpeedDialIcon, Tab, Tabs } from "@mui/material";
+
+import ApartmentsSkeleton from "../../components/common/skeletons/ApartmentsSkeleton";
 
 const OwnerApartments = () => {
-  const { isOwner, isDataFetched, apartments } = useData();
+  const { isClient, isOwner, isDataFetched, apartments } = useData();
+
+  const [activeTab, setActiveTab] = useState(0);
 
   const [rentedApartments, setRentedApartments] = useState([]);
   const [vacantApartments, setVacantApartments] = useState([]);
+
+  const LazyItemsList = React.lazy(() =>
+    import("../../components/common/ItemsList")
+  );
+
+  const handleActiveTabChange = (event, newActiveTab) => {
+    setActiveTab(newActiveTab);
+  };
 
   useEffect(() => {
     setRentedApartments(
@@ -23,30 +37,77 @@ const OwnerApartments = () => {
   }, [apartments]);
 
   return (
-    <section>
-      {isDataFetched && isOwner ? (
-        <>
-          <SectionHeader title="Rented Apartments" />
-          <OwnerApartmentsList apartments={rentedApartments} />
-          <SectionHeader title="Vacant Apartments" />
-          <OwnerApartmentsList apartments={vacantApartments} />
-          <Button as={Link} to="new" variant="outline-dark">
-            Add New Apartment
-          </Button>
-        </>
-      ) : (
-        <span></span>
-      )}
-      {isDataFetched && !isOwner ? (
-        <>
-          <SectionHeader title="Rented Apartment" />
-          <OwnerApartmentsList apartments={rentedApartments} />
-        </>
-      ) : (
-        <span></span>
-      )}
-      {!isDataFetched ? <p>Loading</p> : <span></span>}
-    </section>
+    <Box sx={{ flexGrow: 1 }}>
+      <Suspense fallback={<ApartmentsSkeleton />}>
+        {isDataFetched && isOwner && (
+          <>
+            <Tabs value={activeTab} onChange={handleActiveTabChange} centered>
+              <Tab label="Rented" />
+              <Tab label="Vacant" />
+            </Tabs>
+
+            {activeTab === 0 && (
+              <>
+                {rentedApartments?.length > 0 ? (
+                  <LazyItemsList items={rentedApartments} ItemUI={Apartment} />
+                ) : (
+                  <SectionHeader title="No Rented Apartments" />
+                )}
+              </>
+            )}
+
+            {activeTab === 1 && (
+              <>
+                {vacantApartments?.length > 0 ? (
+                  <LazyItemsList
+                    items={vacantApartments}
+                    ItemUI={Apartment}
+                    itemProps={{ toShowDeleteButton: true }}
+                  />
+                ) : (
+                  <SectionHeader title="No Vacant Apartments" />
+                )}
+              </>
+            )}
+
+            <Link to="new">
+              <SpeedDial
+                ariaLabel="New Apartment"
+                sx={{
+                  position: "fixed",
+                  bottom: 40,
+                  right: 40,
+                }}
+                icon={<SpeedDialIcon />}
+                open={false}
+                FabProps={{
+                  sx: {
+                    bgcolor: "green",
+                    "&:hover": {
+                      bgcolor: "green",
+                    },
+                  },
+                }}
+              />
+            </Link>
+          </>
+        )}
+
+        {isDataFetched && isClient && (
+          <>
+            {rentedApartments?.length > 0 ? (
+              <>
+                <SectionHeader title="Rented Apartments" />
+                <LazyItemsList items={rentedApartments} ItemUI={Apartment} />
+              </>
+            ) : (
+              <SectionHeader title="No Rented Apartments" />
+            )}
+          </>
+        )}
+        {!isDataFetched && <ApartmentsSkeleton />}
+      </Suspense>
+    </Box>
   );
 };
 

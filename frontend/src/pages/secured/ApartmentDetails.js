@@ -3,11 +3,25 @@ import { useParams, Link } from "react-router-dom";
 import { Carousel } from "react-bootstrap";
 import Card from "react-bootstrap/Card";
 import ListGroup from "react-bootstrap/ListGroup";
-import { ExclamationCircleFill, CheckCircleFill } from "react-bootstrap-icons";
+import InputGroup from "react-bootstrap/InputGroup";
+import { Box, TextField } from "@mui/material";
+
+import {
+  ExclamationCircleFill,
+  CheckCircleFill,
+  PlusSquareFill,
+  TrashFill,
+} from "react-bootstrap-icons";
 
 import useData from "../../hooks/useData";
-import { usePatchApartmentEquipmentStatus } from "../../hooks/useApartments";
+import {
+  useDeleteEquipment,
+  usePatchEquipmentStatus,
+  usePostEquipment,
+} from "../../hooks/useApartments";
+import { epochDaysToStringDate } from "../../hooks/useAgreements";
 import SectionHeader from "../../components/common/SectionHeader";
+import ApartmentDetailsSkeleton from "../../components/common/skeletons/ApartmentDetailsSkeleton";
 
 const OwnerApartmentDetails = () => {
   const { id } = useParams();
@@ -19,6 +33,9 @@ const OwnerApartmentDetails = () => {
   const [canceledAgreements, setCanceledAgreements] = useState([]);
   const [isRented, setIsRented] = useState(false);
 
+  const [newEquipmentName, setNewEquipmentName] = useState("");
+  const [newEquipmentDescription, setNewEquipmentDescription] = useState("");
+
   const {
     username,
     isDataFetched,
@@ -27,10 +44,13 @@ const OwnerApartmentDetails = () => {
     isOwner,
     isAdmin,
     apartments,
+    setApartments,
     agreements,
   } = useData();
 
-  const patchUserEquipmentStatus = usePatchApartmentEquipmentStatus();
+  const postEquipment = usePostEquipment();
+  const deleteEquipment = useDeleteEquipment();
+  const patchEquipmentStatus = usePatchEquipmentStatus();
 
   const onApartmentsLoad = () => {
     setDetailedApartment(apartments.find((item) => item.id === parseInt(id)));
@@ -68,35 +88,90 @@ const OwnerApartmentDetails = () => {
   useEffect(onDetailedApartmentLoad, [detailedApartment]);
   useEffect(onDetailedAgreementsLoad, [detailedAgreements]);
 
-  const handleReport = async (equipment) => {
-    const data = await patchUserEquipmentStatus(
+  const handleEquipmentStatusChange = async (equipment) => {
+    const newStatus = equipment.isBroken;
+    await patchEquipmentStatus(username, detailedApartment.id, equipment.id, {
+      status: newStatus,
+    });
+
+    let updatedEquipment = detailedApartment.equipment;
+    updatedEquipment = updatedEquipment.map((e) =>
+      e.id === equipment.id ? { ...e, isBroken: !newStatus } : e
+    );
+    const updatedDetailedApartment = {
+      ...detailedApartment,
+      equipment: updatedEquipment,
+    };
+    setApartments(
+      apartments.map((apartment) =>
+        apartment.id === detailedApartment.id
+          ? updatedDetailedApartment
+          : apartment
+      )
+    );
+  };
+
+  const handleNewEquipment = async (equipmentName, equipmentDescription) => {
+    const newEquipment = {
+      name: equipmentName,
+      description: equipmentDescription,
+      apartmentId: detailedApartment.id,
+      isBroken: false,
+    };
+
+    const data = await postEquipment(
       username,
       detailedApartment.id,
-      equipment.id,
-      { status: equipment.isBroken }
+      newEquipment
     );
-    console.log("data:", data);
-    setIsDataFetched(false);
+
+    const updatedEquipment = [...detailedApartment.equipment, data];
+    const updatedDetailedApartment = {
+      ...detailedApartment,
+      equipment: updatedEquipment,
+    };
+
+    setApartments(
+      apartments.map((apartment) =>
+        apartment.id === detailedApartment.id
+          ? updatedDetailedApartment
+          : apartment
+      )
+    );
+
+    setNewEquipmentName("");
+    setNewEquipmentDescription("");
   };
 
-  const epochDaysToStringDate = (epochDays) => {
-    const millisecondsPerDay = 24 * 60 * 60 * 1000;
-    const date = new Date(
-      epochDays * millisecondsPerDay +
-        new Date().getTimezoneOffset() * 60 * 1000
+  const handleDeleteEquipment = async (eid) => {
+    await deleteEquipment(username, detailedApartment.id, eid);
+
+    const updatedEquipment = detailedApartment.equipment.filter(
+      (e) => e.id !== eid
     );
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, "0");
-    const day = String(date.getDate()).padStart(2, "0");
-    return `${day}-${month}-${year}`;
+
+    const updatedDetailedApartment = {
+      ...detailedApartment,
+      equipment: updatedEquipment,
+    };
+
+    setApartments(
+      apartments.map((apartment) =>
+        apartment.id === detailedApartment.id
+          ? updatedDetailedApartment
+          : apartment
+      )
+    );
   };
+
+  console.log("detailedApartment:", detailedApartment);
 
   return (
-    <section>
+    <Box sx={{ flexGrow: 1 }}>
       {isDataFetched && detailedApartment ? (
         <>
           <SectionHeader title="Apartment Details" />
-          <Card className="mb-3 mx-4">
+          <Card className="mb-4">
             <Carousel fade>
               {Array.isArray(detailedApartment?.pictures) &&
                 detailedApartment?.pictures.map((picture, index) => (
@@ -136,12 +211,22 @@ const OwnerApartmentDetails = () => {
                       activeAgreement.monthlyPayment
                     ).toFixed(2)}
                   </ListGroup.Item>
-                  <ListGroup.Item>
-                    <strong> Tenant: </strong>{" "}
-                    {activeAgreement.tenant.firstName}{" "}
-                    {activeAgreement.tenant.lastName} (
-                    {activeAgreement.tenant.username})
-                  </ListGroup.Item>
+                  {isOwner && (
+                    <ListGroup.Item>
+                      <strong> Tenant: </strong>{" "}
+                      {activeAgreement.tenant.firstName}{" "}
+                      {activeAgreement.tenant.lastName} (
+                      {activeAgreement.tenant.username})
+                    </ListGroup.Item>
+                  )}
+                  {isClient && (
+                    <ListGroup.Item>
+                      <strong> Owner: </strong>{" "}
+                      {activeAgreement.owner.firstName}{" "}
+                      {activeAgreement.owner.lastName} (
+                      {activeAgreement.owner.username})
+                    </ListGroup.Item>
+                  )}
                   <ListGroup.Item>
                     <strong> Duration: </strong>{" "}
                     {epochDaysToStringDate(activeAgreement.signingDate)} :{" "}
@@ -149,59 +234,128 @@ const OwnerApartmentDetails = () => {
                   </ListGroup.Item>
                 </>
               ) : (
+                <ListGroup.Item>
+                  <strong> Status: </strong> Vacant
+                </ListGroup.Item>
+              )}
+
+              {isOwner && (
+                <ListGroup.Item>
+                  <strong> History: </strong>
+                  <Card.Link
+                    as={Link}
+                    to={`/apartments/${detailedApartment.id}/agreements`}
+                  >
+                    Agreements
+                  </Card.Link>
+                </ListGroup.Item>
+              )}
+              {detailedApartment?.properties?.length > 0 && (
                 <>
-                  <ListGroup.Item>
-                    <strong> Status: </strong> Vacant
+                  <ListGroup.Item className="d-flex align-items-center">
+                    <strong>Properties:</strong>
                   </ListGroup.Item>
 
-                  {Array.isArray(proposedAgreements) && (
-                    <>
-                      <ListGroup.Item>
-                        <strong> Proposed Agreements: </strong>
-                      </ListGroup.Item>
-                      {proposedAgreements.map((agreement) => (
-                        <ListGroup.Item
-                          key={agreement.id}
-                          className="flex-row-reverse"
-                        >
-                          <Card.Link
-                            as={Link}
-                            to={`/agreements/${agreement.id}`}
-                          >
-                            {agreement.tenant.firstName}{" "}
-                            {agreement.tenant.lastName} (
-                            {agreement.tenant.username})
-                          </Card.Link>
-                        </ListGroup.Item>
-                      ))}
-                    </>
-                  )}
+                  {detailedApartment.properties.map((property) => (
+                    <ListGroup.Item
+                      key={property.id}
+                      className="d-flex align-items-center"
+                    >
+                      <div className="flex-grow-1">
+                        {property.name}: {property.value}
+                        {}
+                      </div>
+                    </ListGroup.Item>
+                  ))}
                 </>
               )}
-              {Array.isArray(detailedApartment.equipment) && (
-                <>
-                  <ListGroup.Item>
-                    <strong> Equipment: </strong>
-                  </ListGroup.Item>
-                  {detailedApartment.equipment.map((item) => (
-                    <ListGroup.Item
-                      key={item.id}
-                      className="flex-row-reverse"
-                      onClick={() => {
-                        handleReport(item);
-                      }}
-                    >
-                      <div>{item.description}</div>
 
-                      <div style={{ cursor: "pointer" }}>
-                        {item.isBroken ? (
-                          <ExclamationCircleFill />
+              {detailedApartment?.equipment?.length > 0 && (
+                <>
+                  <ListGroup.Item className="d-flex align-items-center">
+                    <div className="flex-grow-1">
+                      <strong>Equipment:</strong>
+                    </div>
+                    <div>
+                      <strong>Status:</strong>
+                    </div>
+                  </ListGroup.Item>
+                  {detailedApartment.equipment.map((equipment) => (
+                    <ListGroup.Item
+                      key={equipment.id}
+                      className="d-flex align-items-center"
+                    >
+                      <div className="flex-grow-1">
+                        {equipment.name}
+                        {equipment?.description && (
+                          <span>: {equipment.description}</span>
+                        )}
+                        {isOwner && (
+                          <span
+                            onClick={() => {
+                              handleDeleteEquipment(equipment.id);
+                            }}
+                            style={{ cursor: "pointer" }}
+                            className="ms-1"
+                          >
+                            <TrashFill color="red" />
+                          </span>
+                        )}
+                        {}
+                      </div>
+
+                      <div
+                        onClick={() => {
+                          handleEquipmentStatusChange(equipment);
+                        }}
+                        style={{ cursor: "pointer" }}
+                      >
+                        {equipment.isBroken ? (
+                          <ExclamationCircleFill color="red" />
                         ) : (
-                          <CheckCircleFill />
+                          <CheckCircleFill color="blue" />
                         )}
                       </div>
                     </ListGroup.Item>
                   ))}
+                  <ListGroup.Item className="d-flex align-items-center">
+                    <div className="flex-grow-1 me-1">
+                      <TextField
+                        size="small"
+                        fullWidth
+                        placeholder="Enter equipment name"
+                        id="newEquipmentName"
+                        value={newEquipmentName}
+                        onChange={(e) => {
+                          setNewEquipmentName(e.target.value);
+                        }}
+                      />
+                    </div>
+                    <div className="flex-grow-1 me-1">
+                      <TextField
+                        size="small"
+                        fullWidth
+                        placeholder="Enter equipment description"
+                        id="newEquipmentDescription"
+                        value={newEquipmentDescription}
+                        onChange={(e) => {
+                          setNewEquipmentDescription(e.target.value);
+                        }}
+                      />
+                    </div>
+                    <div
+                      style={{ cursor: "pointer" }}
+                      onClick={() => {
+                        newEquipmentName &&
+                          handleNewEquipment(
+                            newEquipmentName,
+                            newEquipmentDescription
+                          );
+                      }}
+                    >
+                      <PlusSquareFill color="green" />
+                    </div>
+                  </ListGroup.Item>
                 </>
               )}
               {isOwner && Array.isArray(finishedAgreements) && (
@@ -225,9 +379,9 @@ const OwnerApartmentDetails = () => {
           </Card>
         </>
       ) : (
-        <p>Loading</p>
+        <ApartmentDetailsSkeleton />
       )}
-    </section>
+    </Box>
   );
 };
 

@@ -1,11 +1,11 @@
 import useAxiosUser from "./useAxiosUser";
 
-const usePostRequest = () => {
+const useDeleteRequest = () => {
   const axiosUser = useAxiosUser();
 
-  const postData = async (url, payload) => {
+  const deleteData = async (url) => {
     try {
-      const response = await axiosUser.post(url, payload, {
+      const response = await axiosUser.delete(url, {
         headers: {
           "Content-Type": "application/json",
         },
@@ -13,11 +13,11 @@ const usePostRequest = () => {
       });
       return response.data;
     } catch (err) {
-      console.log("error posting data", err);
+      console.log("error deleting data", err);
       throw err;
     }
   };
-  return postData;
+  return deleteData;
 };
 
-export default usePostRequest;
+export default useDeleteRequest;

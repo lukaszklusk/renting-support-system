@@ -36,10 +36,13 @@ public class Apartment implements Notifiable{
     private double size;
     private String description;
 
-    @OneToMany(mappedBy = "apartment", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "apartment", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private Set<Equipment> equipment;
 
-    @OneToMany
+    @OneToMany(mappedBy = "apartment", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private Set<Agreement> agreements;
+
+    @OneToMany(mappedBy = "apartment", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private Set<ApartmentProperty> properties;
 
     @OneToMany

@@ -32,55 +32,11 @@ public class AgreementController {
     @PatchMapping("/user/{username}/agreements/{aid}")
     public ResponseEntity<AgreementDTO> changeAgreementStatus(@PathVariable String username,
                                                               @PathVariable long aid,
-                                                              @RequestParam String status){
-        Optional<User> userOptional = userService.getUserByUsername(username);
-        if(userOptional.isPresent()){
-            Optional<Agreement> agreementOptional = agreementService.getAgreementById(aid);
-            if(agreementOptional.isPresent()){
-                try {
-                    AgreementStatus agreementStatus =
-                            AgreementStatus.valueOf(status);
-                    return ResponseEntity.ok(AgreementDTO.convertFromAgreement(agreementService.changeAgreementStatus(
-                            agreementOptional.get(), agreementStatus)));
-                }catch (IllegalArgumentException e){
-                    return ResponseEntity.badRequest().build();
-                }
-            } else return ResponseEntity.notFound().build();
-        } else return ResponseEntity.notFound().build();
-    }
-
-    @PatchMapping("/user/{username}/agreements/{aid}/accept")
-    public ResponseEntity<AgreementDTO> setAgreementStatusToActive(@PathVariable String username,
-                                                                   @PathVariable long aid){
-        Optional<User> userOptional = userService.getUserByUsername(username);
-        if(userOptional.isPresent()){
-            Optional<Agreement> agreementOptional = agreementService.getAgreementById(aid);
-            if(agreementOptional.isPresent()){
-                try {
-                    return ResponseEntity.ok(AgreementDTO.convertFromAgreement(agreementService.changeAgreementStatus(
-                            agreementOptional.get(), AgreementStatus.accepted)));
-                }catch (IllegalArgumentException e){
-                    return ResponseEntity.badRequest().build();
-                }
-            } else return ResponseEntity.notFound().build();
-        } else return ResponseEntity.notFound().build();
-    }
-
-    @PatchMapping("/user/{username}/agreements/{aid}/reject")
-    public ResponseEntity<AgreementDTO> setAgreementStatusToRejected(@PathVariable String username,
-                                                                     @PathVariable long aid){
-        Optional<User> userOptional = userService.getUserByUsername(username);
-        if(userOptional.isPresent()){
-            Optional<Agreement> agreementOptional = agreementService.getAgreementById(aid);
-            if(agreementOptional.isPresent()){
-                try {
-                    return ResponseEntity.ok(AgreementDTO.convertFromAgreement(agreementService.changeAgreementStatus(
-                            agreementOptional.get(), AgreementStatus.rejected_owner)));
-                }catch (IllegalArgumentException e){
-                    return ResponseEntity.badRequest().build();
-                }
-            } else return ResponseEntity.notFound().build();
-        } else return ResponseEntity.notFound().build();
+                                                              @RequestParam boolean status,
+                                                              @RequestParam boolean byOwner){
+        Agreement updatedAgreement = agreementService.changeAgreementStatus(username, aid, status, byOwner);
+        AgreementDTO updatedAgreementDTO = AgreementDTO.convertFromAgreement(updatedAgreement);
+        return ResponseEntity.ok(updatedAgreementDTO);
     }
 
     @GetMapping("/user/{username}/agreements")
@@ -88,7 +44,7 @@ public class AgreementController {
         Optional<User> userOptional = userService.getUserByUsername(username);
         if(userOptional.isPresent()){
             if(userOptional.get().getUserRole().equals(UserRole.OWNER))
-                return ResponseEntity.ok(agreementService.getAgreementForUser(userOptional.get()).stream().map(AgreementDTO::convertFromAgreement).collect(Collectors.toList()));
+                return ResponseEntity.ok(agreementService.getAgreementsForOwner(userOptional.get()).stream().map(AgreementDTO::convertFromAgreement).collect(Collectors.toList()));
             else if(userOptional.get().getUserRole().equals(UserRole.CLIENT))
                 return ResponseEntity.ok(agreementService.getAgreementsForClient(userOptional.get()).stream().map(AgreementDTO::convertFromAgreement).collect(Collectors.toList()));
             else return ResponseEntity.badRequest().build();
@@ -149,39 +105,6 @@ public class AgreementController {
                 return ResponseEntity.notFound().build();
             }
     }
-
-//    @PostMapping("/user/{username}/agreements")
-//    public ResponseEntity<AgreementDTO> createAgreement(@PathVariable String username,
-//                                                        @RequestBody Map<String, Object> payload){
-//        if(!payload.containsKey("name") || !payload.containsKey("monthlyPayment") ||
-//                !payload.containsKey("administrationFee") || !payload.containsKey("ownerAccountNo") ||
-//                !payload.containsKey("apartmentId") || !payload.containsKey("signingDate") ||
-//                !payload.containsKey("expirationDate") || !payload.containsKey("tenant")){
-//            return ResponseEntity.badRequest().build();
-//        }
-//        Agreement newAgreement = new Agreement();
-//        Optional<User> owner = userService.getUserByUsername(username);
-//        if(owner.isEmpty()) return ResponseEntity.notFound().build();
-//        newAgreement.setOwner(owner.get());
-//        newAgreement.setName((String) payload.get("name"));
-//        Optional<Apartment> apartment = apartmentService.getApartmentById(
-//                Long.parseLong((String) payload.get("apartmentId")));
-//        if(apartment.isEmpty()) return ResponseEntity.notFound().build();
-//        newAgreement.setApartment(apartment.get());
-//        newAgreement.setSigningDate(LocalDate.parse((String) payload.get("signingDate"),
-//                DateTimeFormatter.ofPattern("yyyy-MM-dd")));
-//        newAgreement.setExpirationDate(LocalDate.parse((String) payload.get("expirationDate"),
-//                DateTimeFormatter.ofPattern("yyyy-MM-dd")));
-//        newAgreement.setMonthlyPayment(Double.parseDouble((String) payload.get("monthlyPayment")));
-//        newAgreement.setAdministrationFee(Double.parseDouble((String) payload.get("administrationFee")));
-//        newAgreement.setOwnerAccountNo((String) payload.get("ownerAccountNo"));
-//        Optional<User> tenant = userService.getUserByUsername((String) payload.get("tenant"));
-//        if(tenant.isPresent()) newAgreement.setTenant(tenant.get());
-//        else return ResponseEntity.notFound().build();
-//        Agreement agreement = agreementService.createAgreement(newAgreement);
-//        if(agreement != null) return ResponseEntity.ok(AgreementDTO.convertFromAgreement(agreement));
-//        else return ResponseEntity.internalServerError().build();
-//    }
 
     @PutMapping("/user/{username}/agreements/{agid}")
     public ResponseEntity<AgreementDTO> changeAgreement(@PathVariable String username,

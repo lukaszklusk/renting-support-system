@@ -58,6 +58,20 @@ public class EquipmentController {
         }
     }
 
+    @DeleteMapping("/{eid}")
+    public ResponseEntity<EquipmentDTO> deleteEquipment(@PathVariable String username,
+                                                        @PathVariable long aid,
+                                                        @PathVariable long eid) {
+        try {
+            equipmentService.deleteEquipment(username, aid, eid);
+            return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+        } catch (EntityNotFoundException e) {
+            return ResponseEntity.notFound().build();
+        } catch (IllegalStateException e) {
+            return ResponseEntity.badRequest().build();
+        }
+    }
+
     @PatchMapping("/{eid}")
     public ResponseEntity<EquipmentDTO> changeEquipmentStatus(@PathVariable String username,
                                                         @PathVariable long aid,

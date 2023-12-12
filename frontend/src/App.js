@@ -23,7 +23,7 @@ import OwnerApartmentDetails from "./pages/secured/ApartmentDetails";
 import AddAgreement from "./pages/secured/owner/NewAgreement";
 
 import AdminDashboard from "./components/admin/AdminDashboard";
-import OwnerAgreementDetails from "./pages/secured/AgreementDetails";
+import AgreementDetails from "./pages/secured/AgreementDetails";
 
 import SendMessage from "./components/common/communication/SendMessage";
 import Notifications from "./components/common/communication/Notifications";
@@ -48,7 +48,7 @@ function App() {
             <Route path="apartments" element={<OwnerApartments />} />
             <Route path="apartments/:id" element={<OwnerApartmentDetails />} />
             <Route path="agreements" element={<OwnerAgreements />} />
-            <Route path="agreements/:id" element={<OwnerAgreementDetails />} />
+            <Route path="agreements/:id" element={<AgreementDetails />} />
             <Route path="chat" element={<SendMessage />} />
             <Route path="notifications" element={<Notifications />} />
           </Route>
@@ -60,13 +60,22 @@ function App() {
             <Route path="dashboard" element={<OwnerDashboard />} />
             <Route exact path="apartments" element={<OwnerApartments />} />
             <Route path="apartments/:id" element={<OwnerApartmentDetails />} />
+            <Route
+              key="apartment-agreements"
+              path="apartments/:apartmentId/agreements"
+              element={<OwnerAgreements />}
+            />
             <Route path="apartments/new" element={<NewApartment />} />
-            <Route path="agreements" element={<OwnerAgreements />} />
-            <Route path="agreements/:id" element={<OwnerAgreementDetails />} />
+            <Route
+              key="agreements"
+              path="agreements"
+              element={<OwnerAgreements />}
+            />
+            <Route path="agreements/:id" element={<AgreementDetails />} />
             <Route path="agreements/new" element={<AddAgreement />} />
             <Route path="reports" element={<OwnerReports />} />
             <Route path="chat" element={<SendMessage />} />
-            <Route path="notifications" element={<Notifications />} />
+            <Route path="notifications/*" element={<Notifications />} />
           </Route>
         )}
 

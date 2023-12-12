@@ -21,7 +21,7 @@ public class ApartmentDTO {
     private double longitude;
     private double size;
     private String description;
-    private Set<ApartmentProperty> properties;
+    private Set<ApartmentPropertyDTO> properties;
     private Set<PictureDTO> pictures;
     private Set<Notification> notifications;
     private Set<EquipmentDTO> equipment;
@@ -40,7 +40,7 @@ public class ApartmentDTO {
                 .longitude(apartment.getLongitude())
                 .size(apartment.getSize())
                 .description(apartment.getDescription())
-                .properties(apartment.getProperties())
+                .properties(apartment.getProperties().stream().map(ApartmentPropertyDTO::convertFromApartmentProperty).collect(Collectors.toSet()))
                 .pictures(apartment.getPictures().stream().map(PictureDTO::convertFromPicture).collect(Collectors.toSet()))
                 .notifications(apartment.getNotifications())
                 .equipment(apartment.getEquipment().stream()

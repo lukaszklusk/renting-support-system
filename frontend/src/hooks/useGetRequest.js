@@ -3,12 +3,15 @@ import useAxiosUser from "./useAxiosUser";
 
 const useGetRequest = () => {
   const axiosUser = useAxiosUser();
-  const navigate = useNavigate();
-  const location = useLocation();
 
   const fetchData = async (url) => {
     try {
-      const response = await axiosUser.get(url);
+      const response = await axiosUser.get(url, {
+        headers: {
+          "Content-Type": "application/json",
+        },
+        withCredentials: true,
+      });
       return response.data;
     } catch (err) {
       console.log("error fetching data", err);

@@ -40,6 +40,10 @@ public class DataInitializer implements CommandLineRunner {
                 "Ala", "Kowalska", "+48557832997");
         User client3 = createUser("client3@mail.com", "client3", "client3", UserRole.CLIENT,
                 "Adam", "Nowak", "+48111222333");
+        createUser("client4@mail.com", "client4", "client4", UserRole.CLIENT,
+                "Jan", "Janowski", "+48111222333");
+        createUser("client5@mail.com", "client5", "client5", UserRole.CLIENT,
+                "Iwan", "Groźny", "+48111222333");
         User owner = createUser("owner@mail.com", "owner", "owner", UserRole.OWNER,
                 "Adam", "Mickiewicz", "+48774623921");
         createUser("admin@mail.com", "admin", "admin", UserRole.ADMIN,
@@ -226,14 +230,14 @@ public class DataInitializer implements CommandLineRunner {
                         .name("Fridge")
                         .description("SAMSUNG RB38T774DB1 EF No frost 203cm")
                         .notifications(new HashSet<>())
-                        .apartment(apartment)
+//                        .apartment(apartment)
                         .isBroken(false)
                 .build());
         equipment.add(Equipment.builder()
                 .name("Chair")
                 .description("Wooden chair")
                 .notifications(new HashSet<>())
-                .apartment(apartment)
+//                .apartment(apartment)
                 .isBroken(false)
                 .build());
         apartment.setEquipment(equipment);

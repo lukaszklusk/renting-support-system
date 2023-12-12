@@ -2,7 +2,6 @@ package pl.edu.agh.student.rentsys.service;
 
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import pl.edu.agh.student.rentsys.exceptions.EntityNotFoundException;
 import pl.edu.agh.student.rentsys.model.*;
@@ -41,18 +40,32 @@ public class ApartmentService {
         apartmentRepository.getApartmentByOwnerAndName(apartment.getOwner(), apartment.getName()).ifPresent(a -> {
             throw new IllegalStateException("Apartment names cannot repeat for the same owner");
         } );
-        pictureRepository.saveAll(apartment.getPictures());
-        apartmentPropertyRepository.saveAll(apartment.getProperties());
 
-        Notification notification = notificationService.createAndSendNotification(apartment.getOwner(), null, NotificationType.apartment_created, NotificationPriority.critical, apartment.getName());
+        pictureRepository.saveAll(apartment.getPictures());
+
+        Notification notification = notificationService.createAndSendNotification(apartment.getOwner(), apartment.getTenant(), NotificationType.apartment_created, NotificationPriority.critical, apartment.getName(), "");
         apartment.addNotification(notification);
 
         Apartment createdApartment = apartmentRepository.save(apartment);
+
+        for (ApartmentProperty property : apartment.getProperties()) {
+            property.setApartment(apartment);
+        }
+        apartmentPropertyRepository.saveAll(apartment.getProperties());
+
         for (Equipment equipment: createdApartment.getEquipment()) {
             equipment.setApartment(apartment);
         }
         equipmentRepository.saveAll(apartment.getEquipment());
         return createdApartment;
+    }
+
+    public void deleteApartment(String username, long id) {
+        Apartment apartment = getApartmentFromUsernameAndId(username, id);
+        Notification notification = notificationService.createAndSendNotification(apartment.getOwner(), apartment.getTenant(), NotificationType.apartment_removed, NotificationPriority.critical, apartment.getName(), "");
+        apartment.addNotification(notification);
+        apartment.getPictures().clear();
+        apartmentRepository.delete(apartment);
     }
 
     public Apartment changeApartment(Apartment apartment){
@@ -122,7 +135,12 @@ public class ApartmentService {
                 .postalCode(apartmentDTO.getPostalCode())
                 .size(apartmentDTO.getSize())
                 .city(apartmentDTO.getCity())
-                .properties(apartmentDTO.getProperties())
+                .properties(apartmentDTO.getProperties().stream().map(dto -> ApartmentProperty.builder()
+                        .name(dto.getName())
+                        .value(dto.getValue())
+                        .valueType(dto.getValueType())
+                        .build()
+                ).collect(Collectors.toSet()))
                 .notifications(new HashSet<>())
                 .equipment(apartmentDTO.getEquipment().stream().map(dto -> Equipment.builder()
                         .isBroken(dto.getIsBroken())

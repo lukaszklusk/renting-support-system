@@ -52,6 +52,18 @@ export const DataProvider = ({ children }) => {
 
   const [firstMsgRender, setFirstMsgRender] = useState(false);
 
+  const [screenSize, setScreenSize] = useState({
+    width: window.innerWidth,
+    height: window.innerHeight,
+  });
+
+  const handleResize = () => {
+    setScreenSize({
+      width: window.innerWidth,
+      height: window.innerHeight,
+    });
+  };
+
   const configCommunication = () => {
     if (isLoggedIn) {
       configWebSocket();
@@ -113,7 +125,11 @@ export const DataProvider = ({ children }) => {
   const fetchNotifications = async () => {
     try {
       const data = await fetchUserNotifications(username);
-      setNotifications(data);
+      setNotifications(
+        data?.sort((notA, notB) => {
+          return notB.sendTimestamp - notA.sendTimestamp;
+        })
+      );
     } catch (err) {
       console.log("error fetching notifications:", err);
       return err;
@@ -152,17 +168,19 @@ export const DataProvider = ({ children }) => {
     setMessages((prevMessages) => [...prevMessages, receivedMessage]);
   };
 
-  const onReceivedNotification = (notification) => {
-    const receivedNotification = JSON.parse(notification.body);
+  const onReceivedNotification = (notificationResponse) => {
+    const notification = JSON.parse(notificationResponse.body);
+    console.log("received notification:", notification);
     if (notification.receiver === username) {
       console.log("setting is data fetch to false after receiving notif");
       notification.receiver === username && setIsDataFetched(false);
     }
-    showNotification(receivedNotification);
-    setNotifications((prevNotifications) => [
-      ...prevNotifications,
-      receivedNotification,
-    ]);
+    showNotification(notification);
+    setNotifications((prevNotifications) =>
+      [...prevNotifications, notification]?.sort((notA, notB) => {
+        return notB.sendTimestamp - notA.sendTimestamp;
+      })
+    );
   };
 
   const sendMessage = (receiver, content) => {
@@ -237,6 +255,14 @@ export const DataProvider = ({ children }) => {
     }
   };
 
+  const onResize = () => {
+    window.addEventListener("resize", handleResize);
+    return () => {
+      window.removeEventListener("resize", handleResize);
+    };
+  };
+
+  useEffect(onResize, []);
   useEffect(configCommunication, [isLoggedIn]);
   useEffect(connect, [stompClient]);
   useEffect(onAuthChange, [auth]);
@@ -297,6 +323,8 @@ export const DataProvider = ({ children }) => {
 
         onSuccessMsg,
         onErrMsg,
+
+        screenSize,
       }}
     >
       {children}

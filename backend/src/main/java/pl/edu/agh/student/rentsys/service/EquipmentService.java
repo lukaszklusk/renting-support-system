@@ -48,10 +48,25 @@ public class EquipmentService {
         Equipment equipment = createEquipment(equipmentDTO.getName(), equipmentDTO.getDescription(), apartment);
 
         Notification notification = notificationService.createAndSendNotification(
-                apartment.getOwner(), null, NotificationType.equipment_added, NotificationPriority.important, equipment.getName()
+                apartment.getOwner(), apartment.getTenant(), NotificationType.equipment_added, NotificationPriority.important, equipment.getName(), apartment.getName()
         );
         equipment.addNotification(notification);
         return equipmentRepository.save(equipment);
+    }
+
+    public void deleteEquipment(String username, long aid, long eid) {
+        Apartment apartment = apartmentService.getApartmentFromUsernameAndId(username, aid);
+        Equipment equipment = getEquipmentById(eid).orElseThrow(() -> new EntityNotFoundException(String.format("Equipment with id %d was not found", eid)));
+        Apartment apartmentFromEquipmentId = equipment.getApartment();
+        if (apartment != apartmentFromEquipmentId) {
+            throw new IllegalStateException();
+        }
+
+        Notification notification = notificationService.createAndSendNotification(
+                apartment.getOwner(), apartment.getTenant(), NotificationType.equipment_removed, NotificationPriority.important, equipment.getName(), apartment.getName()
+        );
+        equipment.addNotification(notification);
+        equipmentRepository.delete(equipment);
     }
 
     public Equipment changeEquipmentStatus(String username, long aid, long eid, Boolean status) {
@@ -61,17 +76,18 @@ public class EquipmentService {
             throw new IllegalStateException();
         }
 
+        Boolean updatedIsBroken = !status;
         Equipment equipment = getEquipmentById(eid).orElseThrow(() -> new EntityNotFoundException(String.format("Equipment with id %d was not found", aid)));
-        if (equipment.getIsBroken() != status) {
+        if (equipment.getIsBroken() == updatedIsBroken) {
             throw new IllegalStateException();
         }
 
-        equipment.setIsBroken(!status);
-        NotificationType modifiedEquipment =  status.equals(true) ? NotificationType.equipment_fix : NotificationType.equipment_failure;
+        equipment.setIsBroken(updatedIsBroken);
+        NotificationType modifiedEquipment =  updatedIsBroken ? NotificationType.equipment_failure : NotificationType.equipment_fix;
         User sender = userService.getUserByUsername(username).orElseThrow(() -> new EntityNotFoundException(""));
         User receiver = apartmentFromId.getOwner() == sender ? apartmentFromId.getTenant() : apartmentFromId.getOwner();
         Notification notification = notificationService.createAndSendNotification(
-                sender, receiver, modifiedEquipment, NotificationPriority.important, equipment.getName()
+                sender, receiver, modifiedEquipment, NotificationPriority.important, equipment.getName(), apartmentFromId.getName()
         );
         equipment.addNotification(notification);
         return equipmentRepository.save(equipment);

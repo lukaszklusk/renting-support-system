@@ -1,9 +1,6 @@
 package pl.edu.agh.student.rentsys.model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.*;
 
 import java.util.Objects;
@@ -15,10 +12,23 @@ import java.util.Objects;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Table(
+        uniqueConstraints = {
+                @UniqueConstraint(
+                        name = "UK_APARTMENT_APARTMENT_PROPERTY",
+                        columnNames = {"apartment_id", "name"}
+                )
+        }
+)
 public class ApartmentProperty {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @ManyToOne
+    @JoinColumn(name = "apartment_id")
+    private Apartment apartment;
+
     private String name;
     private String valueType;
     private String value;
