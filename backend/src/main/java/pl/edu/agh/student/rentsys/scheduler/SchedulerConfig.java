@@ -1,6 +1,5 @@
 package pl.edu.agh.student.rentsys.scheduler;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -9,10 +8,7 @@ import pl.edu.agh.student.rentsys.model.PaymentStatus;
 import pl.edu.agh.student.rentsys.service.PaymentService;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 
 import static java.time.temporal.ChronoUnit.DAYS;
 
