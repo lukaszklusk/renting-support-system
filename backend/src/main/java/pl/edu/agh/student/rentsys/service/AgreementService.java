@@ -18,6 +18,8 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
+import static java.time.temporal.ChronoUnit.DAYS;
+
 @Service
 @AllArgsConstructor
 public class AgreementService {
@@ -202,12 +204,22 @@ public class AgreementService {
         ArrayList<Payment> payments = new ArrayList<>();
         LocalDate paymentDate = agreement.getSigningDate().plusMonths(1);
         while(paymentDate.isBefore(agreement.getExpirationDate())){
-            Payment payment = Payment.builder()
-                    .dueDate(paymentDate)
-                    .status(PaymentStatus.future)
-                    .agreement(agreement)
-                    .amount(agreement.getMonthlyPayment())
-                    .build();
+            Payment payment = null;
+            if(DAYS.between(LocalDate.now(),paymentDate) <= 30) {
+                payment = Payment.builder()
+                        .dueDate(paymentDate)
+                        .status(PaymentStatus.due)
+                        .agreement(agreement)
+                        .amount(agreement.getMonthlyPayment())
+                        .build();
+            }else{
+                payment = Payment.builder()
+                        .dueDate(paymentDate)
+                        .status(PaymentStatus.future)
+                        .agreement(agreement)
+                        .amount(agreement.getMonthlyPayment())
+                        .build();
+            }
             payments.add(payment);
             paymentDate = paymentDate.plusMonths(1);
         }
