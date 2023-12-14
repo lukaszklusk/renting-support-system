@@ -171,6 +171,7 @@ public class DataInitializer implements CommandLineRunner {
         messageService.createMessage(messageDTO9);
         messageService.createMessage(messageDTO10);
 
+        /*
         Payment payment1 = Payment.builder()
                 .paymentMethod(PaymentMethod.card)
                 .dueDate(LocalDate.of(2024, 10,15))
@@ -207,6 +208,7 @@ public class DataInitializer implements CommandLineRunner {
         paymentService.createPayment(payment2);
         paymentService.createPayment(payment3);
         paymentService.createPayment(payment4);
+         */
 
         System.out.println("----- FINISHED DATA INITIALIZATION -----");
     }

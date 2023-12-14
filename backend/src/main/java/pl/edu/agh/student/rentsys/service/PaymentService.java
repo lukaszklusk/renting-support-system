@@ -45,7 +45,7 @@ public class PaymentService {
     }
 
     public List<Payment> updatePayments(List<Payment> payments){
-        return paymentRepository.saveAllAndFlush(payments);
+        return paymentRepository.saveAll(payments);
     }
 
 }
