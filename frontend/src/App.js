@@ -18,7 +18,7 @@ import OwnerDashboard from "./pages/secured/Dashboard";
 import OwnerApartments from "./pages/secured/Apartments";
 import OwnerAgreements from "./pages/secured/Agreements";
 import NewApartment from "./pages/secured/owner/NewApartment";
-import OwnerReports from "./components/owner/OwnerReports";
+import Reports from "./pages/secured/owner/Reports";
 import OwnerApartmentDetails from "./pages/secured/ApartmentDetails";
 import AddAgreement from "./pages/secured/owner/NewAgreement";
 
@@ -27,6 +27,9 @@ import AgreementDetails from "./pages/secured/AgreementDetails";
 
 import SendMessage from "./components/common/communication/SendMessage";
 import Notifications from "./components/common/communication/Notifications";
+
+import Payments from "./pages/secured/Payments";
+import PaymentsDetails from "./pages/secured/PaymentsDetails";
 
 function App() {
   const { isClient, isOwner, isAdmin } = useData();
@@ -73,7 +76,9 @@ function App() {
             />
             <Route path="agreements/:id" element={<AgreementDetails />} />
             <Route path="agreements/new" element={<AddAgreement />} />
-            <Route path="reports" element={<OwnerReports />} />
+            <Route path="reports" element={<Reports />} />
+            <Route path="payments" element={<Payments />} />
+            <Route path="payments-details" element={<PaymentsDetails />} />
             <Route path="chat" element={<SendMessage />} />
             <Route path="notifications/*" element={<Notifications />} />
           </Route>
