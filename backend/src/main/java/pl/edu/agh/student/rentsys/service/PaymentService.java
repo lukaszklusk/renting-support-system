@@ -40,4 +40,12 @@ public class PaymentService {
         return paymentRepository.getPaymentsByAgreement(agreement);
     }
 
+    public List<Payment> getPaymentsByStatus(PaymentStatus[] statuses){
+        return paymentRepository.getPaymentsByStatusIn(statuses);
+    }
+
+    public List<Payment> updatePayments(List<Payment> payments){
+        return paymentRepository.saveAllAndFlush(payments);
+    }
+
 }
