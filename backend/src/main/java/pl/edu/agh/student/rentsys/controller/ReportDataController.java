@@ -86,7 +86,6 @@ public class ReportDataController {
 
             SimplePdfExporterConfiguration exporterConfiguration = new SimplePdfExporterConfiguration();
             exporterConfiguration.setMetadataAuthor("rent-sys");
-            exporterConfiguration.setEncrypted(true);
             exporterConfiguration.setAllowedPermissionsHint("PRINTING");
 
             exporter.setConfiguration(reportConfiguration);
