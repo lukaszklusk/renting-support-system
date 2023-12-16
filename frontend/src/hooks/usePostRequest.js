@@ -13,7 +13,6 @@ const usePostRequest = () => {
       });
       return response.data;
     } catch (err) {
-      console.log("error posting data", err);
       throw err;
     }
   };

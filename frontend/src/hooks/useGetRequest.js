@@ -14,7 +14,6 @@ const useGetRequest = () => {
       });
       return response.data;
     } catch (err) {
-      console.log("error fetching data", err);
       // navigate("/sign-in", {
       //   state: { from: location },
       //   replace: true,

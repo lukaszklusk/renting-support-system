@@ -11,7 +11,6 @@ const usePatchRequest = () => {
       const response = await axiosUser.patch(url, null, { params: args });
       return response.data;
     } catch (err) {
-      console.log("error patching data:", err);
       // navigate("/sign-in", {
       //   state: { from: location },
       //   replace: true,

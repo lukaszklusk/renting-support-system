@@ -98,7 +98,7 @@ export const DataProvider = ({ children }) => {
       setAgreements(data);
     } catch (err) {
       console.log("error fetching apartments:", err);
-      return err;
+      throw err;
     }
   };
 
@@ -108,7 +108,7 @@ export const DataProvider = ({ children }) => {
       setApartments(data);
     } catch (err) {
       console.log("error fetching apartments:", err);
-      return err;
+      throw err;
     }
   };
 
@@ -118,7 +118,7 @@ export const DataProvider = ({ children }) => {
       setMessages(data);
     } catch (err) {
       console.log("error fetching messages:", err);
-      return err;
+      throw err;
     }
   };
 
@@ -132,7 +132,7 @@ export const DataProvider = ({ children }) => {
       );
     } catch (err) {
       console.log("error fetching notifications:", err);
-      return err;
+      throw err;
     }
   };
 

@@ -3,6 +3,7 @@ package pl.edu.agh.student.rentsys.scheduler;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
+import pl.edu.agh.student.rentsys.model.NotificationPriority;
 import pl.edu.agh.student.rentsys.model.NotificationType;
 import pl.edu.agh.student.rentsys.model.Payment;
 import pl.edu.agh.student.rentsys.model.PaymentStatus;
@@ -37,14 +38,14 @@ public class SchedulerConfig {
                 if(p.getDueDate().isBefore(LocalDate.now())) {
                     p.setStatus(PaymentStatus.overdue);
                     notificationService.createAndSendNotification(
-                            p.getAgreement(), NotificationType.payment_due, p.getAgreement().getApartment().getName());
+                            p.getAgreement().getOwner(), p.getAgreement().getTenant(), NotificationType.payment_due, NotificationPriority.critical, p.getAgreement().getApartment().getName(), null);
                 }
             }
             if(p.getStatus().equals(PaymentStatus.future)){
                 if(DAYS.between(LocalDate.now(),p.getDueDate()) <= 30){
                     p.setStatus(PaymentStatus.due);
                     notificationService.createAndSendNotification(
-                            p.getAgreement(), NotificationType.payment_overdue, p.getAgreement().getApartment().getName());
+                            p.getAgreement().getOwner(), p.getAgreement().getTenant(), NotificationType.payment_due, NotificationPriority.critical, p.getAgreement().getApartment().getName(), null);
                 }
             }
         }

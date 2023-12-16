@@ -13,7 +13,6 @@ const useDeleteRequest = () => {
       });
       return response.data;
     } catch (err) {
-      console.log("error deleting data", err);
       throw err;
     }
   };

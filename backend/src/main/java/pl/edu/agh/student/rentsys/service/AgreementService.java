@@ -176,7 +176,7 @@ public class AgreementService {
         return agreementRepository.save(agreement);
     }
     public Agreement activateAgreement(Agreement agreementToActivate) {
-        List<Payment> generatedPayments = generatePaymentsForAgreement(activatedAgreement);
+        List<Payment> generatedPayments = generatePaymentsForAgreement(agreementToActivate);
         paymentService.updatePayments(generatedPayments);
 
         List<Agreement> clientAgreements = getAgreementsForClient(agreementToActivate.getTenant());
