@@ -10,7 +10,7 @@ export const useUserReport = () => {
   const getUserReport = async (username) => {
     const url = getBaseUrl(username);
     console.log("url:", url);
-    return getData(url);
+    return getData(url, { responseType: "blob" });
   };
   return getUserReport;
 };

@@ -4,14 +4,16 @@ import useAxiosUser from "./useAxiosUser";
 const useGetRequest = () => {
   const axiosUser = useAxiosUser();
 
-  const fetchData = async (url) => {
+  const fetchData = async (url, customOptions = {}) => {
     try {
-      const response = await axiosUser.get(url, {
+      const defaultOptions = {
         headers: {
           "Content-Type": "application/json",
         },
         withCredentials: true,
-      });
+      };
+      const mergeOptions = { ...defaultOptions, ...customOptions };
+      const response = await axiosUser.get(url, mergeOptions);
       return response.data;
     } catch (err) {
       // navigate("/sign-in", {
