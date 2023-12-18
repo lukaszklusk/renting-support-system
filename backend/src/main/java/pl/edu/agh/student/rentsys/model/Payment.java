@@ -18,6 +18,7 @@ public class Payment {
     private Agreement agreement;
     private LocalDate dueDate;
     private PaymentMethod paymentMethod;
+    private LocalDate paidDate;
 
 
     public void setId(Long id) {
@@ -62,5 +63,13 @@ public class Payment {
 
     public void setDueDate(LocalDate dueDate) {
         this.dueDate = dueDate;
+    }
+
+    public LocalDate getPaidDate() {
+        return paidDate;
+    }
+
+    public void setPaidDate(LocalDate paidDate) {
+        this.paidDate = paidDate;
     }
 }

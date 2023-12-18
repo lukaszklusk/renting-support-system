@@ -9,12 +9,16 @@ import pl.edu.agh.student.rentsys.repository.AgreementChangeRepository;
 import pl.edu.agh.student.rentsys.repository.AgreementRepository;
 import pl.edu.agh.student.rentsys.model.User;
 import pl.edu.agh.student.rentsys.repository.ApartmentRepository;
+import pl.edu.agh.student.rentsys.repository.PaymentRepository;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+
+import static java.time.temporal.ChronoUnit.DAYS;
 
 @Service
 @AllArgsConstructor
@@ -30,9 +34,14 @@ public class AgreementService {
     private final UserService userService;
     @Autowired
     private final ApartmentRepository apartmentRepository;
+    @Autowired
+    private final PaymentService paymentService;
 
     public Agreement createDemoAgreement(Agreement agreement){
-        return agreementRepository.save(agreement);
+        Agreement savedAgreement = agreementRepository.save(agreement);;
+        List<Payment> generatedPayments = generatePaymentsForAgreement(agreement);
+        paymentService.updatePayments(generatedPayments);
+        return savedAgreement;
     }
 
     public Agreement changeAgreement(Agreement agreement){
@@ -126,6 +135,9 @@ public class AgreementService {
     }
 
     public Agreement activateAgreement(Agreement activatedAgreement) {
+        List<Payment> generatedPayments = generatePaymentsForAgreement(activatedAgreement);
+        paymentService.updatePayments(generatedPayments);
+
         List<Agreement> apartmentAgreements = agreementRepository.findAllByApartment(activatedAgreement.getApartment());
 
         List<Agreement> modifiedAgreements = apartmentAgreements.stream()
@@ -186,5 +198,31 @@ public class AgreementService {
         Notification notification = notificationService.createAndSendNotification(agreement, NotificationType.agreement_proposed, agreement.getApartment().getName());
         agreement.addNotification(notification);
         return agreementRepository.save(agreement);
+    }
+
+    private List<Payment> generatePaymentsForAgreement(Agreement agreement){
+        ArrayList<Payment> payments = new ArrayList<>();
+        LocalDate paymentDate = agreement.getSigningDate().plusMonths(1);
+        while(paymentDate.isBefore(agreement.getExpirationDate())){
+            Payment payment = null;
+            if(DAYS.between(LocalDate.now(),paymentDate) <= 30) {
+                payment = Payment.builder()
+                        .dueDate(paymentDate)
+                        .status(PaymentStatus.due)
+                        .agreement(agreement)
+                        .amount(agreement.getMonthlyPayment())
+                        .build();
+            }else{
+                payment = Payment.builder()
+                        .dueDate(paymentDate)
+                        .status(PaymentStatus.future)
+                        .agreement(agreement)
+                        .amount(agreement.getMonthlyPayment())
+                        .build();
+            }
+            payments.add(payment);
+            paymentDate = paymentDate.plusMonths(1);
+        }
+        return payments;
     }
 }
