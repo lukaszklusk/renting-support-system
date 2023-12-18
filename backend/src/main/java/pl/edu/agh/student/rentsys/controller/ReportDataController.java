@@ -52,7 +52,7 @@ public class ReportDataController {
     }
 
 
-    @GetMapping(value = "/user/{username}/report", produces = MediaType.APPLICATION_PDF_VALUE)
+    @GetMapping(value = "/user/{username}/report/detailed", produces = MediaType.APPLICATION_PDF_VALUE)
     public @ResponseBody ResponseEntity<byte[]> createReport(@PathVariable String username, HttpServletResponse response) {
         Optional<User> userOptional =  userService.getUserByUsername(username);
         if(!userOptional.isPresent()){
@@ -79,6 +79,108 @@ public class ReportDataController {
 
             response.setHeader("Content-Disposition",
                     "attachment; filename=report_" + userID + "_" + dtf2.format(LocalDateTime.now()) + ".pdf");
+
+            SimplePdfReportConfiguration reportConfiguration = new SimplePdfReportConfiguration();
+            reportConfiguration.setSizePageToContent(true);
+            reportConfiguration.setForceLineBreakPolicy(false);
+
+            SimplePdfExporterConfiguration exporterConfiguration = new SimplePdfExporterConfiguration();
+            exporterConfiguration.setMetadataAuthor("rent-sys");
+            exporterConfiguration.setEncrypted(true);
+            exporterConfiguration.setAllowedPermissionsHint("PRINTING");
+
+            exporter.setConfiguration(reportConfiguration);
+            exporter.setConfiguration(exporterConfiguration);
+
+            exporter.exportReport();
+
+            byte[] res = pdfOutputStream.toByteArray();
+            return ResponseEntity.ok(res);
+        } catch (JRException | SQLException e) {
+            e.printStackTrace();
+        }
+
+        return ResponseEntity.internalServerError().build();
+    }
+
+    @GetMapping(value = "/user/{username}/report/simple", produces = MediaType.APPLICATION_PDF_VALUE)
+    public @ResponseBody ResponseEntity<byte[]> createReportSimple(@PathVariable String username, HttpServletResponse response) {
+        Optional<User> userOptional =  userService.getUserByUsername(username);
+        if(!userOptional.isPresent()){
+            return ResponseEntity.notFound().build();
+        }
+        int userID = userOptional.get().getId().intValue();
+        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+        DateTimeFormatter dtf2 = DateTimeFormatter.ofPattern("dd_MM_yyyy");
+        String current_date = dtf.format(LocalDateTime.now());
+        try {
+            HashMap<String,Object> params = new HashMap<>();
+            params.put("owner", userID);
+            params.put("current_date", current_date);
+
+            InputStream stream = this.getClass().getResourceAsStream("/rentsys_report_simple.jasper");
+            JasperReport report = (JasperReport) JRLoader.loadObject(stream);
+            JasperPrint print = JasperFillManager.fillReport(
+                    report,params,getDatasource().getConnection());
+
+            JRPdfExporter exporter = new JRPdfExporter();
+            ByteArrayOutputStream pdfOutputStream = new ByteArrayOutputStream();
+            exporter.setExporterInput(new SimpleExporterInput(print));
+            exporter.setExporterOutput(new SimpleOutputStreamExporterOutput(pdfOutputStream));
+
+            response.setHeader("Content-Disposition",
+                    "attachment; filename=simple_report_" + userID + "_" + dtf2.format(LocalDateTime.now()) + ".pdf");
+
+            SimplePdfReportConfiguration reportConfiguration = new SimplePdfReportConfiguration();
+            reportConfiguration.setSizePageToContent(true);
+            reportConfiguration.setForceLineBreakPolicy(false);
+
+            SimplePdfExporterConfiguration exporterConfiguration = new SimplePdfExporterConfiguration();
+            exporterConfiguration.setMetadataAuthor("rent-sys");
+            exporterConfiguration.setEncrypted(true);
+            exporterConfiguration.setAllowedPermissionsHint("PRINTING");
+
+            exporter.setConfiguration(reportConfiguration);
+            exporter.setConfiguration(exporterConfiguration);
+
+            exporter.exportReport();
+
+            byte[] res = pdfOutputStream.toByteArray();
+            return ResponseEntity.ok(res);
+        } catch (JRException | SQLException e) {
+            e.printStackTrace();
+        }
+
+        return ResponseEntity.internalServerError().build();
+    }
+
+    @GetMapping(value = "/user/{username}/report/overview", produces = MediaType.APPLICATION_PDF_VALUE)
+    public @ResponseBody ResponseEntity<byte[]> createReportoverview(@PathVariable String username, HttpServletResponse response) {
+        Optional<User> userOptional =  userService.getUserByUsername(username);
+        if(!userOptional.isPresent()){
+            return ResponseEntity.notFound().build();
+        }
+        int userID = userOptional.get().getId().intValue();
+        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+        DateTimeFormatter dtf2 = DateTimeFormatter.ofPattern("dd_MM_yyyy");
+        String current_date = dtf.format(LocalDateTime.now());
+        try {
+            HashMap<String,Object> params = new HashMap<>();
+            params.put("owner", userID);
+            params.put("current_date", current_date);
+
+            InputStream stream = this.getClass().getResourceAsStream("/rentsys_report_overview.jasper");
+            JasperReport report = (JasperReport) JRLoader.loadObject(stream);
+            JasperPrint print = JasperFillManager.fillReport(
+                    report,params,getDatasource().getConnection());
+
+            JRPdfExporter exporter = new JRPdfExporter();
+            ByteArrayOutputStream pdfOutputStream = new ByteArrayOutputStream();
+            exporter.setExporterInput(new SimpleExporterInput(print));
+            exporter.setExporterOutput(new SimpleOutputStreamExporterOutput(pdfOutputStream));
+
+            response.setHeader("Content-Disposition",
+                    "attachment; filename=overview_report_" + userID + "_" + dtf2.format(LocalDateTime.now()) + ".pdf");
 
             SimplePdfReportConfiguration reportConfiguration = new SimplePdfReportConfiguration();
             reportConfiguration.setSizePageToContent(true);
