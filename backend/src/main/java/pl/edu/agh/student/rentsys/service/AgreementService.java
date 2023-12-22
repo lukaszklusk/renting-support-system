@@ -206,12 +206,21 @@ public class AgreementService {
         while(paymentDate.isBefore(agreement.getExpirationDate())){
             Payment payment = null;
             if(DAYS.between(LocalDate.now(),paymentDate) <= 30) {
-                payment = Payment.builder()
+                if(DAYS.between(LocalDate.now(),paymentDate) < 0){
+                    payment = Payment.builder()
                         .dueDate(paymentDate)
-                        .status(PaymentStatus.due)
+                        .status(PaymentStatus.overdue)
                         .agreement(agreement)
                         .amount(agreement.getMonthlyPayment())
                         .build();
+                } else {
+                    payment = Payment.builder()
+                            .dueDate(paymentDate)
+                            .status(PaymentStatus.due)
+                            .agreement(agreement)
+                            .amount(agreement.getMonthlyPayment())
+                            .build();
+                }
             }else{
                 payment = Payment.builder()
                         .dueDate(paymentDate)
