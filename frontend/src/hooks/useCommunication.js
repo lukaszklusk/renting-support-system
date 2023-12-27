@@ -1,44 +1,120 @@
 import useGetRequest from "./useGetRequest";
 import usePatchRequest from "./usePatchRequest";
 
-export const getNotificationTitle = (notification) => {
+import { parseISO, format } from "date-fns";
+
+export const getNotificationTitle = (notification, username) => {
   switch (notification?.notificationType) {
     case "equipment_added":
-      return "New Equipment Added";
+      if (notification.sender === username) {
+        return "New Equipment Added By You";
+      } else {
+        return `New Equipment Added By ${notification.sender}`;
+      }
     case "equipment_failure":
-      return "Equipment Failure Reported";
+      if (notification.sender === username) {
+        return "Equipment Failure Reported By You";
+      } else {
+        return `Equipment Failure Reported By ${notification.sender}`;
+      }
     case "equipment_fix":
-      return "Equipment Fix Reported";
+      if (notification.sender === username) {
+        return "Equipment Fix Reported By You";
+      } else {
+        return `Equipment Fix Reported By ${notification.sender}`;
+      }
     case "equipment_removed":
-      return "Equipment Removed";
+      if (notification.sender === username) {
+        return "Equipment Removed By You";
+      } else {
+        return `Equipment Removed By ${notification.sender}`;
+      }
     case "apartment_created":
       return "Apartment Created";
     case "apartment_removed":
       return "Apartment Removed";
     case "agreement_activated":
-      return "Agreement Activated";
+      if (notification.sender === username) {
+        return "Agreement Activated By You";
+      } else {
+        return `Agreement Activated By ${notification.sender}`;
+      }
     case "agreement_proposed":
-      return "Agreement Proposed";
+      if (notification.sender === username) {
+        return "Agreement Proposed By You";
+      } else {
+        return `Agreement Proposed By ${notification.sender}`;
+      }
     case "agreement_accepted":
-      return "Agreement Accepted";
+      if (notification.sender === username) {
+        return "Agreement Accepted By You";
+      } else {
+        return `Agreement Accepted By ${notification.sender}`;
+      }
     case "agreement_rejected_client":
-      return "Agreement Rejected By Client";
     case "agreement_rejected_owner":
-      return "Agreement Rejected By Owner";
+      if (notification.sender === username) {
+        return "Agreement Rejected By You";
+      } else {
+        return `Agreement Rejected By ${notification.sender}`;
+      }
     case "agreement_withdrawn_client":
-      return "Agreement Withdrawn By Client";
     case "agreement_withdrawn_owner":
-      return "Agreement Withdrawn By Owner";
+      if (notification.sender === username) {
+        return "Agreement Withdrawn By You";
+      } else {
+        return `Agreement Withdrawn By ${notification.sender}`;
+      }
     case "agreement_cancelled_owner":
-      return "Agreement Cancelled By Owner";
     case "agreement_cancelled_client":
-      return "Agreement Cancelled By Client";
+      if (notification.sender === username) {
+        return "Agreement Cancelled By You";
+      } else {
+        return `Agreement Cancelled By ${notification.sender}`;
+      }
+    case "payment_owner":
+      if (notification.sender === username) {
+        return "Payment Confirmation By You";
+      } else {
+        return `Payment Confirmation By ${notification.sender}`;
+      }
+    case "payment_late_owner":
+      if (notification.sender === username) {
+        return "Late Payment Confirmation By You";
+      } else {
+        return `Late Payment Confirmation By ${notification.sender}`;
+      }
+    case "payment_client":
+      if (notification.sender === username) {
+        return "Payment Submission By You";
+      } else {
+        return `Payment Submission By ${notification.sender}`;
+      }
+    case "payment_late_client":
+      if (notification.sender === username) {
+        return "Delayed Payment Submission By You";
+      } else {
+        return `Delayed Payment Submission By ${notification.sender}`;
+      }
+    case "payment_due":
+      if (notification.sender === username) {
+        return "New Accouting Period";
+      } else {
+        return `New Accouting Period For ${notification.sender}`;
+      }
+    case "payment_overdue":
+      if (notification.sender === username) {
+        return "Delayed Payment Due By You";
+      } else {
+        return `Delayed Payment Due By ${notification.sender}`;
+      }
     default:
       return "Unknown argument";
   }
 };
 
 export const getNotificationContent = (notification, username) => {
+  const dates = notification.notifiableRelatedName.split(" ");
   switch (notification?.notificationType) {
     case "equipment_added":
       if (notification.sender === username) {
@@ -112,7 +188,6 @@ export const getNotificationContent = (notification, username) => {
       } else {
         return `User ${notification.sender} rejected previously accepted by you agreement '${notification.notifiableName}' related to an apartment '${notification.notifiableRelatedName}'`;
       }
-
     case "agreement_cancelled_owner":
     case "agreement_cancelled_client":
       if (notification.sender === username) {
@@ -120,6 +195,99 @@ export const getNotificationContent = (notification, username) => {
       } else {
         return `User ${notification.sender} cancelled active agreement '${notification.notifiableName}' related to an apartment '${notification.notifiableRelatedName}'`;
       }
+
+    case "payment_owner":
+      if (notification.sender === username) {
+        return `You confirmed a payment made by a user ${
+          notification.receiver
+        } for an apartment '${notification.notifiableName}' for ${parseISO(
+          dates[0]
+        ).toLocaleDateString("en-US", {
+          year: "numeric",
+          month: "long",
+        })} (${dates[0]} : ${dates[1]})`;
+      } else {
+        return `User ${
+          notification.sender
+        } confirmed a payment made by you for an apartment '${
+          notification.notifiableName
+        }' for ${parseISO(dates[0]).toLocaleDateString("en-US", {
+          year: "numeric",
+          month: "long",
+        })} (${dates[0]} : ${dates[1]})`;
+      }
+    case "payment_late_owner":
+      if (notification.sender === username) {
+        return `You confirmed a delayed payment (due date: ${
+          dates[2]
+        }) made by a user ${notification.receiver} for an apartment '${
+          notification.notifiableName
+        }' for ${parseISO(dates[0]).toLocaleDateString("en-US", {
+          year: "numeric",
+          month: "long",
+        })} (${dates[0]} : ${dates[1]})`;
+      } else {
+        return `User ${
+          notification.sender
+        } confirmed a delayed payment (due date: ${
+          dates[2]
+        }) made by you for an apartment '${
+          notification.notifiableName
+        }' for ${parseISO(dates[0]).toLocaleDateString("en-US", {
+          year: "numeric",
+          month: "long",
+        })} (${dates[0]} : ${dates[1]})`;
+      }
+    case "payment_client":
+      if (notification.sender === username) {
+        return `You made a payment for an apartment '${
+          notification.notifiableName
+        }' for ${parseISO(dates[0]).toLocaleDateString("en-US", {
+          year: "numeric",
+          month: "long",
+        })} (${dates[0]} : ${dates[1]})`;
+      } else {
+        return `User ${notification.sender} made a payment for an apartment '${
+          notification.notifiableName
+        }' for ${parseISO(dates[0]).toLocaleDateString("en-US", {
+          year: "numeric",
+          month: "long",
+        })} (${dates[0]} : ${dates[1]})`;
+      }
+    case "payment_late_client":
+      if (notification.sender === username) {
+        return `You made a delayed payment (due date: ${
+          dates[2]
+        }) for an apartment '${notification.notifiableName}' for ${parseISO(
+          dates[0]
+        ).toLocaleDateString("en-US", {
+          year: "numeric",
+          month: "long",
+        })} (${dates[0]} : ${dates[1]})`;
+      } else {
+        return `User ${notification.sender} made a delayed payment (due date: ${
+          dates[2]
+        }) for an apartment '${notification.notifiableName}' for ${parseISO(
+          dates[0]
+        ).toLocaleDateString("en-US", {
+          year: "numeric",
+          month: "long",
+        })} (${dates[0]} : ${dates[1]})`;
+      }
+    case "payment_due":
+      return `You started new accouting period in an apartment '${
+        notification.notifiableName
+      }' for  for ${parseISO(dates[0]).toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "long",
+      })} (${dates[0]} : ${dates[1]}) with due date on ${dates[2]}`;
+    case "payment_overdue":
+      if (notification.sender === username) {
+        return `You haven't made a payment for an apartment '${notification.notifiableName}' in time`;
+      } else {
+        return `User ${notification.sender} hasn't made a payment for an apartment '${notification.notifiableName}' in time`;
+      }
+
     default:
       return "Unknown argument";
   }
@@ -133,6 +301,8 @@ export const getNotificationColor = (notification) => {
     return "green";
   } else if (type.includes("equipment")) {
     return "purple";
+  } else if (type.includes("payment")) {
+    return "orange";
   }
 };
 

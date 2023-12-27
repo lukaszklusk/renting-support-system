@@ -6,6 +6,7 @@ public enum NotificationType {
     agreement_cancelled_client, agreement_cancelled_owner,
     equipment_added, equipment_removed, equipment_failure, equipment_fix,
     apartment_created, apartment_removed,
-    payment_due, payment_overdue;
+    payment_due, payment_overdue,
+    payment_owner, payment_client, payment_late_owner, payment_late_client;
 
 }

@@ -14,6 +14,7 @@ import useAuth from "../../../hooks/useAuth";
 import useAxiosUser from "../../../hooks/useAxiosUser";
 import { useUserApartments } from "../../../hooks/useApartments";
 import { useUserAgreements } from "../../../hooks/useAgreements";
+import { useUserPayments } from "../../../hooks/usePayments";
 import {
   useUserMessages,
   useUserNotifications,
@@ -31,10 +32,12 @@ export const DataProvider = ({ children }) => {
   const fetchUserApartments = useUserApartments();
   const fetchUserAgreements = useUserAgreements();
   const fetchUserNotifications = useUserNotifications();
+  const fetchUserPayments = useUserPayments();
 
   const [messages, setMessages] = useState([]);
   const [apartments, setApartments] = useState([]);
   const [agreements, setAgreements] = useState([]);
+  const [payments, setPayments] = useState([]);
   const [notifications, setNotifications] = useState([]);
   const [isDataFetched, setIsDataFetched] = useState(false);
 
@@ -78,9 +81,10 @@ export const DataProvider = ({ children }) => {
     try {
       console.log("fetcing data", !isDataFetched, username);
       await Promise.all([
-        fetchMessages(),
         fetchApartments(),
         fetchAgreements(),
+        fetchPayments(),
+        fetchMessages(),
         fetchNotifications(),
       ]);
       console.log("setting is data fetch to true after fetching");
@@ -98,6 +102,16 @@ export const DataProvider = ({ children }) => {
       setAgreements(data);
     } catch (err) {
       console.log("error fetching apartments:", err);
+      throw err;
+    }
+  };
+
+  const fetchPayments = async () => {
+    try {
+      const data = await fetchUserPayments(username);
+      setPayments(data.filter((payment) => payment.status !== "cancelled"));
+    } catch (err) {
+      console.log("error fetching payments:", err);
       throw err;
     }
   };
@@ -282,8 +296,9 @@ export const DataProvider = ({ children }) => {
   useEffect(onPathChange, [location.pathname]);
 
   const showNotification = (notification) => {
-    const content = getNotificationTitle(notification);
-    toast.success(content, {
+    const content = getNotificationTitle(notification, username);
+
+    toast.info(content, {
       position: "top-right",
       autoClose: 5000,
       hideProgressBar: false,
@@ -291,6 +306,7 @@ export const DataProvider = ({ children }) => {
       pauseOnHover: true,
       draggable: true,
       progress: undefined,
+      theme: "dark",
     });
   };
 
@@ -303,14 +319,18 @@ export const DataProvider = ({ children }) => {
         isOwner,
         isAdmin,
 
-        messages,
-        setMessages,
-        notifications,
-        setNotifications,
-        apartments,
-        setApartments,
         agreements,
+        apartments,
+        payments,
+        messages,
+        notifications,
+
         setAgreements,
+        setApartments,
+        setPayments,
+        setMessages,
+        setNotifications,
+
         isDataFetched,
         setIsDataFetched,
 

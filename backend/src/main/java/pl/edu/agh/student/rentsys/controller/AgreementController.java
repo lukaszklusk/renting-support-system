@@ -94,7 +94,7 @@ public class AgreementController {
         }
     }
 
-        @PostMapping("/user/{username}/agreements")
+    @PostMapping("/user/{username}/agreements")
     public ResponseEntity<AgreementDTO> createAgreement(@PathVariable String username,
                                                         @RequestBody AgreementDTO agreementDTO) {
             try {

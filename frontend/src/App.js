@@ -25,7 +25,7 @@ import AddAgreement from "./pages/secured/owner/NewAgreement";
 import AdminDashboard from "./components/admin/AdminDashboard";
 import AgreementDetails from "./pages/secured/AgreementDetails";
 
-import SendMessage from "./components/common/communication/SendMessage";
+import Chat from "./components/common/communication/Chat";
 import Notifications from "./components/common/communication/Notifications";
 
 import Payments from "./pages/secured/Payments";
@@ -52,7 +52,8 @@ function App() {
             <Route path="apartments/:id" element={<OwnerApartmentDetails />} />
             <Route path="agreements" element={<OwnerAgreements />} />
             <Route path="agreements/:id" element={<AgreementDetails />} />
-            <Route path="chat" element={<SendMessage />} />
+            <Route path="payments" element={<Payments />} />
+            <Route path="chat" element={<Chat />} />
             <Route path="notifications" element={<Notifications />} />
           </Route>
         )}
@@ -68,6 +69,11 @@ function App() {
               path="apartments/:apartmentId/agreements"
               element={<OwnerAgreements />}
             />
+            <Route
+              key="apartment-payments"
+              path="apartments/:id/payments"
+              element={<PaymentsDetails />}
+            />
             <Route path="apartments/new" element={<NewApartment />} />
             <Route
               key="agreements"
@@ -78,8 +84,7 @@ function App() {
             <Route path="agreements/new" element={<AddAgreement />} />
             <Route path="reports" element={<Reports />} />
             <Route path="payments" element={<Payments />} />
-            <Route path="payments-details" element={<PaymentsDetails />} />
-            <Route path="chat" element={<SendMessage />} />
+            <Route path="chat" element={<Chat />} />
             <Route path="notifications/*" element={<Notifications />} />
           </Route>
         )}

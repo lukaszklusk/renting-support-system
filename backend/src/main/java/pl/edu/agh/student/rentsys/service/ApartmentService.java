@@ -11,6 +11,10 @@ import pl.edu.agh.student.rentsys.repository.EquipmentRepository;
 import pl.edu.agh.student.rentsys.repository.PictureRepository;
 import pl.edu.agh.student.rentsys.model.User;
 
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -125,6 +129,7 @@ public class ApartmentService {
 
     public Apartment createApartment(String username, ApartmentDTO apartmentDTO) {
         User owner = userService.getUserByUsername(username).orElseThrow(() -> new EntityNotFoundException("User was not found"));
+        LocalDate creationDate = LocalDate.now();
         Apartment apartment = Apartment.builder()
                 .owner(owner)
                 .address(apartmentDTO.getAddress())
@@ -132,6 +137,7 @@ public class ApartmentService {
                 .latitude(apartmentDTO.getLatitude())
                 .longitude(apartmentDTO.getLongitude())
                 .name(apartmentDTO.getName())
+                .creationDate(creationDate)
                 .postalCode(apartmentDTO.getPostalCode())
                 .size(apartmentDTO.getSize())
                 .city(apartmentDTO.getCity())

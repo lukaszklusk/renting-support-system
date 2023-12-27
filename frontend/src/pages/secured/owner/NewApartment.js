@@ -299,7 +299,7 @@ const NewApartment = () => {
 
   return (
     <section>
-      <Row className="justify-content-center mt-5">
+      <Row className="justify-content-center my-2">
         <Col md={6}>
           <Card>
             <Card.Body>

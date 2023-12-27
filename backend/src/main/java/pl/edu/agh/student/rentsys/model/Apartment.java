@@ -3,6 +3,7 @@ package pl.edu.agh.student.rentsys.model;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -28,6 +29,7 @@ public class Apartment implements Notifiable{
     @OneToOne
     private User tenant;
     private String name;
+    private LocalDate creationDate;
     private String address;
     private String city;
     private String postalCode;

@@ -37,16 +37,20 @@ public class SchedulerConfig {
             if(p.getStatus().equals(PaymentStatus.due)){
                 if(p.getDueDate().isBefore(LocalDate.now())) {
                     p.setStatus(PaymentStatus.overdue);
+                    String[] dates = {p.getStartDate().toString(),  p.getEndDate().toString(), p.getDueDate().toString()};
+                    String datesStr = String.join(" ", dates);
+
                     notificationService.createAndSendNotification(
-                            p.getAgreement().getOwner(), p.getAgreement().getTenant(), NotificationType.payment_due, NotificationPriority.critical, p.getAgreement().getApartment().getName(), null);
+                            p.getAgreement().getTenant(), p.getAgreement().getOwner(), NotificationType.payment_overdue, NotificationPriority.important, p.getName(), datesStr);
                 }
             }
-            if(p.getStatus().equals(PaymentStatus.future)){
-                if(DAYS.between(LocalDate.now(),p.getDueDate()) <= 30){
-                    p.setStatus(PaymentStatus.due);
-                    notificationService.createAndSendNotification(
-                            p.getAgreement().getOwner(), p.getAgreement().getTenant(), NotificationType.payment_due, NotificationPriority.critical, p.getAgreement().getApartment().getName(), null);
-                }
+            if(p.getStatus().equals(PaymentStatus.future) && p.getStartDate().isBefore(LocalDate.now())){
+                p.setStatus(PaymentStatus.due);
+                String[] dates = {p.getStartDate().toString(),  p.getEndDate().toString(), p.getDueDate().toString()};
+                String datesStr = String.join(" ", dates);
+
+                notificationService.createAndSendNotification(
+                        p.getAgreement().getTenant(), null, NotificationType.payment_due, NotificationPriority.important, p.getName(), datesStr);
             }
         }
         paymentService.updatePayments(payments);

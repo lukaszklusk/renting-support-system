@@ -31,7 +31,7 @@ const DATE_REGEX = /^\d{4}-\d{2}-\d{2}$/;
 const AddAgreement = () => {
   const postUserAgreement = useUserAgreement();
   const navigate = useNavigate();
-  const { username, setAgreements, onSuccessMsg, onErrMsg, apartements } =
+  const { username, setAgreements, onSuccessMsg, onErrMsg, apartments } =
     useData();
 
   const nameRef = useRef();
@@ -57,6 +57,12 @@ const AddAgreement = () => {
 
   const [expirationDate, setExpirationDate] = useState("");
   const [isExpirationDateValid, setIsExpirationDateValid] = useState(false);
+
+  const getApartmentNames = () => {
+    return apartments
+      .filter((apartment) => !apartment.tenant)
+      .map((apartment) => apartment.name);
+  };
 
   useEffect(() => {
     nameRef.current.focus();
@@ -106,20 +112,6 @@ const AddAgreement = () => {
     const isValid = DATE_REGEX.test(expirationDate);
     setIsExpirationDateValid(isValid);
   }, [expirationDate]);
-
-  const getApartmentIdByName = (apartements, name) => {
-    const apartmentsByName = apartements.find((apartment) => {
-      return apartment.name === name;
-    });
-    if (apartmentsByName.length === 0) {
-      console.log("error: ", name, "apartment not found");
-      return null;
-    } else if (apartmentsByName.length > 1) {
-      console.log("error: ", name, "multiple names");
-      return null;
-    }
-    return apartmentsByName[0].id;
-  };
 
   const handleCreateAgreement = async (e) => {
     e.preventDefault();
@@ -173,7 +165,7 @@ const AddAgreement = () => {
 
   return (
     <section>
-      <Row className="justify-content-center mt-5">
+      <Row className="justify-content-center my-2">
         <Col md={6}>
           <Card>
             <Card.Body>
@@ -208,21 +200,22 @@ const AddAgreement = () => {
                     <InputGroup.Text className="transparent-input-group-text">
                       <HouseFill />
                     </InputGroup.Text>
-                    <Form.Control
-                      type="text"
-                      placeholder="Enter apartment name"
+                    <Form.Select
                       value={apartmentName}
                       onChange={(e) => setApartmentName(e.target.value)}
                       required
-                      autoComplete="off"
                       isValid={isApartmentNameValid}
                       isInvalid={apartmentName && !isApartmentNameValid}
-                    />
-                    <Form.Control.Feedback type="invalid" className="ms-5">
-                      Please enter an username with following restrictions:
-                      <br />
-                      - different than existing apartment names <br />
-                    </Form.Control.Feedback>
+                    >
+                      <option value="" disabled>
+                        Select Apartment ...
+                      </option>
+                      {getApartmentNames().map((name, idx) => (
+                        <option key={idx} value={name}>
+                          {name}
+                        </option>
+                      ))}
+                    </Form.Select>
                   </InputGroup>
                 </Form.Group>
 

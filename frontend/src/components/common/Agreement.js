@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import Card from "react-bootstrap/Card";
 import ListGroup from "react-bootstrap/ListGroup";
+import Typography from "@mui/material/Typography";
 
 import useData from "../../hooks/useData";
 import { Button } from "react-bootstrap";
@@ -89,7 +90,8 @@ function Agreement({
               </ListGroup.Item>{" "}
             </>
           )}
-          <ListGroup.Item className="d-flex justify-space-between">
+          <ListGroup.Item>
+            <strong> Agreement: </strong>
             <Card.Link
               className="flex-grow-1"
               as={Link}
@@ -97,12 +99,16 @@ function Agreement({
             >
               Details
             </Card.Link>
+          </ListGroup.Item>
+
+          <ListGroup.Item>
+            <strong> Apartment: </strong>
             <Card.Link
               className="flex-grow-1"
               as={Link}
               to={`/apartments/${agreement.apartmentId}`}
             >
-              Apartment
+              Details
             </Card.Link>
           </ListGroup.Item>
         </ListGroup>
@@ -110,53 +116,49 @@ function Agreement({
         {isPresent && (
           <Card.Footer className="d-flex justify-space-between">
             {toCancel && (
-              <Card.Link className="flex-grow-1">
-                <Button
-                  variant="danger"
-                  onClick={() => {
-                    handleOffer(agreement, false);
-                  }}
-                >
+              <div
+                className="flex-grow-1"
+                style={{ cursor: "pointer", color: "red" }}
+                onClick={() => handleOffer(agreement, false)}
+              >
+                <Typography variant="button" display="block" gutterBottom>
                   Cancel
-                </Button>
-              </Card.Link>
+                </Typography>
+              </div>
             )}
 
             {toWithdrawn && (
-              <Card.Link className="flex-grow-1">
-                <Button
-                  variant="danger"
-                  onClick={() => {
-                    handleOffer(agreement, false);
-                  }}
-                >
+              <div
+                className="flex-grow-1"
+                style={{ cursor: "pointer", color: "red" }}
+                onClick={() => handleOffer(agreement, false)}
+              >
+                <Typography variant="button" display="block" gutterBottom>
                   Withdraw
-                </Button>
-              </Card.Link>
+                </Typography>
+              </div>
             )}
 
             {toResponse && (
               <>
-                <Card.Link className="flex-grow-1">
-                  <Button
-                    variant="success"
-                    onClick={() => {
-                      handleOffer(agreement, true);
-                    }}
-                  >
+                <div
+                  className="flex-grow-1"
+                  style={{ cursor: "pointer", color: "green" }}
+                  onClick={() => handleOffer(agreement, true)}
+                >
+                  <Typography variant="button" display="block" gutterBottom>
                     Accept
-                  </Button>
-                </Card.Link>
-                <Card.Link className="flex-grow-1">
-                  <Button
-                    variant="danger"
-                    onClick={() => {
-                      handleOffer(agreement, false);
-                    }}
-                  >
+                  </Typography>
+                </div>
+                <div
+                  className="flex-grow-1"
+                  style={{ cursor: "pointer", color: "red" }}
+                  onClick={() => handleOffer(agreement, false)}
+                >
+                  <Typography variant="button" display="block" gutterBottom>
                     Reject
-                  </Button>
-                </Card.Link>
+                  </Typography>
+                </div>
               </>
             )}
           </Card.Footer>

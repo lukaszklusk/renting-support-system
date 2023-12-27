@@ -14,6 +14,7 @@ public class ApartmentDTO {
     private UserDTO owner;
     private UserDTO tenant;
     private String name;
+    private Long creationTimestamp;
     private String address;
     private String city;
     private String postalCode;
@@ -33,6 +34,7 @@ public class ApartmentDTO {
                 .owner(UserDTO.convertFromUser(apartment.getOwner()))
                 .tenant(Optional.ofNullable(apartment.getTenant()).map(UserDTO::convertFromUser).orElse(null))
                 .name(apartment.getName())
+                .creationTimestamp(apartment.getCreationDate().toEpochDay())
                 .address(apartment.getAddress())
                 .city(apartment.getCity())
                 .postalCode(apartment.getPostalCode())

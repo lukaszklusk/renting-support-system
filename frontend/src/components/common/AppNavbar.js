@@ -59,6 +59,15 @@ const AppNavbar = () => {
                   </Nav.Link>
                   <Nav.Link
                     as={Link}
+                    to="/payments"
+                    className={`custom-navbar-link ${
+                      activeLink === "payments" ? "active" : ""
+                    }`}
+                  >
+                    Payments
+                  </Nav.Link>
+                  <Nav.Link
+                    as={Link}
                     to="/chat"
                     className={`custom-navbar-link ${
                       activeLink === "chat" ? "active" : ""
@@ -97,6 +106,15 @@ const AppNavbar = () => {
                     }`}
                   >
                     Agreements
+                  </Nav.Link>
+                  <Nav.Link
+                    as={Link}
+                    to="/payments"
+                    className={`custom-navbar-link ${
+                      activeLink === "payments" ? "active" : ""
+                    }`}
+                  >
+                    Payments
                   </Nav.Link>
                   <Nav.Link
                     as={Link}

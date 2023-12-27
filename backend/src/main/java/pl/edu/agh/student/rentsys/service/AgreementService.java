@@ -39,9 +39,11 @@ public class AgreementService {
     private final PaymentService paymentService;
 
     public Agreement createDemoAgreement(Agreement agreement){
-        Agreement savedAgreement = agreementRepository.save(agreement);;
-        List<Payment> generatedPayments = generatePaymentsForAgreement(agreement);
-        paymentService.updatePayments(generatedPayments);
+        Agreement savedAgreement = agreementRepository.save(agreement);
+        if (agreement.getAgreementStatus().equals(AgreementStatus.active)) {
+            List<Payment> generatedPayments = paymentService.generatePaymentsForAgreement(agreement);
+            paymentService.updatePayments(generatedPayments);
+        }
         return savedAgreement;
     }
 
@@ -120,7 +122,6 @@ public class AgreementService {
     }
 
     public Agreement changeAgreementStatus(String username, long aid, boolean status, boolean isOwner) {
-
         User owner, client;
         Agreement agreement;
 
@@ -139,12 +140,14 @@ public class AgreementService {
         }
 
         return status ? acceptAgreement(agreement, isOwner, false) : rejectAgreement(agreement, isOwner);
-
     }
 
     private Agreement rejectAgreement(Agreement agreement, boolean isOwner) {
         AgreementStatus newAgreementStatus = agreement.getAgreementStatus().reject(isOwner)
                 .orElseThrow(IllegalStateException::new);
+        if (newAgreementStatus.equals(AgreementStatus.cancelled_client) || newAgreementStatus.equals(AgreementStatus.cancelled_owner)) {
+            return cancelAgreement(agreement, newAgreementStatus, isOwner);
+        }
         return changeAgreementStatus(agreement, newAgreementStatus, isOwner);
     }
 
@@ -161,7 +164,6 @@ public class AgreementService {
         agreement.setAgreementStatus(newAgreementStatus);
         NotificationType notificationType = newAgreementStatus.mapToNotificationType();
 
-
         User sender = isOwner ? agreement.getOwner() : agreement.getTenant();
         User receiver = isOwner ? agreement.getTenant() : agreement.getOwner();
 
@@ -176,7 +178,7 @@ public class AgreementService {
         return agreementRepository.save(agreement);
     }
     public Agreement activateAgreement(Agreement agreementToActivate) {
-        List<Payment> generatedPayments = generatePaymentsForAgreement(agreementToActivate);
+        List<Payment> generatedPayments = paymentService.generatePaymentsForAgreement(agreementToActivate);
         paymentService.updatePayments(generatedPayments);
 
         List<Agreement> clientAgreements = getAgreementsForClient(agreementToActivate.getTenant());
@@ -199,6 +201,16 @@ public class AgreementService {
         apartmentRepository.save(apartment);
 
         return agreementRepository.save(activeAgreement);
+    }
+
+    public Agreement cancelAgreement(Agreement agreement, AgreementStatus newAgreementStatus, boolean isOwner) {
+        paymentService.cancelAgreementFuturePayments(agreement);
+
+        Apartment apartment = agreement.getApartment();
+        apartment.setTenant(null);
+        apartmentRepository.save(apartment);
+
+        return changeAgreementStatus(agreement, newAgreementStatus, isOwner);
     }
 
     public Agreement createAgreement(String username, AgreementDTO agreementDTO){
@@ -224,31 +236,5 @@ public class AgreementService {
         Notification notification = notificationService.createAndSendNotification(owner, tenant, NotificationType.agreement_proposed, NotificationPriority.critical, agreement.getName(), agreement.getApartment().getName());
         agreement.addNotification(notification);
         return agreementRepository.save(agreement);
-    }
-
-    private List<Payment> generatePaymentsForAgreement(Agreement agreement){
-        ArrayList<Payment> payments = new ArrayList<>();
-        LocalDate paymentDate = agreement.getSigningDate().plusMonths(1);
-        while(paymentDate.isBefore(agreement.getExpirationDate())){
-            Payment payment = null;
-            if(DAYS.between(LocalDate.now(),paymentDate) <= 30) {
-                payment = Payment.builder()
-                        .dueDate(paymentDate)
-                        .status(PaymentStatus.due)
-                        .agreement(agreement)
-                        .amount(agreement.getMonthlyPayment())
-                        .build();
-            }else{
-                payment = Payment.builder()
-                        .dueDate(paymentDate)
-                        .status(PaymentStatus.future)
-                        .agreement(agreement)
-                        .amount(agreement.getMonthlyPayment())
-                        .build();
-            }
-            payments.add(payment);
-            paymentDate = paymentDate.plusMonths(1);
-        }
-        return payments;
     }
 }

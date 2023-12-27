@@ -52,11 +52,11 @@ public class DataInitializer implements CommandLineRunner {
                 "Admin", "Admiński", "+48666420123");
         Apartment apartment = createRandApartment("Apartment 1", "ul. Abc 15",
                 "Kraków", "30-349",
-                50.017741,19.953718,owner, client);
+                50.017741,19.953718,owner, client, LocalDate.of(2019, 1, 1));
 
         Apartment apartment2 = createRandApartment("Apartment 2", "ul. Dde 49",
                 "Kraków", "30-349",
-                50.077285,19.872920,owner, null);
+                50.077285,19.872920,owner, null, LocalDate.of(2023, 12, 1));
 
         Agreement agr = createAgreement("Agreement 1", apartment, owner,
                 LocalDate.of(2023,3, 13),
@@ -178,40 +178,46 @@ public class DataInitializer implements CommandLineRunner {
 
         Payment payment1 = Payment.builder()
                 .paymentMethod(PaymentMethod.card)
-                .dueDate(LocalDate.of(2024, 10,15))
-                .status(PaymentStatus.paid)
+                .startDate(LocalDate.of(2023, 10,14))
+                .endDate(LocalDate.of(2023, 11,13))
+                .dueDate(LocalDate.of(2023, 11,14))
+                .paidDate(LocalDate.of(2023, 11,16))
+                .status(PaymentStatus.paid_late)
                 .agreement(agr)
                 .amount(1500.0)
                 .build();
 
         Payment payment2 = Payment.builder()
                 .paymentMethod(PaymentMethod.card)
-                .dueDate(LocalDate.of(2024, 11,15))
+                .startDate(LocalDate.of(2023, 11,14))
+                .endDate(LocalDate.of(2023, 12,13))
+                .dueDate(LocalDate.of(2023, 12,16))
+                .paidDate(LocalDate.of(2023, 12,15))
                 .status(PaymentStatus.paid)
                 .agreement(agr)
                 .amount(1300.0)
                 .build();
 
-        Payment payment3 = Payment.builder()
-                .paymentMethod(PaymentMethod.card)
-                .dueDate(LocalDate.of(2024, 12,15))
-                .status(PaymentStatus.due)
-                .agreement(agr)
-                .amount(1700.0)
-                .build();
-
-        Payment payment4 = Payment.builder()
-                .paymentMethod(PaymentMethod.card)
-                .dueDate(LocalDate.of(2024, 12,15))
-                .status(PaymentStatus.overdue)
-                .agreement(agr2)
-                .amount(1900.0)
-                .build();
+//        Payment payment3 = Payment.builder()
+//                .paymentMethod(PaymentMethod.card)
+//                .dueDate(LocalDate.of(2024, 12,15))
+//                .status(PaymentStatus.due)
+//                .agreement(agr)
+//                .amount(1700.0)
+//                .build();
+//
+//        Payment payment4 = Payment.builder()
+//                .paymentMethod(PaymentMethod.card)
+//                .dueDate(LocalDate.of(2024, 12,15))
+//                .status(PaymentStatus.overdue)
+//                .agreement(agr2)
+//                .amount(1900.0)
+//                .build();
 
         paymentService.createPayment(payment1);
         paymentService.createPayment(payment2);
-        paymentService.createPayment(payment3);
-        paymentService.createPayment(payment4);
+//        paymentService.createPayment(payment3);
+//        paymentService.createPayment(payment4);
 
         System.out.println("----- FINISHED DATA INITIALIZATION -----");
     }
@@ -236,7 +242,7 @@ public class DataInitializer implements CommandLineRunner {
     private Apartment createRandApartment(String name, String address,
                                      String city, String postalCode,
                                      double latitude, double longitude,
-                                     User owner, User client) throws IOException {
+                                     User owner, User client, LocalDate creationDate) throws IOException {
         Apartment apartment = new Apartment();
         Set<ApartmentProperty> properties = new HashSet<>();
         int randomNum = ThreadLocalRandom.current().nextInt(300, 600 + 1);
@@ -282,6 +288,7 @@ public class DataInitializer implements CommandLineRunner {
                 .build());
         apartment.setEquipment(equipment);
         apartment.setName(name);
+        apartment.setCreationDate(creationDate);
         apartment.setAddress(address);
         apartment.setLatitude(latitude);
         apartment.setLongitude(longitude);
