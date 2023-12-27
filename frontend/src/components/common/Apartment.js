@@ -47,7 +47,8 @@ const Apartment = ({ item: apartment, toShowDeleteButton }) => {
         <ListGroup.Item>
           <strong> Size: </strong> {apartment.size} m²{" "}
         </ListGroup.Item>
-        <ListGroup.Item className="d-flex justify-space-between">
+        <ListGroup.Item>
+          <strong> Apartment: </strong>
           <Card.Link
             className="flex-grow-1"
             as={Link}
@@ -55,16 +56,33 @@ const Apartment = ({ item: apartment, toShowDeleteButton }) => {
           >
             Details
           </Card.Link>
-          {isOwner && (
+        </ListGroup.Item>
+
+        {isOwner && (
+          <ListGroup.Item>
+            <strong> Agreements: </strong>
             <Card.Link
               className="flex-grow-1"
               as={Link}
               to={`/apartments/${apartment.id}/agreements`}
             >
-              Agreements
+              History
             </Card.Link>
-          )}
-        </ListGroup.Item>
+          </ListGroup.Item>
+        )}
+
+        {isOwner && (
+          <ListGroup.Item>
+            <strong> Payments: </strong>
+            <Card.Link
+              className="flex-grow-1"
+              as={Link}
+              to={`/apartments/${apartment.id}/payments`}
+            >
+              History
+            </Card.Link>
+          </ListGroup.Item>
+        )}
       </ListGroup>
     </Card>
   );

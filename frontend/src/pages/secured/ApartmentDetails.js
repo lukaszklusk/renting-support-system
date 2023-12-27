@@ -39,7 +39,6 @@ const OwnerApartmentDetails = () => {
   const {
     username,
     isDataFetched,
-    setIsDataFetched,
     isClient,
     isOwner,
     isAdmin,
@@ -241,15 +240,28 @@ const OwnerApartmentDetails = () => {
 
               {isOwner && (
                 <ListGroup.Item>
-                  <strong> History: </strong>
+                  <strong> Agreements: </strong>
                   <Card.Link
                     as={Link}
                     to={`/apartments/${detailedApartment.id}/agreements`}
                   >
-                    Agreements
+                    History
                   </Card.Link>
                 </ListGroup.Item>
               )}
+
+              {isOwner && (
+                <ListGroup.Item>
+                  <strong> Payments: </strong>
+                  <Card.Link
+                    as={Link}
+                    to={`/apartments/${detailedApartment.id}/payments`}
+                  >
+                    History
+                  </Card.Link>
+                </ListGroup.Item>
+              )}
+
               {detailedApartment?.properties?.length > 0 && (
                 <>
                   <ListGroup.Item className="d-flex align-items-center">

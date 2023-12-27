@@ -10,15 +10,6 @@ import {
 import AvatarComponent from "./AvatarComponent";
 import Chat from "./Chat";
 
-// lillyIco,
-// joeIco,
-// emilyIco,
-// kaiIco,
-// akaneIco,
-// eliotIco,
-// zoeIco,
-// patrikIco,
-
 const SendMessage = () => {
   const { sendMessage } = useData();
   const [receiver, setReceiver] = useState("");

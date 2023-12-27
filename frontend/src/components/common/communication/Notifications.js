@@ -55,7 +55,7 @@ const Notifications = () => {
   const [loadedNotificationsNr, setLoadedNotificationsNr] = useState(0);
 
   const [page, setPage] = useState(1);
-  const itemsPerPage = 5;
+  const itemsPerPage = 8;
 
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [filtersApplyEnable, setFiltersApplyEnable] = useState(false);
@@ -232,7 +232,7 @@ const Notifications = () => {
                               notification?.isRead ? "normal" : "bold"
                             }
                           >
-                            {getNotificationTitle(notification)}
+                            {getNotificationTitle(notification, username)}
                             <span className="ms-1">
                               {getNotificationPriorityText(notification)}
                             </span>

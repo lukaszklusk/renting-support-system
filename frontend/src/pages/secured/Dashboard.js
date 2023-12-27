@@ -10,7 +10,7 @@ import DashboardSkeleton from "../../components/common/skeletons/DashboardSkelet
 import { Box } from "@mui/material";
 
 const OwnerDashboard = () => {
-  const { isOwner, isDataFetched, apartments } = useData();
+  const { isOwner, isClient, isDataFetched, apartments } = useData();
   const [rentedApartments, setRentedApartments] = useState(null);
   const [vacantApartments, setVacantApartments] = useState(null);
 
@@ -33,7 +33,7 @@ const OwnerDashboard = () => {
           <DashboardApartments apartments={vacantApartments} />
         </>
       )}
-      {isDataFetched && !isOwner && (
+      {isDataFetched && isClient && (
         <>
           <SectionHeader title="Rented Apartment" />
           <DashboardApartments apartments={rentedApartments} />
