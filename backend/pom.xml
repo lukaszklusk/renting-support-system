@@ -10,7 +10,7 @@
 	</parent>
 	<groupId>pl.edu.agh.student</groupId>
 	<artifactId>rentsys</artifactId>
-	<version>0.3</version>
+	<version>0.6</version>
 	<name>rentsys</name>
 	<description>Renting system project</description>
 	<packaging>jar</packaging>
