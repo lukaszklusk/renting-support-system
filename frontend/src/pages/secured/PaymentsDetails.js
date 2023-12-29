@@ -18,8 +18,6 @@ import Box from "@mui/material/Box";
 import Tabs from "@mui/material/Tabs";
 import Tab from "@mui/material/Tab";
 
-import Typography from "@mui/material/Typography";
-
 import SectionHeader from "../../components/common/SectionHeader";
 import LastPayment from "../../components/common/LastPayment";
 
@@ -64,10 +62,21 @@ const PaymentsDetails = () => {
     let myApartmentPaymentsTimeline = [];
 
     const creationDate = epochDaysToDate(apartment.creationTimestamp);
-    let monthStart =
-      startOfMonth(creationDate).getMonth() === creationDate.getMonth()
-        ? creationDate
-        : startOfMonth(creationDate);
+    const agreementDate = epochDaysToDate(
+      apartmentPayments.length > 0
+        ? apartmentPayments.reduce((minElement, currentElement) => {
+            return currentElement.startDate < minElement.startDate
+              ? currentElement
+              : minElement;
+          }, apartmentPayments[0]).startDate
+        : { startDate: dateToEpochDays(new Date()) }
+    );
+
+    let monthStart = isOwner ? creationDate : agreementDate;
+
+    if (startOfMonth(monthStart).getMonth() !== monthStart.getMonth()) {
+      monthStart = startOfMonth(creationDate);
+    }
 
     const lastAgreementMonthPayment =
       apartmentPayments.length > 0
@@ -90,14 +99,16 @@ const PaymentsDetails = () => {
           epochDaysToDate(payment.startDate) < monthEnd
       );
 
-      myApartmentPaymentsTimeline.push(
-        payment
-          ? payment
-          : {
-              startDate: dateToEpochDays(monthStart),
-              status: "vacant",
-            }
-      );
+      if (payment || isOwner) {
+        myApartmentPaymentsTimeline.push(
+          payment
+            ? payment
+            : {
+                startDate: dateToEpochDays(monthStart),
+                status: "vacant",
+              }
+        );
+      }
 
       monthStart = addMonths(monthStart, 1);
     }
@@ -158,72 +169,77 @@ const PaymentsDetails = () => {
 
   return (
     <Box sx={{ width: "100%" }}>
-      {isOwner && apartment && <SectionHeader title={apartment.name} />}
-
-      {activeTab && (
+      {isDataFetched && apartment && (
         <>
-          {tabs.length < 8 ? (
-            <Tabs value={activeTab} onChange={handleTabChange} centered>
-              {tabs.map((tab) => (
-                <Tab key={tab} value={tab} label={tab} />
-              ))}
-            </Tabs>
-          ) : (
-            <Tabs
-              value={activeTab}
-              onChange={handleTabChange}
-              variant="scrollable"
-              scrollButtons="auto"
-            >
-              {tabs.map((tab) => (
-                <Tab key={tab} value={tab} label={tab} />
-              ))}
-            </Tabs>
+          <SectionHeader title={apartment.name} />
+
+          {activeTab && (
+            <>
+              {tabs.length < 8 ? (
+                <Tabs value={activeTab} onChange={handleTabChange} centered>
+                  {tabs.map((tab) => (
+                    <Tab key={tab} value={tab} label={tab} />
+                  ))}
+                </Tabs>
+              ) : (
+                <Tabs
+                  value={activeTab}
+                  onChange={handleTabChange}
+                  variant="scrollable"
+                  scrollButtons="auto"
+                >
+                  {tabs.map((tab) => (
+                    <Tab key={tab} value={tab} label={tab} />
+                  ))}
+                </Tabs>
+              )}
+            </>
           )}
+          <Timeline position="alternate">
+            {activePaymentsTimeline.map((payment, idx) => (
+              <TimelineItem key={idx}>
+                <TimelineOppositeContent
+                  sx={{ m: "auto 0" }}
+                  align={idx % 2 === 0 ? "right" : "left"}
+                  variant="body2"
+                  color="text.secondary"
+                >
+                  {payment.month.split(" ")[0]}
+                </TimelineOppositeContent>
+
+                <TimelineSeparator>
+                  <TimelineConnector />
+                  <TimelineDot
+                    sx={{
+                      backgroundColor: payment.color,
+                    }}
+                  >
+                    {payment.status === "paid" ||
+                    payment.status === "paid_late" ? (
+                      <CheckCircleIcon />
+                    ) : payment.status === "overdue" ? (
+                      <ClearIcon />
+                    ) : payment.status === "due" ? (
+                      <HourglassBottomIcon />
+                    ) : payment.status === "non_exist" ? (
+                      <BlockIcon />
+                    ) : payment.status === "future" ? (
+                      <HourglassTopIcon />
+                    ) : (
+                      <HomeIcon />
+                    )}
+                  </TimelineDot>
+                  <TimelineConnector />
+                </TimelineSeparator>
+
+                <TimelineContent sx={{ py: "12px", px: 2 }}>
+                  <LastPayment payment={payment} fullHistory={true} />
+                </TimelineContent>
+              </TimelineItem>
+            ))}
+          </Timeline>
         </>
       )}
-      <Timeline position="alternate">
-        {activePaymentsTimeline.map((payment, idx) => (
-          <TimelineItem key={idx}>
-            <TimelineOppositeContent
-              sx={{ m: "auto 0" }}
-              align={idx % 2 === 0 ? "right" : "left"}
-              variant="body2"
-              color="text.secondary"
-            >
-              {payment.month.split(" ")[0]}
-            </TimelineOppositeContent>
-
-            <TimelineSeparator>
-              <TimelineConnector />
-              <TimelineDot
-                sx={{
-                  backgroundColor: payment.color,
-                }}
-              >
-                {payment.status === "paid" || payment.status === "paid_late" ? (
-                  <CheckCircleIcon />
-                ) : payment.status === "overdue" ? (
-                  <ClearIcon />
-                ) : payment.status === "due" ? (
-                  <HourglassBottomIcon />
-                ) : payment.status === "non_exist" ? (
-                  <BlockIcon />
-                ) : payment.status === "future" ? (
-                  <HourglassTopIcon />
-                ) : (
-                  <HomeIcon />
-                )}
-              </TimelineDot>
-              <TimelineConnector />
-            </TimelineSeparator>
-
-            <TimelineContent sx={{ py: "12px", px: 2 }}>
-              <LastPayment payment={payment} fullHistory={true} />
-            </TimelineContent>
-          </TimelineItem>
-        ))}
-      </Timeline>
     </Box>
   );
 };

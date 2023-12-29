@@ -1,20 +1,15 @@
 package pl.edu.agh.student.rentsys.service;
 
+import jakarta.annotation.PostConstruct;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import pl.edu.agh.student.rentsys.exceptions.EntityNotFoundException;
 import pl.edu.agh.student.rentsys.model.*;
-import pl.edu.agh.student.rentsys.repository.ApartmentPropertyRepository;
-import pl.edu.agh.student.rentsys.repository.ApartmentRepository;
-import pl.edu.agh.student.rentsys.repository.EquipmentRepository;
-import pl.edu.agh.student.rentsys.repository.PictureRepository;
+import pl.edu.agh.student.rentsys.repository.*;
 import pl.edu.agh.student.rentsys.model.User;
 
-import java.time.Instant;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -25,20 +20,30 @@ import java.util.Base64;
 @AllArgsConstructor
 public class ApartmentService {
 
-    @Autowired
     private final UserService userService;
-    @Autowired
     private final ApartmentRepository apartmentRepository;
-    @Autowired
+    private final AgreementRepository agreementRepository;
     private final ApartmentPropertyRepository apartmentPropertyRepository;
-    @Autowired
     private final PictureRepository pictureRepository;
-    @Autowired
     private final EquipmentRepository equipmentRepository;
-    @Autowired
     private final AgreementService agreementService;
-    @Autowired
     private final NotificationService notificationService;
+    private final PaymentService paymentService;
+
+    private Apartment defaultApartment;
+    @Autowired
+    public ApartmentService(UserService userService, ApartmentRepository apartmentRepository, AgreementRepository agreementRepository, ApartmentPropertyRepository apartmentPropertyRepository, PictureRepository pictureRepository, EquipmentRepository equipmentRepository, AgreementService agreementService, NotificationService notificationService, PaymentService paymentService) {
+        this.userService = userService;
+        this.apartmentRepository = apartmentRepository;
+        this.agreementRepository = agreementRepository;
+        this.apartmentPropertyRepository = apartmentPropertyRepository;
+        this.pictureRepository = pictureRepository;
+        this.equipmentRepository = equipmentRepository;
+        this.agreementService = agreementService;
+        this.notificationService = notificationService;
+        this.paymentService = paymentService;
+        this.defaultApartment = null;
+    }
 
     public Apartment createApartment(Apartment apartment){
         apartmentRepository.getApartmentByOwnerAndName(apartment.getOwner(), apartment.getName()).ifPresent(a -> {
@@ -64,12 +69,29 @@ public class ApartmentService {
         return createdApartment;
     }
 
+    @PostConstruct
+    private void createDefaultApartment() {
+        Apartment apartment = Apartment.builder()
+                .name("Removed Apartment")
+                .build();
+        defaultApartment = apartmentRepository.save(apartment);
+    }
+
+
     public void deleteApartment(String username, long id) {
-        Apartment apartment = getApartmentFromUsernameAndId(username, id);
-        Notification notification = notificationService.createAndSendNotification(apartment.getOwner(), apartment.getTenant(), NotificationType.apartment_removed, NotificationPriority.critical, apartment.getName(), "");
-        apartment.addNotification(notification);
-        apartment.getPictures().clear();
-        apartmentRepository.delete(apartment);
+        Apartment apartmentToDelete = getApartmentFromUsernameAndId(username, id);
+        Notification notification = notificationService.createAndSendNotification(apartmentToDelete.getOwner(), apartmentToDelete.getTenant(), NotificationType.apartment_removed, NotificationPriority.critical, apartmentToDelete.getName(), "");
+        apartmentToDelete.addNotification(notification);
+        apartmentToDelete.getPictures().clear();
+
+        apartmentToDelete.getAgreements().forEach(agreement -> {
+            paymentService.cancelAgreementPayments(agreement);
+            agreement.setApartment(defaultApartment);
+            agreementRepository.save(agreement);
+        });
+
+        apartmentToDelete.setAgreements(null);
+        apartmentRepository.delete(apartmentToDelete);
     }
 
     public Apartment changeApartment(Apartment apartment){

@@ -13,6 +13,7 @@ public class PaymentDTO {
     private String status;
     private Long agreementId;
     private Long apartmentId;
+    private String apartmentName;
     private String paymentMethod;
     private Long startDate;
     private Long endDate;
@@ -24,6 +25,7 @@ public class PaymentDTO {
                 .id(payment.getId())
                 .agreementId(payment.getAgreement().getId())
                 .apartmentId(payment.getAgreement().getApartment().getId())
+                .apartmentName(payment.getAgreement().getApartment().getName())
                 .amount(payment.getAmount())
                 .status(payment.getStatus().toString())
                 .startDate(payment.getStartDate().toEpochDay())

@@ -168,9 +168,6 @@ const Payments = () => {
   }, [vacantApartments, payments]);
 
   const handleRedirect = (apartmentName) => {
-    console.log("apartments:", apartments);
-    console.log("apartmentName:", apartmentName);
-
     const apartment = apartments.find(
       (apartment) => apartment.name === apartmentName
     );
@@ -178,9 +175,6 @@ const Payments = () => {
     const newUrl = `/apartments/${apartment.id}/payments`;
     navigate(newUrl);
   };
-
-  // console.log("rentedApartments:", rentedApartments);
-  // console.log("rentedApartmentsLastPayments:", rentedApartmentsLastPayments);
 
   return (
     <Box sx={{ width: "100%" }}>
@@ -310,7 +304,12 @@ const Payments = () => {
               {Object.entries(rentedApartmentsLastPayments).map(
                 ([apartmentName, lastPayments]) => (
                   <React.Fragment key={apartmentName}>
-                    <SectionHeader title={apartmentName} />
+                    <div
+                      style={{ cursor: "pointer" }}
+                      onClick={() => handleRedirect(apartmentName)}
+                    >
+                      <SectionHeader title={apartmentName} />
+                    </div>
                     <Stepper activeStep={1} alternativeLabel className="mt-4">
                       {lastPayments.map((payment) => (
                         <Step key={payment.id}>
