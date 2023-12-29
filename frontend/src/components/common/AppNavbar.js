@@ -1,19 +1,15 @@
 import { useState, useEffect } from "react";
 import { Navbar, Nav } from "react-bootstrap";
 import { Link, useLocation } from "react-router-dom";
-import useAuth from "../../hooks/useAuth";
-import { ROLES } from "../../config/roles";
+import useData from "../../hooks/useData";
 import useLogout from "../../hooks/useLogout";
 
 const AppNavbar = () => {
   const location = useLocation();
-  const { auth } = useAuth();
-  const isLoggedIn = auth?.isLoggedIn !== false;
-  const isClient = isLoggedIn && auth?.roles?.includes(ROLES.client);
-  const isOwner = isLoggedIn && auth?.roles?.includes(ROLES.owner);
-  const isAdmin = isLoggedIn && auth?.roles?.includes(ROLES.admin);
-  const logout = useLogout();
 
+  const { isLoggedIn, isClient, isOwner, isAdmin } = useData();
+
+  const logout = useLogout();
   const [activeLink, setActiveLink] = useState("");
 
   useEffect(() => {
@@ -63,6 +59,15 @@ const AppNavbar = () => {
                   </Nav.Link>
                   <Nav.Link
                     as={Link}
+                    to="/payments"
+                    className={`custom-navbar-link ${
+                      activeLink === "payments" ? "active" : ""
+                    }`}
+                  >
+                    Payments
+                  </Nav.Link>
+                  <Nav.Link
+                    as={Link}
                     to="/chat"
                     className={`custom-navbar-link ${
                       activeLink === "chat" ? "active" : ""
@@ -101,6 +106,15 @@ const AppNavbar = () => {
                     }`}
                   >
                     Agreements
+                  </Nav.Link>
+                  <Nav.Link
+                    as={Link}
+                    to="/payments"
+                    className={`custom-navbar-link ${
+                      activeLink === "payments" ? "active" : ""
+                    }`}
+                  >
+                    Payments
                   </Nav.Link>
                   <Nav.Link
                     as={Link}

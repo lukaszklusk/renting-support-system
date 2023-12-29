@@ -3,6 +3,7 @@ package pl.edu.agh.student.rentsys.model;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -28,6 +29,7 @@ public class Apartment implements Notifiable{
     @OneToOne
     private User tenant;
     private String name;
+    private LocalDate creationDate;
     private String address;
     private String city;
     private String postalCode;
@@ -36,10 +38,13 @@ public class Apartment implements Notifiable{
     private double size;
     private String description;
 
-    @OneToMany(mappedBy = "apartment", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "apartment", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private Set<Equipment> equipment;
 
-    @OneToMany
+    @OneToMany(mappedBy = "apartment", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private Set<Agreement> agreements;
+
+    @OneToMany(mappedBy = "apartment", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private Set<ApartmentProperty> properties;
 
     @OneToMany

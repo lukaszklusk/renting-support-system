@@ -3,7 +3,7 @@ import { Carousel } from "react-bootstrap";
 
 const OwnerDashboardApartments = ({ apartments }) => {
   return (
-    <Carousel fade>
+    <Carousel fade className="mb-4">
       {Array.isArray(apartments) &&
         apartments.map((apartment, index) => (
           <Carousel.Item key={index}>

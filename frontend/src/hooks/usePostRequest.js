@@ -1,10 +1,7 @@
-import { useNavigate, useLocation } from "react-router-dom";
 import useAxiosUser from "./useAxiosUser";
 
 const usePostRequest = () => {
   const axiosUser = useAxiosUser();
-  const navigate = useNavigate();
-  const location = useLocation();
 
   const postData = async (url, payload) => {
     try {
@@ -16,12 +13,7 @@ const usePostRequest = () => {
       });
       return response.data;
     } catch (err) {
-      // TODO
-      console.log(err);
-      navigate("/sign-in", {
-        state: { from: location },
-        replace: true,
-      });
+      throw err;
     }
   };
   return postData;

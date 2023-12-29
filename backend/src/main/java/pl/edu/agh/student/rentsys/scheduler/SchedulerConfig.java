@@ -3,6 +3,7 @@ package pl.edu.agh.student.rentsys.scheduler;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
+import pl.edu.agh.student.rentsys.model.NotificationPriority;
 import pl.edu.agh.student.rentsys.model.NotificationType;
 import pl.edu.agh.student.rentsys.model.Payment;
 import pl.edu.agh.student.rentsys.model.PaymentStatus;
@@ -36,16 +37,20 @@ public class SchedulerConfig {
             if(p.getStatus().equals(PaymentStatus.due)){
                 if(p.getDueDate().isBefore(LocalDate.now())) {
                     p.setStatus(PaymentStatus.overdue);
+                    String[] dates = {p.getStartDate().toString(),  p.getEndDate().toString(), p.getDueDate().toString()};
+                    String datesStr = String.join(" ", dates);
+
                     notificationService.createAndSendNotification(
-                            p.getAgreement(), NotificationType.payment_due, p.getAgreement().getApartment().getName());
+                            p.getAgreement().getTenant(), p.getAgreement().getOwner(), NotificationType.payment_overdue, NotificationPriority.important, p.getName(), datesStr);
                 }
             }
-            if(p.getStatus().equals(PaymentStatus.future)){
-                if(DAYS.between(LocalDate.now(),p.getDueDate()) <= 30){
-                    p.setStatus(PaymentStatus.due);
-                    notificationService.createAndSendNotification(
-                            p.getAgreement(), NotificationType.payment_overdue, p.getAgreement().getApartment().getName());
-                }
+            if(p.getStatus().equals(PaymentStatus.future) && p.getStartDate().isBefore(LocalDate.now())){
+                p.setStatus(PaymentStatus.due);
+                String[] dates = {p.getStartDate().toString(),  p.getEndDate().toString(), p.getDueDate().toString()};
+                String datesStr = String.join(" ", dates);
+
+                notificationService.createAndSendNotification(
+                        p.getAgreement().getTenant(), null, NotificationType.payment_due, NotificationPriority.important, p.getName(), datesStr);
             }
         }
         paymentService.updatePayments(payments);

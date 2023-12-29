@@ -11,6 +11,10 @@ import pl.edu.agh.student.rentsys.repository.EquipmentRepository;
 import pl.edu.agh.student.rentsys.repository.PictureRepository;
 import pl.edu.agh.student.rentsys.model.User;
 
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -37,18 +41,35 @@ public class ApartmentService {
     private final NotificationService notificationService;
 
     public Apartment createApartment(Apartment apartment){
-        pictureRepository.saveAll(apartment.getPictures());
-        apartmentPropertyRepository.saveAll(apartment.getProperties());
+        apartmentRepository.getApartmentByOwnerAndName(apartment.getOwner(), apartment.getName()).ifPresent(a -> {
+            throw new IllegalStateException("Apartment names cannot repeat for the same owner");
+        } );
 
-        Notification notification = notificationService.createAndSendNotification(apartment, NotificationType.apartment_created);
+        pictureRepository.saveAll(apartment.getPictures());
+
+        Notification notification = notificationService.createAndSendNotification(apartment.getOwner(), apartment.getTenant(), NotificationType.apartment_created, NotificationPriority.critical, apartment.getName(), "");
         apartment.addNotification(notification);
 
         Apartment createdApartment = apartmentRepository.save(apartment);
+
+        for (ApartmentProperty property : apartment.getProperties()) {
+            property.setApartment(apartment);
+        }
+        apartmentPropertyRepository.saveAll(apartment.getProperties());
+
         for (Equipment equipment: createdApartment.getEquipment()) {
             equipment.setApartment(apartment);
         }
         equipmentRepository.saveAll(apartment.getEquipment());
         return createdApartment;
+    }
+
+    public void deleteApartment(String username, long id) {
+        Apartment apartment = getApartmentFromUsernameAndId(username, id);
+        Notification notification = notificationService.createAndSendNotification(apartment.getOwner(), apartment.getTenant(), NotificationType.apartment_removed, NotificationPriority.critical, apartment.getName(), "");
+        apartment.addNotification(notification);
+        apartment.getPictures().clear();
+        apartmentRepository.delete(apartment);
     }
 
     public Apartment changeApartment(Apartment apartment){
@@ -71,12 +92,17 @@ public class ApartmentService {
         return apartmentRepository.findById(id);
     }
 
-    public Optional<ApartmentDTO> getApartmentDTO(long id){
-        return getApartmentById(id).map(ApartmentDTO::convertFromApartment);
+    public ApartmentDTO getApartmentDTO(long id){
+        return getApartmentById(id)
+                .map(ApartmentDTO::convertFromApartment)
+                .orElseThrow(() -> new EntityNotFoundException(String.format("Apartment with id = %d was not found", id)));
     }
 
-    public List<Apartment> getAllApartments(){
-        return apartmentRepository.findAll();
+    public List<ApartmentDTO> getAllApartments(){
+        return apartmentRepository.findAll()
+                .stream()
+                .map(ApartmentDTO::convertFromApartment)
+                .collect(Collectors.toList());
     }
 
     public List<Apartment> getApartmentsForUser(User user){
@@ -103,6 +129,7 @@ public class ApartmentService {
 
     public Apartment createApartment(String username, ApartmentDTO apartmentDTO) {
         User owner = userService.getUserByUsername(username).orElseThrow(() -> new EntityNotFoundException("User was not found"));
+        LocalDate creationDate = LocalDate.now();
         Apartment apartment = Apartment.builder()
                 .owner(owner)
                 .address(apartmentDTO.getAddress())
@@ -110,10 +137,16 @@ public class ApartmentService {
                 .latitude(apartmentDTO.getLatitude())
                 .longitude(apartmentDTO.getLongitude())
                 .name(apartmentDTO.getName())
+                .creationDate(creationDate)
                 .postalCode(apartmentDTO.getPostalCode())
                 .size(apartmentDTO.getSize())
                 .city(apartmentDTO.getCity())
-                .properties(apartmentDTO.getProperties())
+                .properties(apartmentDTO.getProperties().stream().map(dto -> ApartmentProperty.builder()
+                        .name(dto.getName())
+                        .value(dto.getValue())
+                        .valueType(dto.getValueType())
+                        .build()
+                ).collect(Collectors.toSet()))
                 .notifications(new HashSet<>())
                 .equipment(apartmentDTO.getEquipment().stream().map(dto -> Equipment.builder()
                         .isBroken(dto.getIsBroken())

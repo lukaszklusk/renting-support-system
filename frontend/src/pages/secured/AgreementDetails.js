@@ -1,12 +1,18 @@
-import { useParams, Link } from "react-router-dom";
-import SectionHeader from "../../components/common/SectionHeader";
-import Card from "react-bootstrap/Card";
 import { useState, useEffect } from "react";
+import { useParams, Link } from "react-router-dom";
+
+import Card from "react-bootstrap/Card";
 import ListGroup from "react-bootstrap/ListGroup";
 
 import useData from "../../hooks/useData";
+import SectionHeader from "../../components/common/SectionHeader";
 
-const OwnerAgreementDetails = () => {
+import AgreementDetailsSkeleton from "../../components/common/skeletons/AgreementDetailsSkeleton";
+import { Box } from "@mui/material";
+
+import { epochDaysToStringDate } from "../../hooks/useAgreements";
+
+const AgreementDetails = () => {
   const { id } = useParams();
 
   const { isDataFetched, isClient, isOwner, isAdmin, apartments, agreements } =
@@ -17,7 +23,7 @@ const OwnerAgreementDetails = () => {
 
   const onDetailedAgreementLoad = () => {
     setDetailedApartment(
-      apartments.find((item) => item.id === detailedAgreement.apartmentId)
+      apartments.find((item) => item.id === detailedAgreement?.apartmentId)
     );
   };
 
@@ -29,19 +35,12 @@ const OwnerAgreementDetails = () => {
   useEffect(onDetailedAgreementLoad, [detailedAgreement]);
 
   return (
-    <section>
+    <Box sx={{ flexGrow: 1 }}>
       {isDataFetched && detailedAgreement?.id ? (
         <>
           <SectionHeader title="Agreement Details" />
-          <Card className="mb-3 mx-4">
-            <Card.Header>
-              <Card.Link
-                as={Link}
-                to={`/apartments/${detailedAgreement.apartmentId}`}
-              >
-                {detailedAgreement.name}
-              </Card.Link>
-            </Card.Header>
+          <Card className="mb-3">
+            <Card.Header>{detailedAgreement.name}</Card.Header>
             <ListGroup variant="flush">
               <ListGroup.Item>
                 {" "}
@@ -49,7 +48,13 @@ const OwnerAgreementDetails = () => {
               </ListGroup.Item>
               <ListGroup.Item>
                 {" "}
-                <strong>Apartment:</strong> {detailedApartment?.name}{" "}
+                <strong>Apartment:</strong>{" "}
+                <Card.Link
+                  as={Link}
+                  to={`/apartments/${detailedAgreement?.apartmentId}`}
+                >
+                  {detailedApartment?.name}
+                </Card.Link>
               </ListGroup.Item>
               <ListGroup.Item>
                 <strong> Rent: </strong>{" "}
@@ -58,7 +63,7 @@ const OwnerAgreementDetails = () => {
                   detailedAgreement.monthlyPayment
                 ).toFixed(2)}
               </ListGroup.Item>
-              {isOwner ? (
+              {isOwner && (
                 <>
                   <ListGroup.Item>
                     {" "}
@@ -73,7 +78,8 @@ const OwnerAgreementDetails = () => {
                     {detailedAgreement.tenant.phoneNumber}
                   </ListGroup.Item>{" "}
                 </>
-              ) : (
+              )}{" "}
+              {isClient && (
                 <>
                   <ListGroup.Item>
                     {" "}
@@ -89,17 +95,18 @@ const OwnerAgreementDetails = () => {
                 </>
               )}
               <ListGroup.Item>
-                <strong> Duration: </strong> {detailedAgreement.signingDate} :{" "}
-                {detailedAgreement.expirationDate}
+                <strong> Duration: </strong>
+                {epochDaysToStringDate(detailedAgreement.signingDate)} :{" "}
+                {epochDaysToStringDate(detailedAgreement.expirationDate)}
               </ListGroup.Item>
             </ListGroup>
           </Card>
         </>
       ) : (
-        <p>Loading</p>
+        <AgreementDetailsSkeleton />
       )}
-    </section>
+    </Box>
   );
 };
 
-export default OwnerAgreementDetails;
+export default AgreementDetails;

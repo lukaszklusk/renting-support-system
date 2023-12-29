@@ -3,20 +3,24 @@ import useAxiosUser from "./useAxiosUser";
 
 const useGetRequest = () => {
   const axiosUser = useAxiosUser();
-  const navigate = useNavigate();
-  const location = useLocation();
 
-  const fetchData = async (url) => {
+  const fetchData = async (url, customOptions = {}) => {
     try {
-      const response = await axiosUser.get(url);
+      const defaultOptions = {
+        headers: {
+          "Content-Type": "application/json",
+        },
+        withCredentials: true,
+      };
+      const mergeOptions = { ...defaultOptions, ...customOptions };
+      const response = await axiosUser.get(url, mergeOptions);
       return response.data;
     } catch (err) {
-      // TODO
-      console.log(err);
-      navigate("/sign-in", {
-        state: { from: location },
-        replace: true,
-      });
+      // navigate("/sign-in", {
+      //   state: { from: location },
+      //   replace: true,
+      // });
+      throw err;
     }
   };
   return fetchData;

@@ -14,6 +14,7 @@ public class ApartmentDTO {
     private UserDTO owner;
     private UserDTO tenant;
     private String name;
+    private Long creationTimestamp;
     private String address;
     private String city;
     private String postalCode;
@@ -21,7 +22,7 @@ public class ApartmentDTO {
     private double longitude;
     private double size;
     private String description;
-    private Set<ApartmentProperty> properties;
+    private Set<ApartmentPropertyDTO> properties;
     private Set<PictureDTO> pictures;
     private Set<Notification> notifications;
     private Set<EquipmentDTO> equipment;
@@ -33,6 +34,7 @@ public class ApartmentDTO {
                 .owner(UserDTO.convertFromUser(apartment.getOwner()))
                 .tenant(Optional.ofNullable(apartment.getTenant()).map(UserDTO::convertFromUser).orElse(null))
                 .name(apartment.getName())
+                .creationTimestamp(apartment.getCreationDate().toEpochDay())
                 .address(apartment.getAddress())
                 .city(apartment.getCity())
                 .postalCode(apartment.getPostalCode())
@@ -40,7 +42,7 @@ public class ApartmentDTO {
                 .longitude(apartment.getLongitude())
                 .size(apartment.getSize())
                 .description(apartment.getDescription())
-                .properties(apartment.getProperties())
+                .properties(apartment.getProperties().stream().map(ApartmentPropertyDTO::convertFromApartmentProperty).collect(Collectors.toSet()))
                 .pictures(apartment.getPictures().stream().map(PictureDTO::convertFromPicture).collect(Collectors.toSet()))
                 .notifications(apartment.getNotifications())
                 .equipment(apartment.getEquipment().stream()

@@ -16,6 +16,7 @@ public class NotificationDTO {
     private String notificationType;
     private String priority;
     private String notifiableName;
+    private String notifiableRelatedName;
     private Boolean isRead;
 
 
@@ -32,6 +33,7 @@ public class NotificationDTO {
                 .notificationType(notification.getNotificationType().toString())
                 .priority(notification.getPriority().toString())
                 .notifiableName(notification.getNotifiableName())
+                .notifiableRelatedName(notification.getNotifiableRelatedName())
                 .isRead(notification.getSenderIsRead())
                 .build();
     }
@@ -45,6 +47,7 @@ public class NotificationDTO {
                 .notificationType(notification.getNotificationType().toString())
                 .priority(notification.getPriority().toString())
                 .notifiableName(notification.getNotifiableName())
+                .notifiableRelatedName(notification.getNotifiableRelatedName())
                 .isRead(notification.getReceiverIsRead())
                 .build();
     }

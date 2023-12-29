@@ -33,6 +33,7 @@ public class Notification {
     private NotificationType notificationType;
     private NotificationPriority priority;
     private String notifiableName;
+    private String notifiableRelatedName;
 
     @ManyToOne
     @JoinColumn(name="responded_id")

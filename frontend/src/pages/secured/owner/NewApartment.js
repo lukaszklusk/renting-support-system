@@ -1,13 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import {
-  Row,
-  Col,
-  Card,
-  Form,
-  Button,
-  Alert,
-  InputGroup,
-} from "react-bootstrap";
+import { Row, Col, Card, Form, Button, InputGroup } from "react-bootstrap";
 import {
   HouseFill,
   EnvelopeFill,
@@ -20,28 +12,32 @@ import {
   ListCheck,
 } from "react-bootstrap-icons";
 import "bootstrap/dist/css/bootstrap.css";
-import useData from "../../hooks/useData";
-import { useUserApartment } from "../../hooks/useApartments";
+
+import { Link, useNavigate, useLocation } from "react-router-dom";
+
+import useData from "../../../hooks/useData";
+import { useUserApartment } from "../../../hooks/useApartments";
 
 const PRESENT_REGEX = /.+/;
 const CITY_REGEX = /^[A-Za-z\s-]+$/;
-const DESCRIPTION_REGEX = /^(?!(\S+\s+){101})((\S+\s+){0,100}\S+)$/;
+const DESCRIPTION_REGEX = /^(\s*\w+\s*){1,100}$/;
 const ZIP_CODE_REGEX = /^\d{2}-\d{3}$/;
 const SIZE_REGEX = /^(?!0\d)\d{1,5}(\.\d{1,2})?$/;
 
 const NewApartment = () => {
   const nameRef = useRef();
 
+  const navigate = useNavigate();
   const postUserApartment = useUserApartment();
 
-  const { username, isClient, isOwner, isAdmin, apartments, agreements } =
+  const { username, apartments, onSuccessMsg, onErrMsg, setApartments } =
     useData();
 
   const [name, setName] = useState("");
   const [isNameValid, setIsNameValid] = useState(false);
 
   const [decription, setDescription] = useState("");
-  const [isDescriptionValid, setIsDescriptionValid] = useState(false);
+  const [isDescriptionValid, setIsDescriptionValid] = useState(true);
 
   const [address, setAddress] = useState("");
   const [isAddressValid, setIsAddressValid] = useState(false);
@@ -69,56 +65,42 @@ const NewApartment = () => {
   const [equipmentsDescription, setEquipmentsDescription] = useState([""]);
   const [isEquipmentNameValid, setIsEquipmentNameValid] = useState(false);
 
-  const [submitMsg, setSubmitMsg] = useState("");
-  const [errMsg, setErrMsg] = useState("");
-
   useEffect(() => {
     nameRef.current.focus();
   }, []);
 
   useEffect(() => {
-    setErrMsg("");
+    onErrMsg("");
   }, [name, decription, city, address, zipCode, size]);
 
   useEffect(() => {
-    const isValid = PRESENT_REGEX.test(name);
-    console.log(isValid);
-    console.log(name);
+    const isValid =
+      PRESENT_REGEX.test(name) && !apartments?.find((a) => a.name === name);
     setIsNameValid(isValid);
   }, [name]);
 
   useEffect(() => {
     const isValid = DESCRIPTION_REGEX.test(decription);
-    console.log(isValid);
-    console.log(decription);
     setIsDescriptionValid(isValid);
   }, [decription]);
 
   useEffect(() => {
     const isValid = PRESENT_REGEX.test(address);
-    console.log(isValid);
-    console.log(address);
     setIsAddressValid(isValid);
   }, [address]);
 
   useEffect(() => {
     const isValid = CITY_REGEX.test(city);
-    console.log(isValid);
-    console.log(city);
     setIsCityValid(isValid);
   }, [city]);
 
   useEffect(() => {
     const isValid = ZIP_CODE_REGEX.test(zipCode);
-    console.log(isValid);
-    console.log(zipCode);
     setIsZipCodeValid(isValid);
   }, [zipCode]);
 
   useEffect(() => {
     const isValid = SIZE_REGEX.test(size);
-    console.log(isValid);
-    console.log(size);
     setIsSizeValid(isValid);
   }, [size]);
 
@@ -160,8 +142,6 @@ const NewApartment = () => {
       return;
     }
     setIsPicturesValid(true);
-    console.log(file);
-    // console.log("file", file);
     const base64 = await convertBase64(file);
     setImageArray(base64);
   };
@@ -174,7 +154,6 @@ const NewApartment = () => {
         resolve(fileReader.result);
       };
       fileReader.onerror = (error) => {
-        console.log("Error");
         reject(error);
       };
     });
@@ -187,7 +166,6 @@ const NewApartment = () => {
     listSetter,
     isLastListElementValidSetter = null
   ) => {
-    console.log("+");
     const newValues = [...list];
     newValues[index] = event.target.value;
     listSetter(newValues);
@@ -268,7 +246,6 @@ const NewApartment = () => {
 
   const handleCreateApartment = async (e) => {
     e.preventDefault();
-    console.log("To Send");
 
     if (
       !PRESENT_REGEX.test(name) ||
@@ -278,7 +255,7 @@ const NewApartment = () => {
       !ZIP_CODE_REGEX.test(zipCode) ||
       !SIZE_REGEX.test(size)
     ) {
-      setErrMsg("Invalid Entry");
+      onErrMsg("Invalid Entry");
       return;
     }
 
@@ -303,37 +280,33 @@ const NewApartment = () => {
         longitude: 0.0,
       });
 
-      console.log("payload:", payload);
-      // const response = await axiosUser.post(APARTMENT_POST_URL, payload, {
-      //   headers: { "Content-Type": "application/json" },
-      //   withCredentials: true,
-      // });
-
-      const response = await postUserApartment(username, payload);
-      setSubmitMsg("Apartment created sucessfully");
-      setErrMsg("");
+      const newApartment = await postUserApartment(username, payload);
+      setApartments((prevApartments) => [...prevApartments, newApartment]);
+      navigate("/dashboard", {
+        replace: true,
+      });
+      onErrMsg("");
+      onSuccessMsg("Apartment created sucessfully");
     } catch (err) {
-      setSubmitMsg("");
+      onSuccessMsg("");
       if (!err?.response) {
-        setErrMsg("Server did not respond");
+        onErrMsg("Server did not respond");
       } else {
-        setErrMsg("Error");
-        console.log(err.response);
+        onErrMsg(err?.response?.data?.message);
       }
     }
   };
 
   return (
     <section>
-      <Row className="justify-content-center mt-5">
+      <Row className="justify-content-center my-2">
         <Col md={6}>
           <Card>
             <Card.Body>
               <Card.Title className="text-center mb-5">
                 Create New Apartment
               </Card.Title>
-              {errMsg && <Alert variant="danger">{errMsg}</Alert>}
-              {submitMsg && <Alert variant="success">{submitMsg}</Alert>}
+
               <Form onSubmit={handleCreateApartment}>
                 <Form.Group controlId="formApartmentName" className="my-3">
                   <InputGroup>
@@ -352,7 +325,10 @@ const NewApartment = () => {
                       isInvalid={name && !isNameValid}
                     />
                     <Form.Control.Feedback type="invalid" className="ms-5">
-                      Please enter apartment name
+                      Please enter an apartment name with following
+                      restrictions:
+                      <br />
+                      - different than existing apartment names <br />
                     </Form.Control.Feedback>
                   </InputGroup>
                 </Form.Group>
@@ -370,7 +346,6 @@ const NewApartment = () => {
                       placeholder="Enter description"
                       value={decription}
                       onChange={(e) => setDescription(e.target.value)}
-                      required
                       autoComplete="off"
                       isValid={isDescriptionValid}
                       isInvalid={decription && !isDescriptionValid}
@@ -490,22 +465,22 @@ const NewApartment = () => {
                   </InputGroup>
                 </Form.Group>
 
-                {equipmentsName.map((equipmentName, index) => (
-                  <InputGroup className={index === 0 && "mt-3"}>
+                {equipmentsName.map((equipmentName, idx) => (
+                  <InputGroup key={idx} className={idx === 0 && "mt-3"}>
                     <InputGroup.Text className="transparent-input-group-text">
                       <ListCheck />
                     </InputGroup.Text>
                     <div>
                       <Form.Group
-                        controlId={`equipment_name_id_${index}`}
-                        key={`equipment_name_key_${index}`}
+                        controlId={`equipment_name_id_${idx}`}
+                        key={`equipment_name_key_${idx}`}
                       >
                         <Form.Control
                           type="text"
                           value={equipmentName}
                           onChange={(e) =>
                             handleListChange(
-                              index,
+                              idx,
                               e,
                               equipmentsName,
                               setEquipmentsName,
@@ -515,22 +490,22 @@ const NewApartment = () => {
                           placeholder="Enter equimpent name"
                           autoComplete="off"
                           isValid={
-                            equipmentsName.length !== index + 1 ||
+                            equipmentsName.length !== idx + 1 ||
                             isEquipmentNameValid
                           }
-                          disabled={equipmentsName.length !== index + 1}
+                          disabled={equipmentsName.length !== idx + 1}
                         />
                       </Form.Group>
                       <Form.Group
-                        controlId={`equipment_description_id_${index}`}
-                        key={`equipment_description_key_${index}`}
+                        controlId={`equipment_description_id_${idx}`}
+                        key={`equipment_description_key_${idx}`}
                       >
                         <Form.Control
                           type="text"
-                          value={equipmentsDescription[index]}
+                          value={equipmentsDescription[idx]}
                           onChange={(e) =>
                             handleListChange(
-                              index,
+                              idx,
                               e,
                               equipmentsDescription,
                               setEquipmentsDescription
@@ -539,19 +514,19 @@ const NewApartment = () => {
                           placeholder="Enter optional equimpent description"
                           autoComplete="off"
                           isValid={true}
-                          disabled={equipmentsDescription.length !== index + 1}
+                          disabled={equipmentsDescription.length !== idx + 1}
                         />
                       </Form.Group>
                     </div>
 
-                    {equipmentsName.length !== index + 1 ? (
+                    {equipmentsName.length !== idx + 1 ? (
                       <div>
                         <Button
                           variant="danger"
                           //   className="py-1"
                           onClick={() => {
                             handleListRemove(
-                              index,
+                              idx,
                               equipmentsName,
                               setEquipmentsName,
                               equipmentsDescription,
@@ -589,22 +564,22 @@ const NewApartment = () => {
                   </InputGroup>
                 ))}
 
-                {propertiesName.map((propertyName, index) => (
-                  <InputGroup className={index === 0 && "mt-3"}>
+                {propertiesName.map((propertyName, idx) => (
+                  <InputGroup key={idx} className={idx === 0 && "mt-3"}>
                     <InputGroup.Text className="transparent-input-group-text">
                       <Tools />
                     </InputGroup.Text>
                     <div>
                       <Form.Group
-                        controlId={`properties_name_id_${index}`}
-                        key={`properties_name_key_${index}`}
+                        controlId={`properties_name_id_${idx}`}
+                        key={`properties_name_key_${idx}`}
                       >
                         <Form.Control
                           type="text"
                           value={propertyName}
                           onChange={(e) =>
                             handleListChange(
-                              index,
+                              idx,
                               e,
                               propertiesName,
                               setPropertiesName,
@@ -614,22 +589,22 @@ const NewApartment = () => {
                           placeholder="Enter property name"
                           autoComplete="off"
                           isValid={
-                            propertiesName.length !== index + 1 ||
+                            propertiesName.length !== idx + 1 ||
                             isPropertyNameValid
                           }
-                          disabled={propertiesName.length !== index + 1}
+                          disabled={propertiesName.length !== idx + 1}
                         />
                       </Form.Group>
                       <Form.Group
-                        controlId={`properties_description_id_${index}`}
-                        key={`properties_description_key_${index}`}
+                        controlId={`properties_description_id_${idx}`}
+                        key={`properties_description_key_${idx}`}
                       >
                         <Form.Control
                           type="text"
-                          value={propertiesDescription[index]}
+                          value={propertiesDescription[idx]}
                           onChange={(e) =>
                             handleListChange(
-                              index,
+                              idx,
                               e,
                               propertiesDescription,
                               setPropertiesDescription
@@ -638,19 +613,19 @@ const NewApartment = () => {
                           placeholder="Enter optional property description"
                           autoComplete="off"
                           isValid={true}
-                          disabled={propertiesDescription.length !== index + 1}
+                          disabled={propertiesDescription.length !== idx + 1}
                         />
                       </Form.Group>
                     </div>
 
-                    {propertiesName.length !== index + 1 ? (
+                    {propertiesName.length !== idx + 1 ? (
                       <div>
                         <Button
                           variant="danger"
                           //   className="py-1"
                           onClick={() => {
                             handleListRemove(
-                              index,
+                              idx,
                               propertiesName,
                               setPropertiesName,
                               propertiesDescription,
@@ -676,7 +651,6 @@ const NewApartment = () => {
                           }}
                           className="mx-2"
                           disabled={!isPropertyNameValid}
-                          //   className="py-1"
                         >
                           +
                         </Button>

@@ -5,34 +5,31 @@ import { ROLES } from "./config/roles";
 import useData from "./hooks/useData";
 
 import Layout from "./components/common/Layout";
-import Home from "./components/common/Home";
-import About from "./components/common/About";
-import Contact from "./components/common/Contact";
-import NotFound from "./components/common/NotFound";
+import Home from "./pages/public/Home";
+import About from "./pages/public/About";
+import Contact from "./pages/public/Contact";
+import NotFound from "./pages/public/NotFound";
 
 import Register from "./components/common/auth/Register";
 import Login from "./components/common/auth/Login";
 import RequireAuth from "./components/common/auth/RequireAuth";
 
-import OwnerDashboard from "./pages/owner/OwnerDashboard";
-import OwnerApartments from "./pages/owner/OwnerApartments";
-import OwnerAgreements from "./pages/owner/OwnerAgreements";
-import NewApartment from "./pages/owner/NewApartment";
-import OwnerReports from "./components/owner/OwnerReports";
-import OwnerApartmentDetails from "./pages/owner/OwnerApartmentDetails";
-import AddAgreement from "./pages/owner/AddAgreement";
-
-import ClientDashboard from "./pages/client/ClientDashboard";
-import ClientAgreements from "./pages/client/ClientAgreements";
-import ClientApartments from "./pages/client/ClientApartments";
+import OwnerDashboard from "./pages/secured/Dashboard";
+import OwnerApartments from "./pages/secured/Apartments";
+import OwnerAgreements from "./pages/secured/Agreements";
+import NewApartment from "./pages/secured/owner/NewApartment";
+import Reports from "./pages/secured/owner/Reports";
+import OwnerApartmentDetails from "./pages/secured/ApartmentDetails";
+import AddAgreement from "./pages/secured/owner/NewAgreement";
 
 import AdminDashboard from "./components/admin/AdminDashboard";
-import OwnerAgreementDetails from "./pages/owner/OwnerAgreementDetails";
+import AgreementDetails from "./pages/secured/AgreementDetails";
 
-import FileUploadForm from "./pages/owner/MyForm";
-
-import SendMessage from "./components/common/communication/SendMessage";
+import Chat from "./components/common/communication/Chat";
 import Notifications from "./components/common/communication/Notifications";
+
+import Payments from "./pages/secured/Payments";
+import PaymentsDetails from "./pages/secured/PaymentsDetails";
 
 function App() {
   const { isClient, isOwner, isAdmin } = useData();
@@ -50,12 +47,13 @@ function App() {
         {/* client secured routes */}
         {isClient && (
           <Route element={<RequireAuth roles={[ROLES.client]} />}>
-            <Route path="dashboard" element={<ClientDashboard />} />
-            <Route path="apartments" element={<ClientApartments />} />
+            <Route path="dashboard" element={<OwnerDashboard />} />
+            <Route path="apartments" element={<OwnerApartments />} />
             <Route path="apartments/:id" element={<OwnerApartmentDetails />} />
-            <Route path="agreements" element={<ClientAgreements />} />
-            <Route path="agreements/:id" element={<OwnerAgreementDetails />} />
-            <Route path="chat" element={<SendMessage />} />
+            <Route path="agreements" element={<OwnerAgreements />} />
+            <Route path="agreements/:id" element={<AgreementDetails />} />
+            <Route path="payments" element={<Payments />} />
+            <Route path="chat" element={<Chat />} />
             <Route path="notifications" element={<Notifications />} />
           </Route>
         )}
@@ -64,16 +62,30 @@ function App() {
         {isOwner && (
           <Route element={<RequireAuth roles={[ROLES.owner]} />}>
             <Route path="dashboard" element={<OwnerDashboard />} />
-            <Route exact path="test" element={<FileUploadForm />} />
             <Route exact path="apartments" element={<OwnerApartments />} />
             <Route path="apartments/:id" element={<OwnerApartmentDetails />} />
+            <Route
+              key="apartment-agreements"
+              path="apartments/:apartmentId/agreements"
+              element={<OwnerAgreements />}
+            />
+            <Route
+              key="apartment-payments"
+              path="apartments/:id/payments"
+              element={<PaymentsDetails />}
+            />
             <Route path="apartments/new" element={<NewApartment />} />
-            <Route path="agreements" element={<OwnerAgreements />} />
-            <Route path="agreements/:id" element={<OwnerAgreementDetails />} />
+            <Route
+              key="agreements"
+              path="agreements"
+              element={<OwnerAgreements />}
+            />
+            <Route path="agreements/:id" element={<AgreementDetails />} />
             <Route path="agreements/new" element={<AddAgreement />} />
-            <Route path="reports" element={<OwnerReports />} />
-            <Route path="chat" element={<SendMessage />} />
-            <Route path="notifications" element={<Notifications />} />
+            <Route path="reports" element={<Reports />} />
+            <Route path="payments" element={<Payments />} />
+            <Route path="chat" element={<Chat />} />
+            <Route path="notifications/*" element={<Notifications />} />
           </Route>
         )}
 

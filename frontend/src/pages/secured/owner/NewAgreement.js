@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { useLocation, Link } from "react-router-dom";
+import { useNavigate, useLocation, Link } from "react-router-dom";
 import {
   Row,
   Col,
@@ -20,11 +20,8 @@ import {
 } from "react-bootstrap-icons";
 import "bootstrap/dist/css/bootstrap.css";
 
-import useData from "../../hooks/useData";
-import { useUserAgreement } from "../../hooks/useAgreements";
-
-import useAxiosUser from "../../hooks/useAxiosUser";
-import { useUserApartments } from "../../hooks/useApartments";
+import useData from "../../../hooks/useData";
+import { useUserAgreement } from "../../../hooks/useAgreements";
 
 const PRESENT_REGEX = /.+/;
 const NUMBER_REGEX = /^(?!0\d)\d{1,5}(\.\d{1,2})?$/;
@@ -32,13 +29,12 @@ const USERNAME_REGEX = /^[A-z][A-z0-9-_]{3,23}$/;
 const DATE_REGEX = /^\d{4}-\d{2}-\d{2}$/;
 
 const AddAgreement = () => {
-  const fetchUserApartments = useUserApartments();
   const postUserAgreement = useUserAgreement();
-  const { username, isClient, isOwner, isAdmin, apartments, agreements } =
+  const navigate = useNavigate();
+  const { username, setAgreements, onSuccessMsg, onErrMsg, apartments } =
     useData();
 
   const nameRef = useRef();
-  const [ownerApartments, setOwnerApartments] = useState([]);
 
   const [agreementName, setAgreementName] = useState("");
   const [isAgreementNameValid, setIsAgreementNameValid] = useState(false);
@@ -62,26 +58,18 @@ const AddAgreement = () => {
   const [expirationDate, setExpirationDate] = useState("");
   const [isExpirationDateValid, setIsExpirationDateValid] = useState(false);
 
-  const [submitMsg, setSubmitMsg] = useState("");
-  const [errMsg, setErrMsg] = useState("");
+  const getApartmentNames = () => {
+    return apartments
+      .filter((apartment) => !apartment.tenant)
+      .map((apartment) => apartment.name);
+  };
 
   useEffect(() => {
     nameRef.current.focus();
   }, []);
 
   useEffect(() => {
-    if (username) {
-      const fetchData = async () => {
-        const apartments = await fetchUserApartments(username);
-        console.log("apartments", apartments);
-        setOwnerApartments(apartments);
-      };
-      fetchData();
-    }
-  }, []);
-
-  useEffect(() => {
-    setErrMsg("");
+    onErrMsg("");
   }, [
     agreementName,
     apartmentName,
@@ -125,20 +113,6 @@ const AddAgreement = () => {
     setIsExpirationDateValid(isValid);
   }, [expirationDate]);
 
-  const getApartmentIdByName = (apartements, name) => {
-    const apartmentsByName = apartements.find((apartment) => {
-      return apartment.name === name;
-    });
-    if (apartmentsByName.length === 0) {
-      console.log("error: ", name, "apartment not found");
-      return null;
-    } else if (apartmentsByName.length > 1) {
-      console.log("error: ", name, "multiple names");
-      return null;
-    }
-    return apartmentsByName[0].id;
-  };
-
   const handleCreateAgreement = async (e) => {
     e.preventDefault();
     console.log("+");
@@ -152,7 +126,7 @@ const AddAgreement = () => {
       !DATE_REGEX.test(expirationDate) ||
       !USERNAME_REGEX.test(clientUsername)
     ) {
-      setErrMsg("Invalid Entry");
+      onErrMsg("Invalid Entry");
       return;
     }
 
@@ -160,7 +134,6 @@ const AddAgreement = () => {
       const payload = JSON.stringify({
         name: agreementName,
         apartmentName,
-        // apartmentId: getApartmentIdByName(ownerApartments, apartmentName),
         administrationFee,
         monthlyPayment,
         signingDate: Math.floor(
@@ -172,39 +145,33 @@ const AddAgreement = () => {
         ownerAccountNo: "ownerAccountNo",
         tenant: { username: clientUsername },
       });
-      // const response = await axiosUser.post(AGREEMENT_POST_URL, payload, {
-      //   headers: { "Content-Type": "application/json" },
-      //   withCredentials: true,
-      // });
-      // console.log(response.data);
-      // console.log(JSON.stringify(response));
-      console.log("payload:", payload);
-      const data = await postUserAgreement(username, payload);
-      console.log("data:", data);
-      setSubmitMsg("Apartment created sucessfully");
-      setErrMsg("");
+
+      const newAgreement = await postUserAgreement(username, payload);
+      setAgreements((prevAgreements) => [...prevAgreements, newAgreement]);
+      navigate("/dashboard", {
+        replace: true,
+      });
+      onErrMsg("");
+      onSuccessMsg("Agreement created sucessfully");
     } catch (err) {
-      setSubmitMsg("");
+      onSuccessMsg("");
       if (!err?.response) {
-        setErrMsg("Server did not respond");
+        onErrMsg("Server did not respond");
       } else {
-        setErrMsg("Error");
-        console.log(err.response);
+        onErrMsg(err?.response?.data?.message);
       }
     }
   };
 
   return (
     <section>
-      <Row className="justify-content-center mt-5">
+      <Row className="justify-content-center my-2">
         <Col md={6}>
           <Card>
             <Card.Body>
               <Card.Title className="text-center mb-5">
                 Propose New Agreement
               </Card.Title>
-              {errMsg && <Alert variant="danger">{errMsg}</Alert>}
-              {submitMsg && <Alert variant="success">{submitMsg}</Alert>}
               <Form onSubmit={handleCreateAgreement}>
                 <Form.Group controlId="formAgreementName" className="my-3">
                   <InputGroup>
@@ -233,19 +200,22 @@ const AddAgreement = () => {
                     <InputGroup.Text className="transparent-input-group-text">
                       <HouseFill />
                     </InputGroup.Text>
-                    <Form.Control
-                      type="text"
-                      placeholder="Enter apartment name"
+                    <Form.Select
                       value={apartmentName}
                       onChange={(e) => setApartmentName(e.target.value)}
                       required
-                      autoComplete="off"
                       isValid={isApartmentNameValid}
                       isInvalid={apartmentName && !isApartmentNameValid}
-                    />
-                    <Form.Control.Feedback type="invalid" className="ms-5">
-                      Please enter apartment name
-                    </Form.Control.Feedback>
+                    >
+                      <option value="" disabled>
+                        Select Apartment ...
+                      </option>
+                      {getApartmentNames().map((name, idx) => (
+                        <option key={idx} value={name}>
+                          {name}
+                        </option>
+                      ))}
+                    </Form.Select>
                   </InputGroup>
                 </Form.Group>
 

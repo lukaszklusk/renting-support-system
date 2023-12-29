@@ -5,7 +5,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import pl.edu.agh.student.rentsys.exceptions.EntityNotFoundException;
 import pl.edu.agh.student.rentsys.model.*;
 import pl.edu.agh.student.rentsys.security.UserRole;
 import pl.edu.agh.student.rentsys.service.AgreementService;
@@ -29,17 +28,12 @@ public class ApartmentController {
 
     @GetMapping("/apartments")
     public ResponseEntity<List<ApartmentDTO>> getAllApartments(){
-        return ResponseEntity.ok(
-                apartmentService.getAllApartments().stream()
-                        .map(ApartmentDTO::convertFromApartment)
-                        .collect(Collectors.toList())
-        );
+        return ResponseEntity.ok(apartmentService.getAllApartments());
     }
 
     @GetMapping("/apartments/{id}")
     public ResponseEntity<ApartmentDTO> getApartmentById(@PathVariable long id){
-        Optional<ApartmentDTO> apartmentOptional = apartmentService.getApartmentDTO(id);
-        return apartmentOptional.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
+        return ResponseEntity.ok(apartmentService.getApartmentDTO(id));
     }
 
     @GetMapping("/user/{username}/apartments")
@@ -68,91 +62,18 @@ public class ApartmentController {
         }else return ResponseEntity.notFound().build();
     }
 
-    @GetMapping("/user/{username}/apartments/status")
-    public ResponseEntity<List<ApartmentDTO>> getApartmentsForUserWithStatus(@PathVariable String username,
-                                                                             @RequestParam String status){
-        Optional<User> userOptional = userService.getUserByUsername(username);
-        if(userOptional.isPresent()){
-            if(userOptional.get().getUserRole().equals(UserRole.CLIENT))
-                return ResponseEntity.badRequest().build();
-            List<Apartment> returnList = new ArrayList<>();
-            if(status.equals("rented")){
-                List<Apartment> apartmentList = apartmentService.getApartmentsForUser(userOptional.get());
-                for(Apartment a: apartmentList){
-                    List<Agreement> agreements = agreementService.getAgreementsForApartment(a);
-                    for(Agreement ag: agreements){
-                        if(ag.getAgreementStatus().equals(AgreementStatus.active) || ag.getAgreementStatus().equals(AgreementStatus.accepted)) {
-                            returnList.add(a);
-                            break;
-                        }
-                    }
-                }
-                return ResponseEntity.ok(returnList.stream()
-                        .map(ApartmentDTO::convertFromApartment)
-                        .collect(Collectors.toList())
-                );
-            } else if(status.equals("vacant")){
-                List<Apartment> apartmentList = apartmentService.getApartmentsForUser(userOptional.get());
-                for(Apartment a: apartmentList){
-                    List<Agreement> agreements = agreementService.getAgreementsForApartment(a);
-                    boolean rented = false;
-                    for(Agreement ag: agreements){
-                        if(ag.getAgreementStatus().equals(AgreementStatus.active) || ag.getAgreementStatus().equals(AgreementStatus.accepted)) {
-                            rented = true;
-                            break;
-                        }
-                    }
-                    if(!rented)
-                        returnList.add(a);
-                }
-                return ResponseEntity.ok(returnList.stream()
-                        .map(ApartmentDTO::convertFromApartment)
-                        .collect(Collectors.toList())
-                );
-            } else {
-                return ResponseEntity.badRequest().build();
-            }
-        } else return ResponseEntity.notFound().build();
-    }
-
-    @GetMapping("/user/{username}/apartments/{aid}/rented")
-    public ResponseEntity<Map<String,Boolean>> checkIfApartmentRented(@PathVariable String username,
-                                                                      @PathVariable long aid){
-        Optional<User> userOptional = userService.getUserByUsername(username);
-        if(userOptional.isPresent()){
-            Optional<Apartment> apartmentOptional = apartmentService.getApartmentById(aid);
-            if(apartmentOptional.isPresent()){
-                List<Agreement> agreements = agreementService.getAgreementsForApartment(apartmentOptional.get());
-                for(Agreement a: agreements){
-                    if(a.getAgreementStatus().equals(AgreementStatus.active) || a.getAgreementStatus().equals(AgreementStatus.accepted)) {
-                        return ResponseEntity.ok(new HashMap<>(){{put("rented",true);}});
-                    }
-                }
-                return ResponseEntity.ok(new HashMap<>(){{put("rented",false);}});
-            } else return ResponseEntity.notFound().build();
-        } else return ResponseEntity.notFound().build();
-    }
-
-    @GetMapping("/user/{username}/apartments/{aid}")
-    public ResponseEntity<ApartmentDTO> getUserApartment(@PathVariable String username, @PathVariable long aid){
-        Optional<User> userOptional = userService.getUserByUsername(username);
-        if (userOptional.isPresent()) {
-            Optional<ApartmentDTO> apartmentOptional = apartmentService.getApartmentDTO(aid);
-            return apartmentOptional.map(ResponseEntity::ok)
-                    .orElseGet(() -> ResponseEntity.notFound().build());
-        }
-        else return ResponseEntity.notFound().build();
-    }
-
     @PostMapping("/user/{username}/apartments")
     public ResponseEntity<ApartmentDTO> createApartment(@PathVariable String username,
                                                         @RequestBody ApartmentDTO apartmentDTO) {
-        try {
-            Apartment apartment = apartmentService.createApartment(username, apartmentDTO);
-            ApartmentDTO newApartmentDTO = ApartmentDTO.convertFromApartment(apartment);
-            return ResponseEntity.status(HttpStatus.CREATED).body(newApartmentDTO);
-        } catch (EntityNotFoundException e) {
-            return ResponseEntity.notFound().build();
-        }
+        Apartment apartment = apartmentService.createApartment(username, apartmentDTO);
+        ApartmentDTO newApartmentDTO = ApartmentDTO.convertFromApartment(apartment);
+        return ResponseEntity.status(HttpStatus.CREATED).body(newApartmentDTO);
+    }
+
+    @DeleteMapping("/user/{username}/apartments/{id}")
+    public ResponseEntity<ApartmentDTO> deleteApartment(@PathVariable String username,
+                                                        @PathVariable long id) {
+        apartmentService.deleteApartment(username, id);
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 }
