@@ -11,7 +11,7 @@ import { Box, SpeedDial, SpeedDialIcon, Tab, Tabs } from "@mui/material";
 
 import ApartmentsSkeleton from "../../components/common/skeletons/ApartmentsSkeleton";
 
-const OwnerApartments = () => {
+const Apartments = () => {
   const { isClient, isOwner, isDataFetched, apartments } = useData();
 
   const [activeTab, setActiveTab] = useState(0);
@@ -111,4 +111,4 @@ const OwnerApartments = () => {
   );
 };
 
-export default OwnerApartments;
+export default Apartments;

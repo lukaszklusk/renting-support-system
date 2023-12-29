@@ -11,7 +11,7 @@ import { Link } from "react-router-dom";
 import { Box, SpeedDial, SpeedDialIcon, Tab, Tabs } from "@mui/material";
 import AgreementsSkeleton from "../../components/common/skeletons/AgreementsSkeleton";
 
-function Agreements() {
+const Agreements = () => {
   const { isClient, isOwner, isDataFetched, agreements } = useData();
 
   const [activeTab, setActiveTab] = useState(0);
@@ -440,6 +440,6 @@ function Agreements() {
       </Suspense>
     </Box>
   );
-}
+};
 
 export default Agreements;

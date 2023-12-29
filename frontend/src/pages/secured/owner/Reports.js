@@ -48,7 +48,7 @@ const BootstrapDialog = styled(Dialog)(({ theme }) => ({
 }));
 
 const Reports = () => {
-  const { username } = useData();
+  const { username, isDataFetched } = useData();
   const getUserReport = useUserReport();
 
   const [viewOpen, setViewOpen] = React.useState(false);
