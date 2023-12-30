@@ -3,7 +3,11 @@ import { Document, Page, pdfjs } from "react-pdf";
 import { saveAs } from "file-saver";
 
 import useData from "../../../hooks/useData";
-import { useUserReport } from "../../../hooks/useReports";
+import {
+  useUserOverviewReport,
+  useUserSimpleReport,
+  useUserDetailedReport,
+} from "../../../hooks/useReports";
 
 import { Box } from "@mui/material";
 import Table from "@mui/material/Table";
@@ -49,53 +53,119 @@ const BootstrapDialog = styled(Dialog)(({ theme }) => ({
 
 const Reports = () => {
   const { username, isDataFetched } = useData();
-  const getUserReport = useUserReport();
+
+  const getOverviewReport = useUserOverviewReport();
+  const getSimpleReport = useUserSimpleReport();
+  const getDetailedReport = useUserDetailedReport();
 
   const [viewOpen, setViewOpen] = React.useState(false);
 
-  const [numPages, setNumPages] = useState(null);
-  const [pageNumber, setPageNumber] = useState(1);
-  const [report, setReport] = useState(null);
+  const [activeReport, setActiveReport] = useState(null);
+  const [activeReportType, setActiveReportType] = useState("");
 
-  const fetchReport = async () => {
-    const data = await getUserReport(username);
+  const [numPages, setNumPages] = useState(0);
+  const [pageNumber, setPageNumber] = useState(1);
+
+  const [overviewReport, setOverviewReport] = useState(null);
+  const [simpleReport, setSimpleReport] = useState(null);
+  const [detailedReport, setDetailedReport] = useState(null);
+
+  const fetchOverviewReport = async () => {
+    const data = await getOverviewReport(username);
     const pdfBlob = new Blob([data], { type: "application/pdf" });
     const url = URL.createObjectURL(pdfBlob);
-    setReport(url);
+    setOverviewReport(url);
+  };
+
+  const fetchSimpleReport = async () => {
+    const data = await getSimpleReport(username);
+    const pdfBlob = new Blob([data], { type: "application/pdf" });
+    const url = URL.createObjectURL(pdfBlob);
+    setSimpleReport(url);
+  };
+
+  const fetchDetailedReport = async () => {
+    const data = await getDetailedReport(username);
+    const pdfBlob = new Blob([data], { type: "application/pdf" });
+    const url = URL.createObjectURL(pdfBlob);
+    setDetailedReport(url);
   };
 
   const handleViewClose = () => {
+    setActiveReportType("");
     setViewOpen(false);
   };
 
-  const handleViewOpen = async () => {
+  const handleViewOpen = async (type) => {
     try {
+      setActiveReportType(type);
       setViewOpen(true);
-      !report && fetchReport();
+      if (type === "overview") {
+        !overviewReport && fetchOverviewReport();
+      } else if (type === "simple") {
+        !simpleReport && fetchSimpleReport();
+      } else if (type === "detailed") {
+        !detailedReport && fetchDetailedReport();
+      }
     } catch (err) {
       console.error("err:", err);
     }
   };
 
-  const handleDownload = async () => {
+  const handleDownload = async (type) => {
     try {
-      !report && (await fetchReport());
-      saveAs(report, "test.pdf");
+      if (type === "overview") {
+        !overviewReport && (await fetchOverviewReport());
+        saveAs(overviewReport, "rentsys_overview_report.pdf");
+      } else if (type === "simple") {
+        !simpleReport && (await fetchSimpleReport());
+        saveAs(simpleReport, "rentsys_simple_report.pdf");
+      } else if (type === "detailed") {
+        !detailedReport && (await fetchDetailedReport());
+        saveAs(detailedReport, "rentsys_detailed_report.pdf");
+      }
     } catch (err) {
       console.error("err:", err);
     }
   };
 
   const onDocumentLoadSuccess = ({ numPages }) => {
-    console.log("onLoadSuccess");
     setNumPages(numPages);
   };
 
-  function createData(name, calories, fat, carbs, protein) {
-    return { name, calories, fat, carbs, protein };
-  }
+  const handlePreviousPage = () => {
+    if (pageNumber > 1) {
+      setPageNumber(pageNumber - 1);
+    }
+  };
 
-  const rows = [createData("General", 159, 6.0, 24, 4.0)];
+  const handleNextPage = () => {
+    // Sprawdź, czy numer strony nie przekracza liczby stron w dokumencie
+    const totalPages = numPages;
+    if (pageNumber < totalPages) {
+      setPageNumber(pageNumber + 1);
+    }
+  };
+
+  const reports = ["overview", "simple", "detailed"];
+
+  useEffect(() => {
+    setOverviewReport(null);
+    setSimpleReport(null);
+    setDetailedReport(null);
+  }, [isDataFetched]);
+
+  useEffect(() => {
+    if (activeReportType === "overview") {
+      setActiveReport(overviewReport);
+    } else if (activeReportType === "simple") {
+      setActiveReport(simpleReport);
+    } else if (activeReportType === "detailed") {
+      setActiveReport(detailedReport);
+    } else {
+      setActiveReport(null);
+    }
+  }, [overviewReport, simpleReport, detailedReport, activeReportType]);
 
   return (
     <Box sx={{ flexGrow: 1 }}>
@@ -112,21 +182,27 @@ const Reports = () => {
             </TableRow>
           </TableHead>
           <TableBody>
-            {rows.map((row) => (
+            {reports.map((report) => (
               <TableRow
-                key={row.name}
+                key={report}
                 sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
               >
                 <TableCell component="th" scope="row">
-                  {row.name}
+                  {report?.charAt(0).toUpperCase() + report?.slice(1)}
                 </TableCell>
                 <TableCell align="right">
-                  <span onClick={handleViewOpen} style={{ cursor: "pointer" }}>
+                  <span
+                    onClick={() => handleViewOpen(report)}
+                    style={{ cursor: "pointer" }}
+                  >
                     <VisibilityIcon />
                   </span>
                 </TableCell>
                 <TableCell align="right">
-                  <span onClick={handleDownload} style={{ cursor: "pointer" }}>
+                  <span
+                    onClick={() => handleDownload(report)}
+                    style={{ cursor: "pointer" }}
+                  >
                     <CloudDownloadIcon />
                   </span>
                 </TableCell>
@@ -165,14 +241,35 @@ const Reports = () => {
               alignItems: "center",
             }}
           >
-            {report ? (
-              <Document
-                file={report}
-                onLoadSuccess={onDocumentLoadSuccess}
-                onPassword={() => {}}
-              >
-                <Page pageNumber={pageNumber} />
-              </Document>
+            {activeReport ? (
+              <>
+                {numPages > 1 && (
+                  <Button
+                    variant="outline"
+                    size="small"
+                    onClick={handlePreviousPage}
+                  >
+                    Previous Page
+                  </Button>
+                )}
+
+                <Document
+                  file={activeReport}
+                  onLoadSuccess={onDocumentLoadSuccess}
+                  onPassword={() => {}}
+                >
+                  <Page pageNumber={pageNumber} />
+                </Document>
+                {numPages > 1 && (
+                  <Button
+                    variant="outline"
+                    size="small"
+                    onClick={handleNextPage}
+                  >
+                    Next Page
+                  </Button>
+                )}
+              </>
             ) : (
               <CircularProgress />
             )}
@@ -182,7 +279,7 @@ const Reports = () => {
           <Button
             autoFocus
             onClick={() => {
-              handleViewClose() || handleDownload();
+              handleDownload(activeReportType) || handleViewClose();
             }}
           >
             Download
