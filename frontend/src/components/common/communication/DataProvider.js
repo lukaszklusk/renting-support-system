@@ -220,7 +220,7 @@ export const DataProvider = ({ children }) => {
 
   const refreshWebSocket = async () => {
     console.log("Refreshing websocket:");
-    const refreshUrl = "http://localhost:8080/test";
+    const refreshUrl = "http://localhost:8080/refresh";
     try {
       await axiosUser.get(refreshUrl);
     } catch (err) {

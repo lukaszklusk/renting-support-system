@@ -1,5 +1,7 @@
+import { useState, useEffect } from "react";
+
 import { Link } from "react-router-dom";
-import { Card, Button } from "react-bootstrap";
+import { Card } from "react-bootstrap";
 import ListGroup from "react-bootstrap/ListGroup";
 import { Trash } from "react-bootstrap-icons";
 
@@ -7,19 +9,36 @@ import { useDeleteApartment } from "../../hooks/useApartments";
 import useData from "../../hooks/useData";
 
 const Apartment = ({ item: apartment, toShowDeleteButton }) => {
-  const { username, setApartments, setAgreements, isOwner } = useData();
+  const {
+    username,
+    setApartments,
+    setAgreements,
+    isOwner,
+    isClient,
+    agreements,
+    setIsDataFetched,
+  } = useData();
+
+  const [activeAgreement, setActiveAgreement] = useState(null);
 
   const deleteApartment = useDeleteApartment();
 
   const handleDeleteApartment = async (id) => {
     await deleteApartment(username, id);
-    setApartments((prevApartments) =>
-      prevApartments?.filter((apartment) => apartment.id !== id)
-    );
-    setAgreements((prevAgreements) =>
-      prevAgreements?.filter((agreement) => agreement.apartmentId !== id)
+    setIsDataFetched(false);
+  };
+
+  const onAgreementsLoad = () => {
+    setActiveAgreement(
+      agreements.find(
+        (agreement) =>
+          agreement.agreementStatus === "active" &&
+          agreement.apartmentId === apartment.id
+      )
     );
   };
+
+  useEffect(onAgreementsLoad, [agreements]);
 
   return (
     <Card
@@ -57,6 +76,19 @@ const Apartment = ({ item: apartment, toShowDeleteButton }) => {
             Details
           </Card.Link>
         </ListGroup.Item>
+
+        {isClient && activeAgreement != null && (
+          <ListGroup.Item>
+            <strong> Agreement: </strong>
+            <Card.Link
+              className="flex-grow-1"
+              as={Link}
+              to={`/agreements/${activeAgreement.id}`}
+            >
+              Details
+            </Card.Link>
+          </ListGroup.Item>
+        )}
 
         {isOwner && (
           <ListGroup.Item>

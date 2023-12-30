@@ -101,16 +101,18 @@ function Agreement({
             </Card.Link>
           </ListGroup.Item>
 
-          <ListGroup.Item>
-            <strong> Apartment: </strong>
-            <Card.Link
-              className="flex-grow-1"
-              as={Link}
-              to={`/apartments/${agreement.apartmentId}`}
-            >
-              Details
-            </Card.Link>
-          </ListGroup.Item>
+          {(isPresent || isOwner) && (
+            <ListGroup.Item>
+              <strong> Apartment: </strong>
+              <Card.Link
+                className="flex-grow-1"
+                as={Link}
+                to={`/apartments/${agreement.apartmentId}`}
+              >
+                Details
+              </Card.Link>
+            </ListGroup.Item>
+          )}
         </ListGroup>
 
         {isPresent && (

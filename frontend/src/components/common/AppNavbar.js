@@ -19,7 +19,11 @@ const AppNavbar = () => {
 
   return (
     <Navbar bg="dark" variant="dark" expand="sm">
-      <Navbar.Brand as={Link} to="/" className="custom-navbar-link">
+      <Navbar.Brand
+        as={Link}
+        to={isLoggedIn ? "dashboard" : "/"}
+        className="custom-navbar-link"
+      >
         RentSys
       </Navbar.Brand>
       <Navbar.Toggle aria-controls="navbar-nav" />
@@ -29,122 +33,62 @@ const AppNavbar = () => {
             <>
               <Nav.Link
                 as={Link}
-                to="dashboard"
+                to="/apartments"
                 className={`custom-navbar-link ${
-                  activeLink === "dashboard" ? "active" : ""
+                  activeLink === "apartments" ? "active" : ""
                 }`}
               >
-                Dashboard
+                Apartments
+              </Nav.Link>
+              <Nav.Link
+                as={Link}
+                to="/agreements"
+                className={`custom-navbar-link ${
+                  activeLink === "agreements" ? "active" : ""
+                }`}
+              >
+                Agreements
+              </Nav.Link>
+              <Nav.Link
+                as={Link}
+                to="/payments"
+                className={`custom-navbar-link ${
+                  activeLink === "payments" ? "active" : ""
+                }`}
+              >
+                Payments
               </Nav.Link>
 
-              {isClient && (
-                <>
-                  <Nav.Link
-                    as={Link}
-                    to="/apartments"
-                    className={`custom-navbar-link ${
-                      activeLink === "apartments" ? "active" : ""
-                    }`}
-                  >
-                    Apartments
-                  </Nav.Link>
-                  <Nav.Link
-                    as={Link}
-                    to="/agreements"
-                    className={`custom-navbar-link ${
-                      activeLink === "agreements" ? "active" : ""
-                    }`}
-                  >
-                    Agreements
-                  </Nav.Link>
-                  <Nav.Link
-                    as={Link}
-                    to="/payments"
-                    className={`custom-navbar-link ${
-                      activeLink === "payments" ? "active" : ""
-                    }`}
-                  >
-                    Payments
-                  </Nav.Link>
-                  <Nav.Link
-                    as={Link}
-                    to="/chat"
-                    className={`custom-navbar-link ${
-                      activeLink === "chat" ? "active" : ""
-                    }`}
-                  >
-                    Chat
-                  </Nav.Link>
-                  <Nav.Link
-                    as={Link}
-                    to="/notifications"
-                    className={`custom-navbar-link ${
-                      activeLink === "notifications" ? "active" : ""
-                    }`}
-                  >
-                    Notifications
-                  </Nav.Link>
-                </>
+              {isOwner && (
+                <Nav.Link
+                  as={Link}
+                  to="/reports"
+                  className={`custom-navbar-link ${
+                    activeLink === "reports" ? "active" : ""
+                  }`}
+                >
+                  Reports
+                </Nav.Link>
               )}
 
-              {isOwner && (
-                <>
-                  <Nav.Link
-                    as={Link}
-                    to="/apartments"
-                    className={`custom-navbar-link ${
-                      activeLink === "apartments" ? "active" : ""
-                    }`}
-                  >
-                    Apartments
-                  </Nav.Link>
-                  <Nav.Link
-                    as={Link}
-                    to="/agreements"
-                    className={`custom-navbar-link ${
-                      activeLink === "agreements" ? "active" : ""
-                    }`}
-                  >
-                    Agreements
-                  </Nav.Link>
-                  <Nav.Link
-                    as={Link}
-                    to="/payments"
-                    className={`custom-navbar-link ${
-                      activeLink === "payments" ? "active" : ""
-                    }`}
-                  >
-                    Payments
-                  </Nav.Link>
-                  <Nav.Link
-                    as={Link}
-                    to="/reports"
-                    className={`custom-navbar-link ${
-                      activeLink === "reports" ? "active" : ""
-                    }`}
-                  >
-                    Reports
-                  </Nav.Link>
-                  <Nav.Link
-                    as={Link}
-                    to="/chat"
-                    className={`custom-navbar-link ${
-                      activeLink === "chat" ? "active" : ""
-                    }`}
-                  >
-                    Chat
-                  </Nav.Link>
-                  <Nav.Link
-                    as={Link}
-                    to="/notifications"
-                    className={`custom-navbar-link ${
-                      activeLink === "notifications" ? "active" : ""
-                    }`}
-                  >
-                    Notifications
-                  </Nav.Link>
-                </>
-              )}
+              <Nav.Link
+                as={Link}
+                to="/chat"
+                className={`custom-navbar-link ${
+                  activeLink === "chat" ? "active" : ""
+                }`}
+              >
+                Chat
+              </Nav.Link>
+              <Nav.Link
+                as={Link}
+                to="/notifications"
+                className={`custom-navbar-link ${
+                  activeLink === "notifications" ? "active" : ""
+                }`}
+              >
+                Notifications
+              </Nav.Link>
 
               <Nav.Link
                 as={Link}
@@ -161,15 +105,6 @@ const AppNavbar = () => {
             </>
           ) : (
             <>
-              <Nav.Link
-                as={Link}
-                to="/"
-                className={`custom-navbar-link ${
-                  activeLink === "" ? "active" : ""
-                }`}
-              >
-                Home
-              </Nav.Link>
               <Nav.Link
                 as={Link}
                 to="/about"

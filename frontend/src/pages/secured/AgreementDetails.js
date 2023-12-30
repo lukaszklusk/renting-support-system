@@ -49,12 +49,16 @@ const AgreementDetails = () => {
               <ListGroup.Item>
                 {" "}
                 <strong>Apartment:</strong>{" "}
-                <Card.Link
-                  as={Link}
-                  to={`/apartments/${detailedAgreement?.apartmentId}`}
-                >
-                  {detailedApartment?.name}
-                </Card.Link>
+                {detailedApartment?.name ? (
+                  <Card.Link
+                    as={Link}
+                    to={`/apartments/${detailedAgreement?.apartmentId}`}
+                  >
+                    {detailedApartment?.name}
+                  </Card.Link>
+                ) : (
+                  <>{detailedAgreement?.apartmentName}</>
+                )}
               </ListGroup.Item>
               <ListGroup.Item>
                 <strong> Rent: </strong>{" "}

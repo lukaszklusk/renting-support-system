@@ -69,15 +69,15 @@ public class PaymentService {
         ArrayList<Payment> payments = new ArrayList<>();
         LocalDate startDate = agreement.getSigningDate();
         LocalDate endDate = startDate.plusMonths(1).minusDays(1);
-        LocalDate paymentDate = endDate.plusWeeks(1);
+        LocalDate dueDate = endDate.plusWeeks(1);
         while(startDate.isBefore(agreement.getExpirationDate())){
             Payment payment = null;
             if(startDate.isBefore(LocalDate.now())) {
                 payment = Payment.builder()
                         .startDate(startDate)
                         .endDate(endDate)
-                        .dueDate(paymentDate)
-                        .status(PaymentStatus.due)
+                        .dueDate(dueDate)
+                        .status(dueDate.isBefore(LocalDate.now()) ? PaymentStatus.overdue : PaymentStatus.due)
                         .agreement(agreement)
                         .amount(agreement.getMonthlyPayment())
                         .build();
@@ -85,7 +85,7 @@ public class PaymentService {
                 payment = Payment.builder()
                         .startDate(startDate)
                         .endDate(endDate)
-                        .dueDate(paymentDate)
+                        .dueDate(dueDate)
                         .status(PaymentStatus.future)
                         .agreement(agreement)
                         .amount(agreement.getMonthlyPayment())
@@ -94,7 +94,7 @@ public class PaymentService {
             payments.add(payment);
             startDate = startDate.plusMonths(1);
             endDate = endDate.plusMonths(1);
-            paymentDate = paymentDate.plusMonths(1);
+            dueDate = dueDate.plusMonths(1);
         }
         return payments;
     }
@@ -145,6 +145,18 @@ public class PaymentService {
                 .toList();
 
         for (var payment: futurePayments) {
+            payment.setStatus(PaymentStatus.cancelled);
+            paymentRepository.save(payment);
+        }
+    }
+
+    void cancelAgreementPayments(Agreement agreement) {
+        List<Payment> payments = paymentRepository.getPaymentsByAgreement(agreement);
+        List<Payment> unpaidPayments = payments.stream()
+                .filter(p -> !p.getStatus().equals(PaymentStatus.paid) && !p.getStatus().equals(PaymentStatus.paid_late))
+                .toList();
+
+        for (var payment: unpaidPayments) {
             payment.setStatus(PaymentStatus.cancelled);
             paymentRepository.save(payment);
         }

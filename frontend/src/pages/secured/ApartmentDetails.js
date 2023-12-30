@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate, useLocation } from "react-router-dom";
 import { Carousel } from "react-bootstrap";
 import Card from "react-bootstrap/Card";
 import ListGroup from "react-bootstrap/ListGroup";
@@ -19,12 +19,19 @@ import {
   usePatchEquipmentStatus,
   usePostEquipment,
 } from "../../hooks/useApartments";
+
 import { epochDaysToStringDate } from "../../hooks/useAgreements";
 import SectionHeader from "../../components/common/SectionHeader";
 import ApartmentDetailsSkeleton from "../../components/common/skeletons/ApartmentDetailsSkeleton";
 
-const OwnerApartmentDetails = () => {
+const ApartmentDetails = () => {
   const { id } = useParams();
+
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  const from = location.state?.from?.pathname || "/not-found";
+
   const [detailedApartment, setDetailedApartment] = useState(null);
   const [detailedAgreements, setDetailedAgreements] = useState([]);
   const [activeAgreement, setActiveAgreement] = useState(null);
@@ -62,6 +69,10 @@ const OwnerApartmentDetails = () => {
   };
 
   const onDetailedApartmentLoad = () => {
+    if (!detailedApartment) {
+      navigate(from, { replace: true });
+      return;
+    }
     setIsRented(detailedApartment?.tenant != null);
   };
 
@@ -163,7 +174,7 @@ const OwnerApartmentDetails = () => {
     );
   };
 
-  console.log("detailedApartment:", detailedApartment);
+  // console.log("detailedApartment:", detailedApartment);
 
   return (
     <Box sx={{ flexGrow: 1 }}>
@@ -201,7 +212,17 @@ const OwnerApartmentDetails = () => {
               {isRented ? (
                 <>
                   <ListGroup.Item>
-                    <strong> Status: </strong> Rented
+                    <strong> Status: </strong> rented
+                  </ListGroup.Item>
+                  <ListGroup.Item>
+                    {" "}
+                    <strong>Active Agreement:</strong>{" "}
+                    <Card.Link
+                      as={Link}
+                      to={`/agreements/${activeAgreement?.apartmentId}`}
+                    >
+                      {activeAgreement?.name}
+                    </Card.Link>
                   </ListGroup.Item>
                   <ListGroup.Item>
                     <strong> Rent: </strong>{" "}
@@ -234,7 +255,7 @@ const OwnerApartmentDetails = () => {
                 </>
               ) : (
                 <ListGroup.Item>
-                  <strong> Status: </strong> Vacant
+                  <strong> Status: </strong> vacant
                 </ListGroup.Item>
               )}
 
@@ -397,4 +418,4 @@ const OwnerApartmentDetails = () => {
   );
 };
 
-export default OwnerApartmentDetails;
+export default ApartmentDetails;
