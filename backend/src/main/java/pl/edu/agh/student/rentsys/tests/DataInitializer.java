@@ -27,7 +27,7 @@ import java.util.concurrent.ThreadLocalRandom;
 @AllArgsConstructor
 public class DataInitializer implements CommandLineRunner {
 
-    private Logger logger = (Logger) LoggerFactory.getLogger(DataInitializer.class);
+    private final Logger logger = (Logger)LoggerFactory.getLogger(DataInitializer.class);
 
     private final UserRepository userRepository;
     private final ApartmentService apartmentService;

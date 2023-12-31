@@ -1,6 +1,8 @@
 package pl.edu.agh.student.rentsys.controller;
 
+import ch.qos.logback.classic.Logger;
 import lombok.AllArgsConstructor;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -22,6 +24,9 @@ import java.util.stream.Collectors;
 @RestController
 @AllArgsConstructor
 public class AgreementController {
+
+    private final Logger logger = (Logger) LoggerFactory.getLogger(AgreementController.class);
+
     @Autowired
     private final UserService userService;
     @Autowired
@@ -35,12 +40,15 @@ public class AgreementController {
                                                               @RequestParam boolean status,
                                                               @RequestParam boolean byOwner){
         Agreement updatedAgreement = agreementService.changeAgreementStatus(username, aid, status, byOwner);
+        logger.info("PATCH /user/" + username + "/agreements/" + aid
+                + " --- status -> " + status + " byOwner -> " + byOwner);
         AgreementDTO updatedAgreementDTO = AgreementDTO.convertFromAgreement(updatedAgreement);
         return ResponseEntity.ok(updatedAgreementDTO);
     }
 
     @GetMapping("/user/{username}/agreements")
     public ResponseEntity<List<AgreementDTO>> getAllAgreementsForUser(@PathVariable String username){
+        logger.info("GET /user/" + username + "/agreements");
         Optional<User> userOptional = userService.getUserByUsername(username);
         if(userOptional.isPresent()){
             if(userOptional.get().getUserRole().equals(UserRole.OWNER))
@@ -54,6 +62,7 @@ public class AgreementController {
     @GetMapping("/user/{username}/agreements/status/{status}")
     public ResponseEntity<List<AgreementDTO>> getAllAgreementsForUserWithStatus(@PathVariable String username,
                                                                                 @PathVariable String status){
+        logger.info("GET /user/" + username + "/agreements/status/" + status);
         Optional<User> userOptional = userService.getUserByUsername(username);
         if(userOptional.isPresent()){
             try {
@@ -72,6 +81,7 @@ public class AgreementController {
     @GetMapping("/user/{username}/agreements/{agid}")
     public ResponseEntity<AgreementDTO> getAgreementForUserById(@PathVariable String username,
                                                                 @PathVariable long agid){
+        logger.info("GET /user/" + username +"/agreements/" + agid);
         Optional<User> userOptional = userService.getUserByUsername(username);
         if(userOptional.isPresent()){
             Optional<Agreement> agreementOptional = agreementService.getAgreementById(agid);
@@ -82,6 +92,7 @@ public class AgreementController {
     @GetMapping("/user/{username}/apartments/{aid}/agreements")
     public ResponseEntity<List<AgreementDTO>> getAgreementsForApartment(@PathVariable String username,
                                                                         @PathVariable long aid){
+        logger.info("GET /user/" + username + "/apartments/" + aid + "/agreements");
         Optional<User> userOptional = userService.getUserByUsername(username);
         if(userOptional.isEmpty()) return ResponseEntity.notFound().build();
         else{
@@ -97,6 +108,8 @@ public class AgreementController {
     @PostMapping("/user/{username}/agreements")
     public ResponseEntity<AgreementDTO> createAgreement(@PathVariable String username,
                                                         @RequestBody AgreementDTO agreementDTO) {
+        logger.info("POST /user/" + username + "/agreements ---" +
+                " agreement -> " + agreementDTO.toString());
             try {
                 Agreement agreement = agreementService.createAgreement(username, agreementDTO);
                 AgreementDTO createdAgreementDTO = AgreementDTO.convertFromAgreement(agreement);
@@ -110,6 +123,14 @@ public class AgreementController {
     public ResponseEntity<AgreementDTO> changeAgreement(@PathVariable String username,
                                                         @PathVariable long agid,
                                                         @RequestBody Map<String,Object> payload){
+        StringBuilder payload_str = new StringBuilder();
+        for (Map.Entry entry : payload.entrySet())
+        {
+            payload_str.append("\"").append(entry.getKey()).append("\": ").append(entry.getValue()).append(" ");
+        }
+        payload_str.append("}");
+        logger.info("PUT /user/" + username + "/agreements/" + agid + " --- " +
+                "payload -> {" + payload_str);
         if(!payload.containsKey("name") && !payload.containsKey("monthlyPayment") &&
                 !payload.containsKey("administrationFee") && !payload.containsKey("ownerAccountNo") &&
                 !payload.containsKey("apartmentId") && !payload.containsKey("signingDate") &&

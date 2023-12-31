@@ -50,4 +50,22 @@ public class ApartmentDTO {
                                 .collect(Collectors.toSet()))
                 .build();
     }
+
+    @Override
+    public String toString() {
+        return "ApartmentDTO{" +
+                "id=" + id +
+                ", owner=" + owner.getId() +
+                ", tenant=" + tenant.getId() +
+                ", name='" + name + '\'' +
+                ", creationTimestamp=" + creationTimestamp +
+                ", address='" + address + '\'' +
+                ", city='" + city + '\'' +
+                ", postalCode='" + postalCode + '\'' +
+                ", latitude=" + latitude +
+                ", longitude=" + longitude +
+                ", size=" + size +
+                ", description='" + description + '\'' +
+                '}';
+    }
 }
