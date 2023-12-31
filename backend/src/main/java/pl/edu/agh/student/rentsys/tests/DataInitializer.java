@@ -1,6 +1,8 @@
 package pl.edu.agh.student.rentsys.tests;
+import ch.qos.logback.classic.Logger;
 import lombok.AllArgsConstructor;
 import lombok.SneakyThrows;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
@@ -24,6 +26,8 @@ import java.util.concurrent.ThreadLocalRandom;
 @Component
 @AllArgsConstructor
 public class DataInitializer implements CommandLineRunner {
+
+    private Logger logger = (Logger) LoggerFactory.getLogger(DataInitializer.class);
 
     private final UserRepository userRepository;
     private final ApartmentService apartmentService;
@@ -220,6 +224,8 @@ public class DataInitializer implements CommandLineRunner {
 //        paymentService.createPayment(payment4);
 
         System.out.println("----- FINISHED DATA INITIALIZATION -----");
+        logger.info("Finished data initialization");
+
     }
 
     private User createUser(String email, String username, String password, UserRole role,

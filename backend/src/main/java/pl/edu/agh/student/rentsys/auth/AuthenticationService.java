@@ -1,10 +1,12 @@
 package pl.edu.agh.student.rentsys.auth;
 
+import ch.qos.logback.classic.Logger;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.AllArgsConstructor;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -32,6 +34,8 @@ import static pl.edu.agh.student.rentsys.security.jwt.JwtConfig.*;
 @Service
 @AllArgsConstructor
 public class AuthenticationService {
+
+    private final Logger logger = (Logger) LoggerFactory.getLogger(AuthenticationService.class);
 
     private final UserService userService;
     private final ConfirmationTokenService tokenService;
@@ -97,6 +101,7 @@ public class AuthenticationService {
                         request.getPassword()
                 )
         );
+        logger.info("Login request: " + request.getUsername());
         UserDetails user = userService.loadUserByUsername(request.getUsername());
         String[] roles = userService.getUserRolesAsStringArray(user);
         String accessToken = jwtService.generateAccessToken(user);
