@@ -185,8 +185,8 @@ const Register = () => {
   };
 
   return (
-    <Container>
-      <Row className="justify-content-center mt-5">
+    <Container className="my-4">
+      <Row className="justify-content-center">
         <Col md={6}>
           <Card>
             <Card.Body>

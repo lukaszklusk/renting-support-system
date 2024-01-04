@@ -65,7 +65,7 @@ const Login = () => {
 
   return (
     <Container>
-      <Row className="justify-content-center mt-5">
+      <Row className="justify-content-center my-4">
         <Col md={6}>
           <Card>
             <Card.Body>
