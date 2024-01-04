@@ -59,7 +59,12 @@ const ApartmentDetails = () => {
   const patchEquipmentStatus = usePatchEquipmentStatus();
 
   const onApartmentsLoad = () => {
-    setDetailedApartment(apartments.find((item) => item.id === parseInt(id)));
+    const loadedApartment = apartments.find((item) => item.id === parseInt(id));
+    if (!loadedApartment) {
+      navigate(from, { replace: true });
+      return;
+    }
+    setDetailedApartment(loadedApartment);
   };
 
   const onAgreementsLoad = () => {
@@ -69,10 +74,6 @@ const ApartmentDetails = () => {
   };
 
   const onDetailedApartmentLoad = () => {
-    if (!detailedApartment) {
-      navigate(from, { replace: true });
-      return;
-    }
     setIsRented(detailedApartment?.tenant != null);
   };
 
@@ -173,8 +174,6 @@ const ApartmentDetails = () => {
       )
     );
   };
-
-  // console.log("detailedApartment:", detailedApartment);
 
   return (
     <Box sx={{ flexGrow: 1 }}>
@@ -351,45 +350,47 @@ const ApartmentDetails = () => {
                       </div>
                     </ListGroup.Item>
                   ))}
-                  <ListGroup.Item className="d-flex align-items-center">
-                    <div className="flex-grow-1 me-1">
-                      <TextField
-                        size="small"
-                        fullWidth
-                        placeholder="Enter equipment name"
-                        id="newEquipmentName"
-                        value={newEquipmentName}
-                        onChange={(e) => {
-                          setNewEquipmentName(e.target.value);
-                        }}
-                      />
-                    </div>
-                    <div className="flex-grow-1 me-1">
-                      <TextField
-                        size="small"
-                        fullWidth
-                        placeholder="Enter equipment description"
-                        id="newEquipmentDescription"
-                        value={newEquipmentDescription}
-                        onChange={(e) => {
-                          setNewEquipmentDescription(e.target.value);
-                        }}
-                      />
-                    </div>
-                    <div
-                      style={{ cursor: "pointer" }}
-                      onClick={() => {
-                        newEquipmentName &&
-                          handleNewEquipment(
-                            newEquipmentName,
-                            newEquipmentDescription
-                          );
-                      }}
-                    >
-                      <PlusSquareFill color="green" />
-                    </div>
-                  </ListGroup.Item>
                 </>
+              )}
+              {isOwner && (
+                <ListGroup.Item className="d-flex align-items-center">
+                  <div className="flex-grow-1 me-1">
+                    <TextField
+                      size="small"
+                      fullWidth
+                      placeholder="Enter equipment name"
+                      id="newEquipmentName"
+                      value={newEquipmentName}
+                      onChange={(e) => {
+                        setNewEquipmentName(e.target.value);
+                      }}
+                    />
+                  </div>
+                  <div className="flex-grow-1 me-1">
+                    <TextField
+                      size="small"
+                      fullWidth
+                      placeholder="Enter equipment description"
+                      id="newEquipmentDescription"
+                      value={newEquipmentDescription}
+                      onChange={(e) => {
+                        setNewEquipmentDescription(e.target.value);
+                      }}
+                    />
+                  </div>
+                  <div
+                    style={{ cursor: "pointer" }}
+                    onClick={() => {
+                      newEquipmentName &&
+                        handleNewEquipment(
+                          newEquipmentName,
+                          newEquipmentDescription
+                        );
+                    }}
+                  >
+                    <PlusSquareFill color="green" />
+                  </div>
+                </ListGroup.Item>
               )}
               {isOwner && Array.isArray(finishedAgreements) && (
                 <>

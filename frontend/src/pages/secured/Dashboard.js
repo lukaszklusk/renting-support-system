@@ -659,6 +659,12 @@ const Dashboard = () => {
               </div>
             </>
           )}
+
+          {apartments?.length == 0 && months?.length == 0 && (
+            <>
+              <SectionHeader title="Welcome To RentSys" />
+            </>
+          )}
         </>
       ) : (
         <DashboardSkeleton />
