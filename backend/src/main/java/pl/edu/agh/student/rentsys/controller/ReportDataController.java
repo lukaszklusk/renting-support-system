@@ -1,6 +1,7 @@
 package pl.edu.agh.student.rentsys.controller;
 
 
+import ch.qos.logback.classic.Logger;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.servlet.http.HttpServletResponse;
@@ -15,6 +16,7 @@ import net.sf.jasperreports.export.SimpleExporterInput;
 import net.sf.jasperreports.export.SimpleOutputStreamExporterOutput;
 import net.sf.jasperreports.export.SimplePdfExporterConfiguration;
 import net.sf.jasperreports.export.SimplePdfReportConfiguration;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.orm.jpa.EntityManagerFactoryInfo;
@@ -37,6 +39,8 @@ import java.util.Optional;
 @RestController
 public class ReportDataController {
 
+    private final Logger logger = (Logger) LoggerFactory.getLogger(ReportDataController.class);
+
     @PersistenceContext
     EntityManager entityManager;
 
@@ -54,6 +58,7 @@ public class ReportDataController {
 
     @GetMapping(value = "/user/{username}/report/detailed", produces = MediaType.APPLICATION_PDF_VALUE)
     public @ResponseBody ResponseEntity<byte[]> createReport(@PathVariable String username, HttpServletResponse response) {
+        logger.info("GET /user/" + username + "/report/detailed");
         Optional<User> userOptional =  userService.getUserByUsername(username);
         if(!userOptional.isPresent()){
             return ResponseEntity.notFound().build();
@@ -105,6 +110,7 @@ public class ReportDataController {
 
     @GetMapping(value = "/user/{username}/report/simple", produces = MediaType.APPLICATION_PDF_VALUE)
     public @ResponseBody ResponseEntity<byte[]> createReportSimple(@PathVariable String username, HttpServletResponse response) {
+        logger.info("GET /user/" + username + "/report/simple");
         Optional<User> userOptional =  userService.getUserByUsername(username);
         if(!userOptional.isPresent()){
             return ResponseEntity.notFound().build();
@@ -156,6 +162,7 @@ public class ReportDataController {
 
     @GetMapping(value = "/user/{username}/report/overview", produces = MediaType.APPLICATION_PDF_VALUE)
     public @ResponseBody ResponseEntity<byte[]> createReportoverview(@PathVariable String username, HttpServletResponse response) {
+        logger.info("GET /user/" + username + "/report/overview");
         Optional<User> userOptional =  userService.getUserByUsername(username);
         if(!userOptional.isPresent()){
             return ResponseEntity.notFound().build();

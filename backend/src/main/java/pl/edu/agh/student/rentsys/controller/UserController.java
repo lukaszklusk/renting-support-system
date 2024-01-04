@@ -1,7 +1,9 @@
 package pl.edu.agh.student.rentsys.controller;
 
 
+import ch.qos.logback.classic.Logger;
 import lombok.AllArgsConstructor;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -18,30 +20,36 @@ import java.util.*;
 @AllArgsConstructor
 public class UserController {
 
+    private final Logger logger = (Logger) LoggerFactory.getLogger(UserController.class);
+
     @Autowired
     private final UserService userService;
     @Autowired
     private final PasswordEncoder passwordEncoder;
 
-
-    @GetMapping("/test")
-    public String test(){
-        return "ok";
-    }
-
     @GetMapping("/user")
     public ResponseEntity<List<User>> getAllUsers(){
+        logger.info("GET /user");
         return ResponseEntity.ok(userService.getAllUsers());
     }
 
     @GetMapping("/user/{username}")
     public ResponseEntity<UserDTO> getUserByUsername(@PathVariable String username){
-       UserDTO userDTO = userService.getByUsername(username);
+        logger.info("GET /user/" + username);
+        UserDTO userDTO = userService.getByUsername(username);
         return ResponseEntity.status(HttpStatus.OK).body(userDTO);
     }
 
     @PostMapping("/user")
     public ResponseEntity<Map<String,Object>> createUser(@RequestBody Map<String, Object> payload){
+        StringBuilder payload_str = new StringBuilder();
+        for (Map.Entry entry : payload.entrySet())
+        {
+            payload_str.append("\"").append(entry.getKey()).append("\": ").append(entry.getValue()).append(" ");
+        }
+        payload_str.append("}");
+        logger.info("POST /user --- " +
+                "payload -> {" + payload_str);
         if(!payload.containsKey("username") || !payload.containsKey("password") ||
                 !payload.containsKey("email") || !payload.containsKey("phoneNumber") ||
                 !payload.containsKey("role") || !payload.containsKey("firstName") ||

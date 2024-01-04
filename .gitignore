@@ -31,3 +31,8 @@ build/
 
 ### VS Code ###
 .vscode/
+
+### misc ###
+/RENT-SYS
+RENT-SYS.zip
+docker-compose.yaml.bak

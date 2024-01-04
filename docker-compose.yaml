@@ -1,0 +1,83 @@
+version: "3.7"
+
+volumes:
+  esdata:
+
+services:
+  rentsys-backend:
+    build: ./backend
+    restart: on-failure
+    ports:
+      - 8080:8080
+      - 1025:1025
+    networks:
+      - rentsys-net
+    environment:
+      - spring.datasource.url=jdbc:mysql://rentsys-mysqldb:3306/rentsys
+    depends_on:
+      - rentsys-mysqldb
+      - fluentd
+
+  rentsys-mysqldb:
+    image: "mysql:8.0"
+    restart: always
+    ports:
+      - 3306:3306
+    networks:
+      - rentsys-net
+    environment:
+      MYSQL_DATABASE: rentsys
+      MYSQL_USER: rentsys_user
+      MYSQL_PASSWORD: rentsys
+      MYSQL_ROOT_PASSWORD: rentsys
+
+  rentsys-frontend:
+    build: ./frontend
+    restart: on-failure
+    ports:
+      - 3000:3000
+    networks:
+      - rentsys-net
+
+  fluentd:
+    build: ./fluentd
+    volumes:
+      - ./fluentd/conf:/fluentd/etc
+    links:
+      - elasticsearch
+    networks:
+      - rentsys-net
+    ports:
+      - "24224:24224"
+      - "24224:24224/udp"
+
+  elasticsearch:
+    image: elasticsearch:7.17.0
+    expose:
+      - 9200
+    ports:
+      - "9200:9200"
+    environment:
+      - discovery.type=single-node
+    volumes:
+      - esdata:/usr/share/elasticsearch/data
+    networks:
+      - rentsys-net
+
+  kibana:
+    image: kibana:7.17.0
+    links:
+      - elasticsearch
+    depends_on:
+      - elasticsearch
+    ports:
+      - "5601:5601"
+    environment:
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+    networks:
+      - rentsys-net
+
+
+
+networks:
+  rentsys-net:

@@ -10,7 +10,7 @@
 	</parent>
 	<groupId>pl.edu.agh.student</groupId>
 	<artifactId>rentsys</artifactId>
-	<version>0.3</version>
+	<version>0.6</version>
 	<name>rentsys</name>
 	<description>Renting system project</description>
 	<packaging>jar</packaging>
@@ -43,6 +43,30 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-test</artifactId>
 			<scope>test</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>ch.qos.logback</groupId>
+			<artifactId>logback-classic</artifactId>
+			<version>1.4.14</version>
+		</dependency>
+
+		<dependency>
+			<groupId>ch.qos.logback</groupId>
+			<artifactId>logback-core</artifactId>
+			<version>1.4.14</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.komamitsu</groupId>
+			<artifactId>fluency-core</artifactId>
+			<version>2.7.0</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.komamitsu</groupId>
+			<artifactId>fluency-fluentd</artifactId>
+			<version>2.7.0</version>
 		</dependency>
 
 		<dependency>

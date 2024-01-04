@@ -24,4 +24,15 @@ public class MessageDTO {
                 .sendTimestamp(message.getSendTime().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli())
                 .build();
     }
+
+    @Override
+    public String toString() {
+        return "MessageDTO{" +
+                "id=" + id +
+                ", receiver='" + receiver + '\'' +
+                ", content='" + content + '\'' +
+                ", sender='" + sender + '\'' +
+                ", sendTimestamp=" + sendTimestamp +
+                '}';
+    }
 }

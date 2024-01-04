@@ -38,4 +38,22 @@ public class AgreementDTO {
                 .agreementStatus(agreement.getAgreementStatus().toString())
                 .build();
     }
+
+    @Override
+    public String toString() {
+        return "AgreementDTO{" +
+                "id=" + id +
+                ", apartmentId=" + apartmentId +
+                ", owner=" + owner.getId() +
+                ", tenant=" + tenant.getId() +
+                ", name='" + name + '\'' +
+                ", apartmentName='" + apartmentName + '\'' +
+                ", monthlyPayment=" + monthlyPayment +
+                ", administrationFee=" + administrationFee +
+                ", signingDate=" + signingDate +
+                ", expirationDate=" + expirationDate +
+                ", ownerAccountNo='" + ownerAccountNo + '\'' +
+                ", agreementStatus='" + agreementStatus + '\'' +
+                '}';
+    }
 }

@@ -21,4 +21,15 @@ public class EquipmentDTO {
                 .apartmentId(equipment.getApartment().getId())
                 .build();
     }
+
+    @Override
+    public String toString() {
+        return "EquipmentDTO{" +
+                "id=" + id +
+                ", apartmentId=" + apartmentId +
+                ", name='" + name + '\'' +
+                ", description='" + description + '\'' +
+                ", isBroken=" + isBroken +
+                '}';
+    }
 }

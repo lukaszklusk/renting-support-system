@@ -1,6 +1,8 @@
 package pl.edu.agh.student.rentsys.controller;
 
+import ch.qos.logback.classic.Logger;
 import lombok.AllArgsConstructor;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -18,6 +20,8 @@ import java.util.stream.Collectors;
 @AllArgsConstructor
 public class ApartmentController {
 
+    private final Logger logger = (Logger) LoggerFactory.getLogger(ApartmentController.class);
+
     @Autowired
     private final ApartmentService apartmentService;
     @Autowired
@@ -28,16 +32,19 @@ public class ApartmentController {
 
     @GetMapping("/apartments")
     public ResponseEntity<List<ApartmentDTO>> getAllApartments(){
+        logger.info("GET /apartments");
         return ResponseEntity.ok(apartmentService.getAllApartments());
     }
 
     @GetMapping("/apartments/{id}")
     public ResponseEntity<ApartmentDTO> getApartmentById(@PathVariable long id){
+        logger.info("/apartments/" + id);
         return ResponseEntity.ok(apartmentService.getApartmentDTO(id));
     }
 
     @GetMapping("/user/{username}/apartments")
     public ResponseEntity<List<ApartmentDTO>> getAllApartmentsForUser(@PathVariable String username){
+        logger.info("GET /user/"+ username +"/apartments");
         Optional<User> userOptional = userService.getUserByUsername(username);
         if(userOptional.isPresent()){
             if(userOptional.get().getUserRole().equals(UserRole.OWNER))
@@ -65,6 +72,8 @@ public class ApartmentController {
     @PostMapping("/user/{username}/apartments")
     public ResponseEntity<ApartmentDTO> createApartment(@PathVariable String username,
                                                         @RequestBody ApartmentDTO apartmentDTO) {
+        logger.info("POST /user/" + username + "/apartments --- " +
+                "apartment -> " + apartmentDTO.toString());
         Apartment apartment = apartmentService.createApartment(username, apartmentDTO);
         ApartmentDTO newApartmentDTO = ApartmentDTO.convertFromApartment(apartment);
         return ResponseEntity.status(HttpStatus.CREATED).body(newApartmentDTO);
@@ -73,6 +82,7 @@ public class ApartmentController {
     @DeleteMapping("/user/{username}/apartments/{id}")
     public ResponseEntity<ApartmentDTO> deleteApartment(@PathVariable String username,
                                                         @PathVariable long id) {
+        logger.info("DELETE /user/" + username + "/apartments/" + id);
         apartmentService.deleteApartment(username, id);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }

@@ -1,6 +1,9 @@
 package pl.edu.agh.student.rentsys.service;
 
+
 import lombok.AllArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import pl.edu.agh.student.rentsys.exceptions.EntityNotFoundException;
@@ -24,6 +27,8 @@ import static java.time.temporal.ChronoUnit.DAYS;
 @Service
 @AllArgsConstructor
 public class AgreementService {
+
+    private final Logger logger = LoggerFactory.getLogger(AgreementService.class);
 
     @Autowired
     private final AgreementRepository agreementRepository;

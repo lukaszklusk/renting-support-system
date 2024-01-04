@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE logback>
+<configuration>
+    <include resource="org/springframework/boot/logging/logback/defaults.xml"/>
+    <include resource="org/springframework/boot/logging/logback/console-appender.xml" />
+
+    <appender name="fluent" class="pl.edu.agh.student.rentsys.logs.FluencyLogbackAppender"/>
+    <root level="info" additivity="false">
+        <appender-ref ref="fluent" />
+    </root>
+</configuration>
